@@ -1,0 +1,5 @@
+/electron-builder.yml
+node_modules/
+/dist
+/tmp
+/out-tsc
