@@ -6,9 +6,17 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish never"
+    "deploy": "electron-builder build --win --publish always"
   },
-  "author": "",
+  "build":{
+    "appId": "com.github.devmarcius.binsplash",
+    "publish": [{
+      "provider": "github",
+      "owner": "DevMarcius",
+      "repo": "binsplash"
+    }]
+  },
+  "author": "DevMarcius",
   "license": "ISC",
   "devDependencies": {
     "electron": "^12.0.6",
