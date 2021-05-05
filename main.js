@@ -3,7 +3,6 @@ const path = require('path')
 const {ipcMain} = require('electron')
 const { dialog } = require('electron')
 const { autoUpdater } = require('electron-updater');
-
 function createWindow () {
   const win = new BrowserWindow({
     width: 500,
@@ -17,9 +16,6 @@ function createWindow () {
   })
   //win.setMenu(null)
   win.loadFile('binsplash.html');
-  win.once('ready-to-show', () => {
-    autoUpdater.checkForUpdatesAndNotify();
-  });
 }
 
 app.whenReady().then(() => {
@@ -61,15 +57,40 @@ ipcMain.on('raiseError', (event, errorMessage, errorAt) => {
     app.quit()
   }
 })
-ipcMain.on('app_version', (event) => {
-  event.sender.send('app_version', { version: app.getVersion() });
-});
+ipcMain.on('version', event => {
+  event.returnValue = app.getVersion()
+})
 
-autoUpdater.on('update-available', () => {
-  win.webContents.send('update_available');
-});autoUpdater.on('update-downloaded', () => {
-  win.webContents.send('update_downloaded');
+function sendStatusToWindow(type, text) {
+  ipcMain.on('updater', (event) =>{
+    event.returnValue = text
+  })
+}
+
+autoUpdater.on('update-downloaded', (info) => {
+  sendStatusToWindow('Update downloaded');
 });
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall();
+app.on('ready', function()  {
+  autoUpdater.checkForUpdates().then((value)=>{console.log(value)}).catch((error)=>{console.log(error)});
 });
+autoUpdater.on('checking-for-update', () => {
+  sendStatusToWindow('checking-for-update','Checking for update...')
+})
+autoUpdater.on('update-available', (info) => {
+  sendStatusToWindow('update-available','Update not available.');
+})
+autoUpdater.on('update-not-available', (info) => {
+  sendStatusToWindow('update-unavailable','Update not available.');
+})
+autoUpdater.on('error', (err) => {
+  sendStatusToWindow('error','Error in auto-updater. ' + err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+  sendStatusToWindow('download-progress',log_message);
+})
+autoUpdater.on('update-downloaded', (info) => {
+  autoUpdater.quitAndInstall();  
+})

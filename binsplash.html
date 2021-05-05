@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="binsplash.css">
 </head>
 <body>
-  <div class="header"><button class="header-button" onclick="mainMenu()">Main</button><button class="header-button" onclick="settingsMenu()">Settings</button><button class="header-button" style="float:right" id="version" onclick="window.location.href = 'https:\/\/github.com\/DevMarcius\/binsplash'">version: 1.0.0</button></div>
+  <div class="header"><button class="header-button" onclick="mainMenu()">Main</button><button class="header-button" onclick="settingsMenu()">Settings</button><button class="header-button" style="float:right" id="version" onclick="window.location.href = 'https:\/\/github.com\/DevMarcius\/binsplash'"></button></div>
   <div id="Main">
     <div class="div" id="slider-input-container">
       <input id="slider-input" class="slider-input" type="range" min="1" value="1" max="10" onchange="colorFields(this.value)"></div>
@@ -49,15 +49,6 @@
     <div class="div">
       <button onclick="saveConfig()" class="ButtonC1 important" id="Save-Config">Save Settings</button> 
     </div>
-  </div>
-  <div id="notification" style="display:none">
-    <p id="message"></p>
-    <button id="close-button" onClick="closeNotification()">
-      Close
-    </button>
-    <button id="restart-button" onClick="restartApp()" style="display:none">
-      Restart
-    </button>
   </div>
   <script src="binsplash.js"></script>
 </body>

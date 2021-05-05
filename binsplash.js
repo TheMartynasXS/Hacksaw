@@ -2,9 +2,14 @@ const { exec } = require('child_process');
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
+
+document.getElementById('version').innerText = `version: ${ipcRenderer.sendSync('version')}`
+
+let text = ipcRenderer.sendSync('updater')
+console.log(text)
+
 window.onerror = function (msg, error, lineNo, columnNo) {
   ipcRenderer.sendSync('raiseError', `Message: ${msg}\n\nError: ${error}`,`Raised at: ${lineNo} : ${columnNo}` )
-  //console.log(`Message: ${msg}\n\nError: ${error}`,`Raised at: ${lineNo} : ${columnNo}`)
 }
 let appconfig = {};
 let file = {};
@@ -13,6 +18,7 @@ function dismissAlert(){
   let alert = document.getElementById("dim-bg")
   alert.remove()
 }
+
 function createAlert(message){
   let dim = document.createElement("div")
   dim.className = "dim-bg"
@@ -32,26 +38,20 @@ function createAlert(message){
   alertdiv.className = "alert-box"
   dim.appendChild(alertdiv)
 }
-const notification = document.getElementById('notification');
-const message = document.getElementById('message');
-const restartButton = document.getElementById('restart-button');
 
 ipcRenderer.on('update_available', () => {
   ipcRenderer.removeAllListeners('update_available');
-  message.innerText = 'A new update is available. Downloading now...';
-  notification.style.display = "block"
+  dismissAlert()
+  createAlert("New version available press OK to download").then(boolean =>{if(boolean){restartApp()}})
 });ipcRenderer.on('update_downloaded', () => {
   ipcRenderer.removeAllListeners('update_downloaded');
-  message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
-  restartButton.style.display = "block"
-  notification.style.display = "block"
+  dismissAlert()
+  createAlert("New Version downloaded OK to download")
 });
-function closeNotification() {
-  notification.style.display = "none"
-}function restartApp() {
-  ipcRenderer.send('restart_app');
+function restartApp() {
+  ipcRenderer.sendSync('restart_app');
 }
-const appconfigpath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\binsplash\\' + 'config.json')//path.join(ipcRenderer.sendSync('ConfigPath'),) //app.getPath('appData')
+const appconfigpath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\binsplash\\' + 'config.json')
 
 let isExists = fs.existsSync(appconfigpath, 'utf8')
 if (isExists == false){
@@ -222,7 +222,6 @@ function selectFiles(){
               } else if (itemsC[C].key == "birthColor"){
                 birthColorIndex = C
               }
-              //excerpt 1
             }
             if (colorIndex != null){
               let itemsD = itemsC[colorIndex].value.items;
@@ -251,10 +250,7 @@ function selectFiles(){
                 }
               }
             }
-            //dom.style.backgroundImage = 'linear-gradient('+ "90deg" + ', ' + colorOne + ', ' + colorTwo + ')';
-            //EmitterColor.style.backgroundImage = `linear-gradient(0.25turn, #ee9292, rgb(167, 233, 161), #958feb)`
             if (colorIndex == null && birthColorIndex == null){
-              //console.log(`${A},${B}`)
               EmitterColor.style.display = "none";
               EmitterColor.parentNode.childNodes[1].style.color = "#9a9a9a"
               EmitterColor.parentNode.firstChild.style.visibility = "hidden"
