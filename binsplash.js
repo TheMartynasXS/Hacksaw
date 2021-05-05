@@ -51,7 +51,7 @@ function closeNotification() {
 }function restartApp() {
   ipcRenderer.send('restart_app');
 }
-const appconfigpath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\BinBrush\\' + 'config.json')//path.join(ipcRenderer.sendSync('ConfigPath'),) //app.getPath('appData')
+const appconfigpath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\binsplash\\' + 'config.json')//path.join(ipcRenderer.sendSync('ConfigPath'),) //app.getPath('appData')
 
 let isExists = fs.existsSync(appconfigpath, 'utf8')
 if (isExists == false){
@@ -127,7 +127,7 @@ function selectFiles(){
   if(filepath == undefined){
     return 0
   }
-  document.title = `BinBrush - ${filepath.substring(filepath.lastIndexOf('\\') + 1)}`
+  document.title = `BinSplash - ${filepath.substring(filepath.lastIndexOf('\\') + 1)}`
   const checkTime = 1000;
   
   if(fs.existsSync((filepath.slice(0,-4) + ".json"), 'utf8') == false){
