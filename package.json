@@ -10,6 +10,13 @@
   },
   "build":{
     "appId": "com.github.devmarcius.binsplash",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "runAfterFinish": false,
+      "deleteAppDataOnUninstall": true,
+      "allowToChangeInstallationDirectory": true
+    },
     "publish": [{
       "provider": "github",
       "owner": "DevMarcius",
