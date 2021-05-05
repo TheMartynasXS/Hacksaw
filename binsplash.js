@@ -3,11 +3,6 @@ const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
-document.getElementById('version').innerText = `version: ${ipcRenderer.sendSync('version')}`
-
-let text = ipcRenderer.sendSync('updater')
-console.log(text)
-
 window.onerror = function (msg, error, lineNo, columnNo) {
   ipcRenderer.sendSync('raiseError', `Message: ${msg}\n\nError: ${error}`,`Raised at: ${lineNo} : ${columnNo}` )
 }
