@@ -8,7 +8,7 @@
     "build": "electron-builder build --win --publish never",
     "deploy": "electron-builder build --win --publish always"
   },
-  "build":{
+  "build": {
     "appId": "com.github.devmarcius.binsplash",
     "nsis": {
       "oneClick": false,
@@ -17,11 +17,13 @@
       "deleteAppDataOnUninstall": true,
       "allowToChangeInstallationDirectory": true
     },
-    "publish": [{
-      "provider": "github",
-      "owner": "DevMarcius",
-      "repo": "binsplash"
-    }]
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "DevMarcius",
+        "repo": "binsplash"
+      }
+    ]
   },
   "author": "DevMarcius",
   "license": "ISC",

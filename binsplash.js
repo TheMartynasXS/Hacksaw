@@ -130,132 +130,133 @@ function selectFiles(){
   }
   const timerId = setInterval(() => {
     if(fs.existsSync((filepath.slice(0,-4) + ".json"), 'utf8')) {
-            
-      file = require((filepath.slice(0,-4) + ".json"));
-      let complexEmitterList = document.getElementById("complexEmitterList")
-      complexEmitterList.textContent = ''
-      let itemsA = file.entries.value.items
-      for (let A = 0; A < itemsA.length; A++) {
-        if (itemsA[A].value.items[0].key == "complexEmitterDefinitionData"){
-          itemsZero = itemsA[A].value.items
-          itemsZero.forEach(itemZero => {
-            function createEmitterItem(EmitterList,EmitterName){
-              let EmitterItem = document.createElement('li')
-              EmitterItem.className = "EmitterItem"
-              EmitterList.appendChild(EmitterItem)
-              let EmitterInput = document.createElement('input')
-              EmitterInput.type = "checkbox"
-              EmitterInput.className = "EmitterInput"
-              EmitterItem.appendChild(EmitterInput)
-              let EmitterTitle = document.createElement('div')
-              EmitterTitle.className = "EmitterTitle"
-              EmitterTitle.innerText = EmitterName
-              EmitterItem.appendChild(EmitterTitle)
-              let EmitterColor = document.createElement('div')
-              EmitterColor.className = "color"
-              EmitterItem.appendChild(EmitterColor)
-            }
-            if(itemZero.key == "particleName"){
-              let complexEmitterItem = document.createElement('li')
-              complexEmitterItem.className = "complexEmitterItem"
-              complexEmitterItem.id = A
-              complexEmitterList.appendChild(complexEmitterItem)
-              let complexEmitterHeader = document.createElement('div')
-              complexEmitterHeader.className = "complexEmitterHeader"
-              let complexEmitterTitle = document.createElement('div')
-              complexEmitterTitle.className = "complexEmitterTitle"
-              complexEmitterTitle.innerText = itemZero.value
-
-              let complexEmitterInput = document.createElement('input')
-              complexEmitterInput.type = "checkbox"
-              complexEmitterInput.className = "ComplexEmitterInput"
-              complexEmitterInput.onclick = function(){checkchildren(this.parentNode.parentNode,false)}
-              complexEmitterItem.appendChild(complexEmitterHeader)
-              complexEmitterHeader.appendChild(complexEmitterInput)
-              complexEmitterHeader.appendChild(complexEmitterTitle)
-
-              let EmitterList = document.createElement('ol')
-              EmitterList.style = "list-style: none"
-              EmitterList.className = "EmitterList"
-              complexEmitterItem.appendChild(EmitterList)
-              let itemsB = itemsZero[0].value.items
-              for (let B = 0; B < itemsB.length; B++) {
-                let itemsC = itemsB[B].items;
-                for (let C = 0; C < itemsC.length; C++) {
-                  if (itemsC[C].key == "emitterName"){
-                    createEmitterItem(EmitterList,itemsC[C].value)
-                  } 
-                }
-              }
-            }
-
-          });
-        }
-      }
-      for (let A = 0; A < complexEmitterList.childNodes.length; A++) {
-        let ComplexEmitter = complexEmitterList.childNodes[A]
-        let id = complexEmitterList.childNodes[A].id
-        let itemsA = file.entries.value.items
-        if (itemsA[id].value.items[0].key == "complexEmitterDefinitionData"){
-          itemsZero = itemsA[id].value.items
-          itemsB = itemsZero[0].value.items
-          for (let B = 0; B < itemsB.length; B++) {
-            let EmitterColor = ComplexEmitter.childNodes[1].childNodes[B].childNodes[2]
-            let itemsC = itemsB[B].items;
-
-            let colorIndex = null
-            let birthColorIndex = null
-
-            for (let C = 0; C < itemsC.length; C++){
-              if (itemsC[C].key == "color"){
-                let itemsD = itemsC[C].value.items;
-                for (let D = 0; D < itemsD.length; D++) {
-                  if(itemsD[D].key == "constantValue" || itemsD[D].key == "dynamics"){
-                    colorIndex = C
-                  }
-                }
-              } else if (itemsC[C].key == "birthColor"){
-                birthColorIndex = C
-              }
-            }
-            if (colorIndex != null){
-              let itemsD = itemsC[colorIndex].value.items;
-              if(itemsD[itemsD.length-1].key == "constantValue"){
-                EmitterColor.classList.add("color-gradient")
-                EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*255},${itemsD[itemsD.length -1].value[1]*255},${itemsD[itemsD.length -1].value[2]*255})`
-              }else{
-                let E = itemsD[itemsD.length-1].value.items.length - 1 
-                let itemsE = itemsD[itemsD.length -1].value.items
-                let array = null
-                let colorString = ""
-                for (let F = 0; F < itemsE[E].value.items.length; F++) {
-                  array = itemsE[E].value.items[F]
-                  colorString += `RGB(${array[0]*255},${array[1]*255},${array[2]*255}) ${itemsE[E-1].value.items[F]*100}%,`
-                }
-                EmitterColor.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
-              } 
-            }else{
-              if(birthColorIndex != null){
-                let itemsD = itemsC[birthColorIndex].value.items;
-                for (let D = 0; D < itemsD.length; D++) {
-                  if(itemsD[D].key == "constantValue"){
-                    EmitterColor.classList.add("color-solid")
-                    EmitterColor.style.backgroundColor = `RGB(${itemsD[D].value[0]*255},${itemsD[D].value[1]*255},${itemsD[D].value[2]*255})`
-                  }
-                }
-              }
-            }
-            if (colorIndex == null && birthColorIndex == null){
-              EmitterColor.style.display = "none";
-              EmitterColor.parentNode.childNodes[1].style.color = "#9a9a9a"
-              EmitterColor.parentNode.firstChild.style.visibility = "hidden"
-            }
-          }
-        }
-      }
       clearInterval(timerId)
     }
   }, checkTime)
+
+  file = require((filepath.slice(0,-4) + ".json"));
+  let complexEmitterList = document.getElementById("complexEmitterList")
+  complexEmitterList.textContent = ''
+  let itemsA = file.entries.value.items
+  function createEmitterItem(EmitterList,EmitterName){
+    let EmitterItem = document.createElement('li')
+    EmitterItem.className = "EmitterItem"
+    EmitterList.appendChild(EmitterItem)
+    let EmitterInput = document.createElement('input')
+    EmitterInput.type = "checkbox"
+    EmitterInput.className = "EmitterInput"
+    EmitterItem.appendChild(EmitterInput)
+    let EmitterTitle = document.createElement('div')
+    EmitterTitle.className = "EmitterTitle"
+    EmitterTitle.innerText = EmitterName
+    EmitterItem.appendChild(EmitterTitle)
+    let EmitterColor = document.createElement('div')
+    EmitterColor.className = "color"
+    EmitterItem.appendChild(EmitterColor)
+  }
+  for (let A = 0; A < itemsA.length; A++) {
+    if (itemsA[A].value.items[0].key == "complexEmitterDefinitionData"){
+      itemsZero = itemsA[A].value.items
+      itemsZero.forEach(itemZero => {
+        if(itemZero.key == "particleName"){
+          let complexEmitterItem = document.createElement('li')
+          complexEmitterItem.className = "complexEmitterItem"
+          complexEmitterItem.id = A
+          complexEmitterList.appendChild(complexEmitterItem)
+          let complexEmitterHeader = document.createElement('div')
+          complexEmitterHeader.className = "complexEmitterHeader"
+          let complexEmitterTitle = document.createElement('div')
+          complexEmitterTitle.className = "complexEmitterTitle"
+          complexEmitterTitle.innerText = itemZero.value
+
+          let complexEmitterInput = document.createElement('input')
+          complexEmitterInput.type = "checkbox"
+          complexEmitterInput.className = "ComplexEmitterInput"
+          complexEmitterInput.onclick = function(){checkchildren(this.parentNode.parentNode,false)}
+          complexEmitterItem.appendChild(complexEmitterHeader)
+          complexEmitterHeader.appendChild(complexEmitterInput)
+          complexEmitterHeader.appendChild(complexEmitterTitle)
+
+          let EmitterList = document.createElement('ol')
+          EmitterList.style = "list-style: none"
+          EmitterList.className = "EmitterList"
+          complexEmitterItem.appendChild(EmitterList)
+          let itemsB = itemsZero[0].value.items
+          for (let B = 0; B < itemsB.length; B++) {
+            let itemsC = itemsB[B].items;
+            let tempName = `unnamed ${A}-${B}`
+            for (let C = 0; C < itemsC.length; C++) {
+              if (itemsC[C].key == "emitterName"){
+                tempName = itemsC[C].value
+              } 
+            }
+            createEmitterItem(EmitterList,tempName)
+          }
+        }
+      });
+    }
+  }
+  for (let A = 0; A < complexEmitterList.childNodes.length; A++) {
+    let ComplexEmitter = complexEmitterList.childNodes[A]
+    let id = complexEmitterList.childNodes[A].id
+    let itemsA = file.entries.value.items
+    if (itemsA[id].value.items[0].key == "complexEmitterDefinitionData"){
+      itemsZero = itemsA[id].value.items
+      itemsB = itemsZero[0].value.items
+      for (let B = 0; B < itemsB.length; B++) {
+        let EmitterColor = ComplexEmitter.childNodes[1].childNodes[B].childNodes[2]
+        let itemsC = itemsB[B].items;
+
+        let colorIndex = null
+        let birthColorIndex = null
+
+        for (let C = 0; C < itemsC.length; C++){
+          if (itemsC[C].key == "color"){
+            let itemsD = itemsC[C].value.items;
+            for (let D = 0; D < itemsD.length; D++) {
+              if(itemsD[D].key == "constantValue" || itemsD[D].key == "dynamics"){
+                colorIndex = C
+              }
+            }
+          } else if (itemsC[C].key == "birthColor"){
+            birthColorIndex = C
+          }
+        }
+        if (colorIndex != null){
+          let itemsD = itemsC[colorIndex].value.items;
+          if(itemsD[itemsD.length-1].key == "constantValue"){
+            EmitterColor.classList.add("color-gradient")
+            EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*255},${itemsD[itemsD.length -1].value[1]*255},${itemsD[itemsD.length -1].value[2]*255})`
+          }else{
+            let E = itemsD[itemsD.length-1].value.items.length - 1 
+            let itemsE = itemsD[itemsD.length -1].value.items
+            let array = null
+            let colorString = ""
+            for (let F = 0; F < itemsE[E].value.items.length; F++) {
+              array = itemsE[E].value.items[F]
+              colorString += `RGB(${array[0]*255},${array[1]*255},${array[2]*255}) ${itemsE[E-1].value.items[F]*100}%,`
+            }
+            EmitterColor.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
+          } 
+        }else{
+          if(birthColorIndex != null){
+            let itemsD = itemsC[birthColorIndex].value.items;
+            for (let D = 0; D < itemsD.length; D++) {
+              if(itemsD[D].key == "constantValue"){
+                EmitterColor.classList.add("color-solid")
+                EmitterColor.style.backgroundColor = `RGB(${itemsD[D].value[0]*255},${itemsD[D].value[1]*255},${itemsD[D].value[2]*255})`
+              }
+            }
+          }
+        }
+        if (colorIndex == null && birthColorIndex == null){
+          EmitterColor.style.display = "none";
+          EmitterColor.parentNode.childNodes[1].style.color = "#9a9a9a"
+          EmitterColor.parentNode.firstChild.style.visibility = "hidden"
+        }
+      }
+    }
+  }
 }
 function selectRitobin(){
   appconfig.ritoBinPath = ipcRenderer.sendSync('ritobinselect')[0]
