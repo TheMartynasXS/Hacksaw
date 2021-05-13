@@ -123,7 +123,7 @@ function selectFiles(){
     return 0
   }
   document.title = `BinSplash - ${filepath.substring(filepath.lastIndexOf('\\') + 1)}`
-  const checkTime = 1000;
+  const checkTime = 100;
   
   if(fs.existsSync((filepath.slice(0,-4) + ".json"), 'utf8') == false){
     exec(`"${appconfig.ritoBinPath}" -o json "${filepath}"`)
@@ -133,7 +133,8 @@ function selectFiles(){
       clearInterval(timerId)
     }
   }, checkTime)
-
+}
+function loadTheFile(){
   file = require((filepath.slice(0,-4) + ".json"));
   let complexEmitterList = document.getElementById("complexEmitterList")
   complexEmitterList.textContent = ''
