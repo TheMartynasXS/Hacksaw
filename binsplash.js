@@ -1,8 +1,11 @@
 const { exec } = require('child_process');
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, app } = require('electron');
 const fs = require('fs');
 const path = require('path');
-
+const https = require('https');
+const { config } = require('process');
+let filesaved = true
+let persistant = false
 window.onerror = function (msg, error, lineNo, columnNo) {
   ipcRenderer.sendSync('raiseError', `Message: ${msg}\n\nError: ${error}`,`Raised at: ${lineNo} : ${columnNo}` )
 }
@@ -33,19 +36,6 @@ function createAlert(message){
   alertdiv.className = "alert-box"
   dim.appendChild(alertdiv)
 }
-
-ipcRenderer.on('update_available', () => {
-  ipcRenderer.removeAllListeners('update_available');
-  dismissAlert()
-  createAlert("New version available press OK to download").then(boolean =>{if(boolean){restartApp()}})
-});ipcRenderer.on('update_downloaded', () => {
-  ipcRenderer.removeAllListeners('update_downloaded');
-  dismissAlert()
-  createAlert("New Version downloaded OK to download")
-});
-function restartApp() {
-  ipcRenderer.sendSync('restart_app');
-}
 const appconfigpath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\binsplash\\' + 'config.json')
 
 let isExists = fs.existsSync(appconfigpath, 'utf8')
@@ -54,24 +44,12 @@ if (isExists == false){
   settingsMenu()
 }else{
   appconfig = require(appconfigpath)
-  if(appconfig.ignoreBW){
-    document.getElementById("bwvalues").checked = true
-  }
-  if(appconfig.editBlendmodes){
-    document.getElementById("bmvalues").checked = true
-  }
-  if(appconfig.rainbow){
-    document.getElementById("slider-input-container").style.display = "none"
-    document.getElementById("color-container").style.display = "none"
-    document.getElementById("rainbow").checked = true
-    document.getElementById("nav").style.maxHeight = "calc(100vh - 275px)"
-    document.getElementById("navdiv").style.maxHeight = "calc(100vh - 205px)"
-  }
+  document.getElementById("bwvalues").checked = appconfig.ignoreBW
+  document.getElementById("linear").checked = appconfig.linear
 }
 function saveConfig(){
   appconfig.ignoreBW = document.getElementById("bwvalues").checked
-  appconfig.editBlendmodes = document.getElementById("bmvalues").checked
-  appconfig.rainbow = document.getElementById("rainbow").checked
+  appconfig.linear = document.getElementById("linear").checked
   fs.writeFileSync(appconfigpath,JSON.stringify(appconfig,null,2),"utf8")
   window.location.reload()
 }
@@ -84,22 +62,40 @@ function settingsMenu(){
   document.getElementById("Main").style.display = "none"
   document.getElementById("Settings").style.display = "block"
 }
+let colorcontainer = document.getElementById("color-container")
+let gradientindicator = document.getElementById("gradient-indicator")
+function updateGradient(){
+  let length = colorcontainer.children.length
+  if(length > 1){
+    let colorString = ''
+    for (let id = 0; id < length; id++) {
+      colorString += `${colorcontainer.childNodes[id].value},`
+    }
+    gradientindicator.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
+  }else{
+    gradientindicator.style.backgroundImage = `linear-gradient(0.25turn,${colorcontainer.childNodes[0].value},${colorcontainer.childNodes[0].value})`
+  }
+
+}
 function colorFields(value){
-  container = document.getElementById("color-container")
-  length = container.children.length
+  let length = colorcontainer.children.length
   if (length < value){
     for (let step = 0; step < value - length; step++) {
       rgb = document.createElement("input")
       rgb.type = "color"
       rgb.value = "#" + Math.floor(Math.random()*16777215).toString(16)
+      rgb.onchange = updateGradient
       rgb.classList.add("rgb");
-      container.appendChild(rgb);
+      colorcontainer.appendChild(rgb);
     }
   }
   else if (length > value){
     for (let step = 1; step <= length-value; step++) {
-      container.removeChild(container.children[length-step])
+      colorcontainer.removeChild(colorcontainer.children[length-step])
     }
+  }
+  if(appconfig.linear){
+    updateGradient()
   }
 }
 function hexToRgb(hex) {
@@ -111,13 +107,11 @@ function hexToRgb(hex) {
     b: parseFloat(parseInt(result[3], 16))
   } : null;
 }
-function colordisplay(item){
-  let colorone = Math.round(item[0]*255)
-  let colortwo = Math.round(item[1]*255)
-  let colorthree = Math.round(item[2]*255)
-  return `RGB(${colorone},${colortwo},${colorthree})`
-}
 function selectFiles(){
+  if(!filesaved && !persistant){
+    persistant = true
+    return createAlert("You may have forgotten to save the .bin file,\nsave cause next time I won't warn you.")
+  }
   filepath = ipcRenderer.sendSync('fileselect')[0]
   if(filepath == undefined){
     return 0
@@ -130,9 +124,12 @@ function selectFiles(){
   }
   const timerId = setInterval(() => {
     if(fs.existsSync((filepath.slice(0,-4) + ".json"), 'utf8')) {
+      loadTheFile()
       clearInterval(timerId)
     }
   }, checkTime)
+  filesaved = false
+  persistant = false
 }
 function loadTheFile(){
   file = require((filepath.slice(0,-4) + ".json"));
@@ -155,6 +152,7 @@ function loadTheFile(){
     EmitterColor.className = "color"
     EmitterItem.appendChild(EmitterColor)
   }
+  let foundemitters = false
   for (let A = 0; A < itemsA.length; A++) {
     if (itemsA[A].value.items[0].key == "complexEmitterDefinitionData"){
       itemsZero = itemsA[A].value.items
@@ -192,10 +190,15 @@ function loadTheFile(){
               } 
             }
             createEmitterItem(EmitterList,tempName)
+            foundemitters = true
           }
         }
       });
     }
+  }
+  if(foundemitters == false){
+    filesaved = true
+    return createAlert("This Bin has no color values")
   }
   for (let A = 0; A < complexEmitterList.childNodes.length; A++) {
     let ComplexEmitter = complexEmitterList.childNodes[A]
@@ -226,7 +229,7 @@ function loadTheFile(){
         if (colorIndex != null){
           let itemsD = itemsC[colorIndex].value.items;
           if(itemsD[itemsD.length-1].key == "constantValue"){
-            EmitterColor.classList.add("color-gradient")
+            EmitterColor.classList.add("color-solid")
             EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*255},${itemsD[itemsD.length -1].value[1]*255},${itemsD[itemsD.length -1].value[2]*255})`
           }else{
             let E = itemsD[itemsD.length-1].value.items.length - 1 
@@ -267,11 +270,8 @@ function checkchildren(object,invert){
     if(invert){
       object.childNodes[1].childNodes[J].childNodes[0].checked = !object.childNodes[1].childNodes[J].childNodes[0].checked
     }else{
-      if (object.childNodes[0].childNodes[0].checked) {
-        object.childNodes[1].childNodes[J].childNodes[0].checked = true
-      }
-      if (!object.childNodes[0].childNodes[0].checked) {
-        object.childNodes[1].childNodes[J].childNodes[0].checked = false
+      if(object.childNodes[1].childNodes[J].childNodes[0].style.visibility != "hidden"){
+        object.childNodes[1].childNodes[J].childNodes[0].checked=object.childNodes[0].childNodes[0].checked
       }
     }
   }
@@ -308,10 +308,9 @@ function invert(){
 
 function filterList(filterString){
   let emitterList = document.getElementById("complexEmitterList").childNodes
-
+  let search = new RegExp(filterString, "i")
   for (let I = 0; I < emitterList.length; I++) 
   {
-    let search = new RegExp(filterString, "i")
     let match = emitterList[I].textContent.match(search)
 
     if(match == null)
@@ -327,10 +326,27 @@ function filterList(filterString){
     }
   }
 }
+function linearColoring(){
 
-function doColoring(){
-  let colors = document.getElementById("color-container").children
-  return colors[Math.floor(Math.random() * colors.length)].value
+}
+function randomColoring(colors,old){
+  let rgb = hexToRgb(colors[Math.floor(Math.random() * colors.length)].value)
+  if(appconfig.ignoreBW){
+    if((old[0] == 0 && old[1] == 0 && old[2] == 0) || (old[0] == 1 && old[1] == 1 && old[2] == 1)){
+      return {
+        r: old[0] *255,
+        g: old[1] *255,
+        b: old[2] *255
+      }
+    }
+  }
+  old[0] = rgb.r/256
+  old[1] = rgb.g/256
+  old[2] = rgb.b/256
+  return rgb
+}
+function fetchColors(){
+  return document.getElementById("color-container").children
 }
 function recolorSelected(){
   let complexEmitterList = document.getElementById("complexEmitterList")
@@ -362,77 +378,98 @@ function recolorSelected(){
               birthColorIndex = C
             }
           }
-          if (colorIndex != null){
-            let itemsD = itemsC[colorIndex].value.items;
-            for (let D = 0; D < itemsD.length; D++) {
-              if(itemsD[D].key == "constantValue"){
-                for (let D = 0; D < itemsD.length; D++) {
-                  if(itemsD[D].key == "constantValue"){
-                    if(appconfig.ignoreBW){
-                      if((itemsD[D].value[0] == 0 && itemsD[D].value[1] == 0 && itemsD[D].value[1] == 0) || (itemsD[D].value[0] == 1 && itemsD[D].value[1] == 1 && itemsD[D].value[2] == 1)){break}
-                    }
-                    if(appconfig.rainbow == false){
-                      color = hexToRgb(doColoring())
-                    }else{
-                      color = {r:Math.floor(Math.random() * 255),g:Math.floor(Math.random() * 255),b:Math.floor(Math.random() * 255)}
-                    }
-                    itemsD[D].value[0] = color.r/256
-                    itemsD[D].value[1] = color.g/256
-                    itemsD[D].value[2] = color.b/256
-                    EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
-                    
-                  }
+          if(appconfig.linear){
+            if (colorIndex != null){
+              
+            }else{
+              colorIndex = itemsC.length
+              itemsC[colorIndex] = {
+                key: "color",
+                type: "embed",
+                value:{
+                  items:[{},{}],
+                  name: "ValueColor"
                 }
-                if(appconfig.rainbow == false){
-                  color = hexToRgb(doColoring())
-                }else{
-                  color = {r:Math.floor(Math.random() * 255),g:Math.floor(Math.random() * 255),b:Math.floor(Math.random() * 255)}
-                }
-                EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
-                
-              }else{
-                let E = itemsD[D].value.items.length - 1 
-                let itemsE = itemsD[D].value.items
-                let array = null
-                let colorString = ""
-                for (let F = 0; F < itemsE[E].value.items.length; F++) {
-                  if(appconfig.rainbow == false){
-                    color = hexToRgb(doColoring())
-                  }else{
-                    color = {r:Math.floor(Math.random() * 255),g:Math.floor(Math.random() * 255),b:Math.floor(Math.random() * 255)}
-                  }
-                  array = itemsE[E].value.items[F]
-                  if(appconfig.ignoreBW){
-                    if((array[0] == 0 && array[1] == 0 && array[2] == 0) || (array[0] == 1 && array[1] == 1 && array[2] == 1)){
-                      colorString += `RGB(${array[0]*255},${array[1]*255},${array[2]*255}) ${itemsE[E-1].value.items[F]*100}%,`
-                      continue
-                    }
-                  }
-                  array[0] = color.r/255
-                  array[1] = color.g/255
-                  array[2] = color.b/255
-                  colorString += `RGB(${color.r},${color.g},${color.b}) ${itemsE[E-1].value.items[F]*100}%,`
-                }
-                EmitterColor.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
               }
+              
             }
+            let itemsD = itemsC[colorIndex].value.items;
+            let dynid = itemsD.length-1
+            let colorcount = colorcontainer.childNodes.length
+            let times =  []
+            let values = []
+            
+            for (let id = 0; id < colorcount; id++) {
+              let color = hexToRgb(colorcontainer.childNodes[id].value)
+              values.push([(color.r/256),(color.g/256),(color.b/256),255])
+              times.push(1/(colorcount-1)*id)
+            }
+            itemsD[dynid].key = "dynamics"
+            itemsD[dynid].type = "pointer"
+            itemsD[dynid].value = {
+              items:[
+                {
+                  key: "times",
+                  type: "list",
+                  value: {
+                    items: times,
+                    valueType: "f32"
+                  }
+                },
+                {
+                  key: "values",
+                  type: "list",
+                  value: {
+                    items: values,
+                    valueType: "vec4"
+                  }
+                }
+              ],
+              name: "VfxAnimatedColorVariableData"
+            }
+            
+            if(EmitterColor.classList.length > 1){
+              EmitterColor.classList.remove('color-solid')
+            }
+            EmitterColor.style.backgroundImage=gradientindicator.style.backgroundImage
           }else{
-            if(birthColorIndex != null){
-              let itemsD = itemsC[birthColorIndex].value.items;
+            if (colorIndex != null){
+              let itemsD = itemsC[colorIndex].value.items;
               for (let D = 0; D < itemsD.length; D++) {
                 if(itemsD[D].key == "constantValue"){
-                  if(appconfig.ignoreBW){
-                    if((itemsD[D].value[0] == 0 && itemsD[D].value[1] == 0 && itemsD[D].value[1] == 0) || (itemsD[D].value[0] == 1 && itemsD[D].value[1] == 1 && itemsD[D].value[2] == 1)){break}
+                  let color = undefined
+                  for (let D = 0; D < itemsD.length; D++) {
+                    if(itemsD[D].key == "constantValue"){
+                      color = randomColoring(fetchColors(),itemsD[D].value)
+                      
+                      EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
+                    }
                   }
-                  if(appconfig.rainbow == false){
-                    let color = hexToRgb(doColoring())
-                  }else{
-                    let color = {r:Math.floor(Math.random() * 255),g:Math.floor(Math.random() * 255),b:Math.floor(Math.random() * 255)}
-                  }
-                  itemsD[D].value[0] = color.r/256
-                  itemsD[D].value[1] = color.g/256
-                  itemsD[D].value[2] = color.b/256
                   EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
+                }else if(itemsD[D].key == "dynamics"){
+                  let E = itemsD[D].value.items.length - 1 
+                  let itemsE = itemsD[D].value.items
+                  let array = null
+                  let colorString = ""
+                  for (let F = 0; F < itemsE[E].value.items.length; F++) {
+                    array = itemsE[E].value.items[F]
+                    let color = null
+                    color = randomColoring(fetchColors(),array)
+                    colorString += `RGB(${color.r},${color.g},${color.b}) ${itemsE[E-1].value.items[F]*100}%,`
+                    
+                  }
+                  EmitterColor.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
+                }
+              }
+            }else{
+              if(birthColorIndex != null){
+                let itemsD = itemsC[birthColorIndex].value.items;
+                for (let D = 0; D < itemsD.length; D++) {
+                  if(itemsD[D].key == "constantValue"){
+                    let color = null
+                    color = randomColoring(fetchColors(),itemsD[D].value)
+                    EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
+                  }
                 }
               }
             }

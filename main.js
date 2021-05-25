@@ -39,7 +39,6 @@ ipcMain.on('ritobinselect', (event) => {
   dialog.showOpenDialog({ filters: [{ name: 'ritobin_cli', extensions:['exe']}],properties: ['openFile'] }).then( val => event.returnValue = val.filePaths, val => console.log("error"))
 })
 ipcMain.on('ConfigPath', event => {
-  
   event.returnValue = app.getPath('appData')
 })
 ipcMain.on('raiseError', (event, errorMessage, errorAt) => {

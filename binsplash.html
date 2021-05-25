@@ -11,7 +11,9 @@
   <div id="Main">
     <div class="div" id="slider-input-container">
       <input id="slider-input" class="slider-input" type="range" min="1" value="1" max="10" onchange="colorFields(this.value)"></div>
-    <div class="div" id="color-container"><input type="color" class="rgb" value="#123456"></div>
+    <div id="gradient-indicator">
+    </div>
+    <div id="color-container"><input type="color" class="rgb" value="#123456"></div>
     <output for="slider" onforminput="value = slider.valueAsNumber;"></output>
     <div class="div">
       <button onclick="selectFiles()" class="ButtonC1" id="Select-Files">Select Files</button> 
@@ -38,13 +40,9 @@
       <label class="SettingLabel">Ignore B/W Values?</label>
       <input type="checkbox" class="SettingOptionCheckbox" id="bwvalues">
     </div>
-    <div class="div" style="display: none;">
-      <label class="SettingLabel">Edit blend modes?</label>
-      <input type="checkbox" class="SettingOptionCheckbox" id="bmvalues">
-    </div>
     <div class="div">
-      <label class="SettingLabel">Full Random</label>
-      <input type="checkbox" class="SettingOptionCheckbox" id="rainbow">
+      <label class="SettingLabel">Linear Color Assign</label>
+      <input type="checkbox" class="SettingOptionCheckbox" id="linear">
     </div>
     <div class="div">
       <button onclick="saveConfig()" class="ButtonC1 important" id="Save-Config">Save Settings</button> 
