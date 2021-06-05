@@ -42,19 +42,16 @@ input[type="checkbox"] {
 .div {
   height: 30px;
   width: auto;
-  margin: 15px;
-  margin-bottom: 0px;
+  display: flex;
   background-color: #40444b;
 }
 #navdiv {
   height: 30px;
   background-color: #40444b;
-  
   width: auto;
-  margin: 0px 15px 15px 15px;
   padding: 0px 0 10px 0;
   height: auto;
-  max-height: calc(100vh - 275px);
+  max-height: calc(100vh - 270px);
   min-height: 80px;
 }
 .no-margin {
@@ -63,8 +60,11 @@ input[type="checkbox"] {
 }
 #nav {
   margin-top: 10px;
-  max-height: calc(100vh - 365px);
+  max-height: calc(100vh - 380px);
   overflow-y: scroll;
+}
+#timeinput {
+  height: auto;
 }
 .slider-input {
   background-color: #202225;
@@ -78,13 +78,12 @@ input[type="checkbox"] {
   height: 30px;
   cursor: pointer;
   background: #40444b;
-  
 }
 .slider-input::-webkit-slider-thumb {
   border: 2px solid #7a7a7a;
   height: 30px;
   width: 30px;
-  
+
   background: #202225;
   -webkit-appearance: none;
 }
@@ -92,13 +91,11 @@ input[type="checkbox"] {
   padding-left: 10px;
 }
 .complexEmitterItem {
-  margin: 5px;
+  margin: 5px 0 5px 5px;
   border: 2px solid #202225;
-  
 }
 .complexEmitterItem:hover {
   border: 2px solid #7a7a7a;
-  
 }
 .complexEmitterHeader {
   text-align: center;
@@ -152,7 +149,7 @@ li {
   width: 60px;
   height: 24px;
   margin: 3px 5px 3px 5px;
-  
+
   box-shadow: inset 0 0 2px black;
   float: right;
 }
@@ -169,19 +166,22 @@ li {
   padding: 5px;
   box-sizing: border-box;
   border: 2 solid #202225;
-  
 }
 .ButtonC1 {
-  width: 100%;
+  width: auto;
+  flex: 4 4;
   height: 30px;
   background-color: #7a7a7a;
   border-width: 0;
-  
 }
 .ButtonC2 {
-  background-color: #7a7a7a;
-  width: calc(100% / 3);
-  height: 100%;
+  position: relative;
+  color: white;
+  left: 20px;
+  top: 20%;
+  width:100px;
+  background-color: #20222582;
+  height: 60%;
   padding: 0px;
   border-width: 0;
 }
@@ -204,7 +204,6 @@ li {
   background-color: #7a7a7a;
   width: 40%;
   height: 100%;
-  
 }
 .SettingOptionCheckbox {
   height: 30px;
@@ -214,7 +213,16 @@ li {
   box-sizing: border-box;
   height: 30px;
   width: 60%;
-  
+}
+.time {
+  min-width: 30px;
+  width: 10%;
+  height: 100%;
+  flex: 4 4;
+  text-align: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background-color: #40444b;
 }
 .rgb::-webkit-color-swatch:hover,
 .slider-input::-webkit-slider-thumb:hover {
@@ -225,25 +233,23 @@ li {
   background-color: #9f9f9f;
 }
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 15px;
 }
 ::-webkit-scrollbar-thumb {
   background-color: #ee2222;
 }
-#gradient-indicator{
-  position:relative;
-  top:10px;
-  height:15px;
-  margin: 0 19px 0 19px;
+#gradient-indicator {
+  height: 10px;
   background-image: none;
-  width:auto;
+  width: auto;
 }
 #color-container {
   display: flex;
   height: 30px;
   width: auto;
-  margin: 15px;
-  margin-bottom: 0px;
+}
+#PaletteManager {
+  max-height: calc(100vh - 60px);
 }
 .rgb {
   flex: auto;
@@ -252,7 +258,6 @@ li {
   width: auto;
   height: 30px;
   margin: none;
-  
   border: 0px;
   outline: none;
   cursor: pointer;
@@ -272,7 +277,6 @@ li {
   width: 100%;
   box-sizing: border-box;
   border: 0;
-  
 }
 .alert-box {
   box-shadow: inset 0 -3px 0 0 #ee2222;
@@ -304,7 +308,10 @@ li {
   height: 100%;
 }
 .important {
-  background: linear-gradient(90deg, #ee9292, rgb(167, 233, 161), #958feb);
+  background: linear-gradient(90deg, #ee9292, #a7e9a1, #958feb);
+}
+.important2 {
+  background: linear-gradient(90deg, #958feb, #a7e9a1);
 }
 #notification {
   position: fixed;
@@ -312,7 +319,19 @@ li {
   left: 20px;
   width: 200px;
   padding: 20px;
-  
+
   background-color: white;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+.tm {
+  margin-top: 10px;
+}
+.bm {
+  margin-bottom: 10px;
+}
+.lm {
+  margin-left: 10px;
+}
+.rm {
+  margin-right: 10px;
 }

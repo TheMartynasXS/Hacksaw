@@ -1,9 +1,9 @@
 const { exec } = require('child_process');
-const { ipcRenderer, app } = require('electron');
+const { ipcRenderer, clipboard, app} = require('electron');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 const { config } = require('process');
+
 let filesaved = true
 let persistant = false
 window.onerror = function (msg, error, lineNo, columnNo) {
@@ -12,11 +12,11 @@ window.onerror = function (msg, error, lineNo, columnNo) {
 let appconfig = {};
 let file = {};
 let filepath = "";
+let palette = [{time:0,color:`#${Math.floor(Math.random()*16777215).toString(16)}`}]
 function dismissAlert(){
   let alert = document.getElementById("dim-bg")
   alert.remove()
 }
-
 function createAlert(message){
   let dim = document.createElement("div")
   dim.className = "dim-bg"
@@ -24,7 +24,10 @@ function createAlert(message){
   document.body.appendChild(dim)
   let alertdiv = document.createElement("div")
   let alerttext = document.createElement("div")
+  let dismissbuttondiv = document.createElement("div")
   let alertdismiss = document.createElement("button")
+  dismissbuttondiv.className = "div"
+
   alertdismiss.className = "ButtonC1"
   alertdismiss.textContent = "OK"
   alertdismiss.style.marginBottom = "0px"
@@ -32,71 +35,182 @@ function createAlert(message){
   alerttext.innerText = message
   alertdiv.appendChild(alerttext)
   alertdismiss.onclick= dismissAlert
-  alertdiv.appendChild(alertdismiss) 
+  alertdiv.appendChild(dismissbuttondiv)
+  dismissbuttondiv.appendChild(alertdismiss)
   alertdiv.className = "alert-box"
   dim.appendChild(alertdiv)
 }
 const appconfigpath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\binsplash\\' + 'config.json')
-
-let isExists = fs.existsSync(appconfigpath, 'utf8')
-if (isExists == false){
-  createAlert("You have to select Ritobin_cli.exe for the program to work")
-  settingsMenu()
-}else{
-  appconfig = require(appconfigpath)
-  document.getElementById("bwvalues").checked = appconfig.ignoreBW
-  document.getElementById("linear").checked = appconfig.linear
+function checkConfig(){
+  let isExists = fs.existsSync(appconfigpath, 'utf8')
+  if (isExists == false){
+    createAlert("You have to select Ritobin_cli.exe for the program to work")
+    settingsMenu()
+  }else{
+    appconfig = require(appconfigpath)
+    document.getElementById("bwvalues").checked = appconfig.ignoreBW
+    document.getElementById("linear").checked = appconfig.linear
+    if(!appconfig.linear){
+      document.getElementById("gradient-indicator").style.display = "none"
+      document.getElementById("time-container").style.display = "none"
+    }else{
+      document.getElementById("gradient-indicator").style.display = "block"
+      document.getElementById("time-container").style.display = "block"
+    }
+  }
 }
-function saveConfig(){
+checkConfig()
+function saveConfig(ignore=false){
   appconfig.ignoreBW = document.getElementById("bwvalues").checked
   appconfig.linear = document.getElementById("linear").checked
   fs.writeFileSync(appconfigpath,JSON.stringify(appconfig,null,2),"utf8")
-  window.location.reload()
+  saveBin(true)
+  if(!ignore){
+    mainMenu()
+  }
+  checkConfig()
 }
 
 function mainMenu(){
   document.getElementById("Main").style.display = "block"
   document.getElementById("Settings").style.display = "none"
+  document.getElementById("pmcontainer").style.display = "none"
 }
 function settingsMenu(){
   document.getElementById("Main").style.display = "none"
   document.getElementById("Settings").style.display = "block"
+  document.getElementById("pmcontainer").style.display = "none"
+
+}
+function paletteMenu(){
+  document.getElementById("Main").style.display = "none"
+  document.getElementById("Settings").style.display = "none"
+  document.getElementById("pmcontainer").style.display = "block"
+  loadPalettes()
 }
 let colorcontainer = document.getElementById("color-container")
 let gradientindicator = document.getElementById("gradient-indicator")
-function updateGradient(){
-  let length = colorcontainer.children.length
+let timecontainer = document.getElementById("time-container")
+function updateTime(event){
+  let length = event.target.parentNode.childNodes.length
+  for(let i = 0; i < length; i++){
+    if(event.target.parentNode.childNodes[i] == event.target){
+      palette[i].time = parseInt(event.target.value)
+      timecontainer.childNodes[i].style.borderBottom = `4px solid ${palette[i].time}`
+      
+      timecontainer.childNodes[i].value = palette[i].time
+    }
+  }
+
+  updateGradient(gradientindicator,palette)
+}
+function loadPalettes(){
+  let paletteContainer = document.getElementById("PaletteManager")
+  paletteContainer.innerText = null
+  appconfig.savedpalettes.map((item,id) => {
+    let palettediv = document.createElement("div")
+    palettediv.innertext = "yikes"
+    palettediv.className = "div"
+    paletteContainer.appendChild(palettediv)
+    if(item.length > 1){
+      updateGradient(palettediv,item,true)
+    } else{
+      palettediv.style.backgroundColor = item[0].color
+      //palettediv.style.backgroundImage = `linear-gradient(0.25turn,${item.color},${item.color})`
+    }
+    let selectbutton = document.createElement("button")
+    selectbutton.className="ButtonC2"
+    selectbutton.innerText="USE THIS"
+    selectbutton.onclick = ()=>{
+      palette = JSON.parse(JSON.stringify([...appconfig.savedpalettes[id]]))
+      renderfields()
+      updateGradient(gradientindicator,palette)
+    }
+    palettediv.appendChild(selectbutton)
+    let removebutton = document.createElement("button")
+    removebutton.className="ButtonC2"
+    removebutton.innerText="DELETE"
+    removebutton.onclick = ()=>{
+      appconfig.savedpalettes.splice(id,1)
+      saveConfig(true)
+      paletteContainer.childNodes[id] = null
+      loadPalettes()
+    }
+    palettediv.appendChild(removebutton)
+  })
+}
+function updateColor(event){
+  let length = event.target.parentNode.childNodes.length
+  for(let i = 0; i < length; i++){
+    if(event.target.parentNode.childNodes[i] == event.target){
+      palette[i].color = event.target.value
+      timecontainer.childNodes[i].style.borderBottom = `4px solid ${palette[i].color}`
+      
+      colorcontainer.childNodes[i].value = palette[i].color
+    }
+  }
+
+  updateGradient(gradientindicator,palette)
+}
+function updateGradient(indicator,palette,fromconfig=false){
+  let length = palette.length
   if(length > 1){
     let colorString = ''
     for (let id = 0; id < length; id++) {
-      colorString += `${colorcontainer.childNodes[id].value},`
+      if(!fromconfig){
+        if(timecontainer.childNodes[id].value.length == 0){
+          palette[id].time = parseInt(timecontainer.childNodes[id].placeholder)
+        }
+        if(timecontainer.childNodes.length-1 == id){
+          palette[id].time = 100
+        }else if(id == 0){
+          palette[id].time = 0
+        }
+      }
+      colorString += `${palette[id].color} ${palette[id].time}%,`
     }
-    gradientindicator.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
+    indicator.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
   }else{
-    gradientindicator.style.backgroundImage = `linear-gradient(0.25turn,${colorcontainer.childNodes[0].value},${colorcontainer.childNodes[0].value})`
+    indicator.style.backgroundImage = `linear-gradient(0.25turn,${colorcontainer.childNodes[0].value},${colorcontainer.childNodes[0].value})`
   }
-
 }
 function colorFields(value){
-  let length = colorcontainer.children.length
-  if (length < value){
-    for (let step = 0; step < value - length; step++) {
-      rgb = document.createElement("input")
-      rgb.type = "color"
-      rgb.value = "#" + Math.floor(Math.random()*16777215).toString(16)
-      rgb.onchange = updateGradient
-      rgb.classList.add("rgb");
-      colorcontainer.appendChild(rgb);
+  let length = palette.length
+  //let length = colorcontainer.children.length
+  if (value > length){
+    for(let i = 0; i < value - length;i++){
+      palette.push({time:0,color:`#${Math.floor(Math.random()*16777215).toString(16)}`})
+    }
+  } else if(value < length){
+    for(let i = 1; i < (length - value)+1; i++){
+      palette.pop(palette[length-(i)])
     }
   }
-  else if (length > value){
-    for (let step = 1; step <= length-value; step++) {
-      colorcontainer.removeChild(colorcontainer.children[length-step])
-    }
-  }
-  if(appconfig.linear){
-    updateGradient()
-  }
+  renderfields()
+  updateGradient(gradientindicator,palette)
+}
+function renderfields(){
+  colorcontainer.innerText = null
+  timecontainer.innerText = null
+  palette.map((item,id)=>{
+    let rgb = document.createElement("input")
+    rgb.type = "color"
+    rgb.value = item.color
+    rgb.onchange = updateColor
+    rgb.classList.add("rgb");
+    colorcontainer.appendChild(rgb);
+    item.color = rgb.value
+    let time = document.createElement("input")
+    time.type = "number"
+    time.min = 0
+    time.max = 100
+    time.classList.add("time")
+    time.placeholder = Math.floor(1/(palette.length-1)*(id)*100)
+    
+    time.onchange = updateTime
+    time.style.borderBottom = `4px solid ${item.color}`
+    timecontainer.appendChild(time)
+  })
 }
 function hexToRgb(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -128,12 +242,11 @@ function selectFiles(){
       clearInterval(timerId)
     }
   }, checkTime)
-  filesaved = false
-  persistant = false
 }
 function loadTheFile(){
   file = require((filepath.slice(0,-4) + ".json"));
   let complexEmitterList = document.getElementById("complexEmitterList")
+  
   complexEmitterList.textContent = ''
   let itemsA = file.entries.value.items
   function createEmitterItem(EmitterList,EmitterName){
@@ -326,9 +439,6 @@ function filterList(filterString){
     }
   }
 }
-function linearColoring(){
-
-}
 function randomColoring(colors,old){
   let rgb = hexToRgb(colors[Math.floor(Math.random() * colors.length)].value)
   if(appconfig.ignoreBW){
@@ -350,7 +460,8 @@ function fetchColors(){
 }
 function recolorSelected(){
   let complexEmitterList = document.getElementById("complexEmitterList")
-
+  filesaved = false
+  persistant = false
   for (let A = 0; A < complexEmitterList.childNodes.length; A++) {
     let ComplexEmitter = complexEmitterList.childNodes[A]
     let id = complexEmitterList.childNodes[A].id
@@ -365,7 +476,6 @@ function recolorSelected(){
   
           let colorIndex = null
           let birthColorIndex = null
-  
           for (let C = 0; C < itemsC.length; C++){
             if (itemsC[C].key == "color"){
               let itemsD = itemsC[C].value.items;
@@ -378,7 +488,7 @@ function recolorSelected(){
               birthColorIndex = C
             }
           }
-          if(appconfig.linear){
+          if(appconfig.linear && colorcontainer.childNodes.length > 1){
             if (colorIndex != null){
               
             }else{
@@ -387,7 +497,7 @@ function recolorSelected(){
                 key: "color",
                 type: "embed",
                 value:{
-                  items:[{},{}],
+                  items:[{}],
                   name: "ValueColor"
                 }
               }
@@ -398,12 +508,11 @@ function recolorSelected(){
             let colorcount = colorcontainer.childNodes.length
             let times =  []
             let values = []
-            
-            for (let id = 0; id < colorcount; id++) {
-              let color = hexToRgb(colorcontainer.childNodes[id].value)
-              values.push([(color.r/256),(color.g/256),(color.b/256),255])
-              times.push(1/(colorcount-1)*id)
-            }
+            palette.map((item)=>{
+              times.push(JSON.parse(JSON.stringify(item.time/100)))
+              let temp = hexToRgb(JSON.parse(JSON.stringify(item.color)))
+              values.push([(temp.r/256),(temp.g/256),(temp.b/256),0])
+            })
             itemsD[dynid].key = "dynamics"
             itemsD[dynid].type = "pointer"
             itemsD[dynid].value = {
@@ -480,9 +589,29 @@ function recolorSelected(){
   }
   createAlert("Recolored Selection");
 }
-function saveBin(){
+function savePalette(){
+  if(palette.length >1){
+    if(typeof(appconfig.savedpalettes) != undefined){
+    }else{
+      appconfig.savedpalettes = []
+    }
+    appconfig.savedpalettes.push(JSON.parse(JSON.stringify(palette)))
+  }else{
+    appconfig.savedpalettes.push([{times:0,color:colorcontainer.childNodes[0].value}])
+  }
+  saveConfig(true)
+  loadPalettes()
+}
+function importPalette(){
+  console.log(palette)
+}
+function saveBin(skip=false){
   jsonfile = JSON.stringify(file,null,2)
   fs.writeFileSync((filepath.slice(0,-4) + ".json"),jsonfile,"utf8")
   exec(`"${appconfig.ritoBinPath}" -o bin "${(filepath.slice(0,-4) + ".json")}"`)
-  createAlert(`File saved, dont forget to delete\n.json files from directory`);
+  filesaved = true
+  persistant = false
+  if(!skip){
+    createAlert(`File saved, dont forget to delete\n.json files from directory`);
+  }
 }

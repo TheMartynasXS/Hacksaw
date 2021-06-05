@@ -7,45 +7,57 @@
   <link rel="stylesheet" href="binsplash.css">
 </head>
 <body>
-  <div class="header"><button class="header-button" onclick="mainMenu()">Main</button><button class="header-button" onclick="settingsMenu()">Settings</button><button class="header-button" style="float:right" id="version" onclick="window.location.href = 'https:\/\/github.com\/DevMarcius\/binsplash\/releases'">GitHub</button></div>
+  <div class="header">
+    <button class="header-button" onclick="mainMenu()">Main</button>
+    <button class="header-button" onclick="settingsMenu()">Settings</button>
+    <button class="header-button" onclick="paletteMenu()">Palette Manager</button>
+    <button class="header-button" style="float:right" id="version" onclick="window.location.href = 'https:\/\/github.com\/DevMarcius\/binsplash\/releases'">GitHub</button>
+  </div>
   <div id="Main">
-    <div class="div" id="slider-input-container">
+    <div class="div tm lm rm" id="slider-input-container">
       <input id="slider-input" class="slider-input" type="range" min="1" value="1" max="10" onchange="colorFields(this.value)"></div>
-    <div id="gradient-indicator">
-    </div>
-    <div id="color-container"><input type="color" class="rgb" value="#123456"></div>
+    <div class="div tm lm rm" style="display:flex;overflow:hidden" id="time-container"><input class="time" type="number" placeholder=0></input></div>
+    <div class="lm rm" id="gradient-indicator" style="background-image:linear-gradient(#123456,#123456);"></div>
+    <div class="tm lm rm bm" id="color-container"><input type="color" class="rgb" value="#123456"></div>
     <output for="slider" onforminput="value = slider.valueAsNumber;"></output>
-    <div class="div">
+    <div class="div lm rm bm">
       <button onclick="selectFiles()" class="ButtonC1" id="Select-Files">Select Files</button> 
     </div>
-    <div id="navdiv">
-      <div class="div no-margin"><input type="text" placeholder="Filter by Complex Emitter" class="filter" oninput="filterList(this.value)"></div>
-      <div class="div no-margin"><button onclick="check()" class="ButtonC2">Check</button><button onclick="unCheck()" class="ButtonC2">UnCheck</button><button onclick="invert()" class="ButtonC2">Invert</button></div>
+    <div class="lm rm" id="navdiv">
+      <div class="div lm rm"><input type="text" placeholder="Filter by Complex Emitter" class="filter" oninput="filterList(this.value)"></div>
+      <div class="div"><button onclick="check()" class="ButtonC1">Check</button><button onclick="unCheck()" class="ButtonC1">UnCheck</button><button onclick="invert()" class="ButtonC1">Invert</button></div>
       <nav id="nav">
         <ol style="list-style: none" id="complexEmitterList"></ol>
       </nav>
     </div>
-    <div class="div">
+    <div class="div lm rm tm">
       <button onclick="recolorSelected()" class="ButtonC1" id="Recolor_Selected_Button">Recolor Selected</button>
     </div>
-    <div class="div">
-      <button onclick="saveBin()" class="ButtonC1 important" id="Save_Bin_Button">Save Bin</button>
+    <div class="div lm rm tm">
+      <button onclick="saveBin()" class="ButtonC1 important">Save Bin</button>
     </div>
   </div>
   <div id="Settings" style="display: none">
-    <div class="div">
+    <div class="div tm lm rm">
       <button onclick="selectRitobin()" class="ButtonC1" id="Select-Files">Select Ritobin_cli.exe</button> 
     </div>
-    <div class="div">
+    <div class="div tm lm rm">
       <label class="SettingLabel">Ignore B/W Values?</label>
       <input type="checkbox" class="SettingOptionCheckbox" id="bwvalues">
     </div>
-    <div class="div">
+    <div class="div tm lm rm">
       <label class="SettingLabel">Linear Color Assign</label>
       <input type="checkbox" class="SettingOptionCheckbox" id="linear">
     </div>
-    <div class="div">
+    <div class="div tm lm rm">
       <button onclick="saveConfig()" class="ButtonC1 important" id="Save-Config">Save Settings</button> 
+    </div>
+  </div>
+  <div id="pmcontainer" style="display: none">
+    <div class="div">
+      <button onclick="savePalette()" class="ButtonC1 important2">Save Palette</button>
+    </div>
+    <div id="PaletteManager" style="overflow-y: scroll">
     </div>
   </div>
   <script src="binsplash.js"></script>
