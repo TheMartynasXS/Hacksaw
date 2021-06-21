@@ -149,7 +149,7 @@ li {
   width: 60px;
   height: 24px;
   margin: 3px 5px 3px 5px;
-
+  cursor:pointer;
   box-shadow: inset 0 0 2px black;
   float: right;
 }
@@ -169,19 +169,26 @@ li {
 }
 .ButtonC1 {
   width: auto;
-  flex: 4 4;
+  flex: 1;
   height: 30px;
   background-color: #7a7a7a;
   border-width: 0;
 }
 .ButtonC2 {
-  position: relative;
   color: white;
-  left: 20px;
-  top: 20%;
   width:100px;
-  background-color: #20222582;
+  background-color: #20222572;
   height: 60%;
+  padding: 0px;
+  border-width: 0;
+}
+.InputC2 {
+  color: white;
+  width:auto;
+  flex:1;
+  background-color: #20222572;
+  height: 60%;
+  text-align: center;
   padding: 0px;
   border-width: 0;
 }

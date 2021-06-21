@@ -17,8 +17,8 @@
     <div class="div tm lm rm" id="slider-input-container">
       <input id="slider-input" class="slider-input" type="range" min="1" value="1" max="10" onchange="colorFields(this.value)"></div>
     <div class="div tm lm rm" style="display:flex;overflow:hidden" id="time-container"><input class="time" type="number" placeholder=0></input></div>
-    <div class="lm rm" id="gradient-indicator" style="background-image:linear-gradient(#123456,#123456);"></div>
-    <div class="tm lm rm bm" id="color-container"><input type="color" class="rgb" value="#123456"></div>
+    <div class="lm rm" id="gradient-indicator" ></div>
+    <div class="tm lm rm bm" id="color-container"></div>
     <output for="slider" onforminput="value = slider.valueAsNumber;"></output>
     <div class="div lm rm bm">
       <button onclick="selectFiles()" class="ButtonC1" id="Select-Files">Select Files</button> 
@@ -31,7 +31,8 @@
       </nav>
     </div>
     <div class="div lm rm tm">
-      <button onclick="recolorSelected()" class="ButtonC1" id="Recolor_Selected_Button">Recolor Selected</button>
+      <button onclick="recolorSelected()" class="ButtonC1" style="flex:3" id="Recolor_Selected_Button">Recolor Selected</button>
+      <button onclick="undoLast()" class="ButtonC1" style="border: 2px dotted red;">Undo</button>
     </div>
     <div class="div lm rm tm">
       <button onclick="saveBin()" class="ButtonC1 important">Save Bin</button>
@@ -43,10 +44,10 @@
     </div>
     <div class="div tm lm rm">
       <label class="SettingLabel">Ignore B/W Values?</label>
-      <input type="checkbox" class="SettingOptionCheckbox" id="bwvalues">
+      <input type="checkbox" class="SettingOptionCheckbox" checked="true" id="bwvalues">
     </div>
     <div class="div tm lm rm">
-      <label class="SettingLabel">Linear Color Assign</label>
+      <label class="SettingLabel">Advanced Mode</label>
       <input type="checkbox" class="SettingOptionCheckbox" id="linear">
     </div>
     <div class="div tm lm rm">
@@ -60,6 +61,6 @@
     <div id="PaletteManager" style="overflow-y: scroll">
     </div>
   </div>
-  <script src="binsplash.js"></script>
+  <script src="binsplash.js" defer></script>
 </body>
 </html>

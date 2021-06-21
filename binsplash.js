@@ -7,10 +7,11 @@ const { config } = require('process');
 let filesaved = true
 let persistant = false
 window.onerror = function (msg, error, lineNo, columnNo) {
-  ipcRenderer.sendSync('raiseError', `Message: ${msg}\n\nError: ${error}`,`Raised at: ${lineNo} : ${columnNo}` )
+  createAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
 }
 let appconfig = {};
 let file = {};
+let filebackup = {}
 let filepath = "";
 let palette = [{time:0,color:`#${Math.floor(Math.random()*16777215).toString(16)}`}]
 function dismissAlert(){
@@ -64,7 +65,7 @@ function saveConfig(ignore=false){
   appconfig.ignoreBW = document.getElementById("bwvalues").checked
   appconfig.linear = document.getElementById("linear").checked
   fs.writeFileSync(appconfigpath,JSON.stringify(appconfig,null,2),"utf8")
-  saveBin(true)
+  saveJson()
   if(!ignore){
     mainMenu()
   }
@@ -104,42 +105,65 @@ function updateTime(event){
 
   updateGradient(gradientindicator,palette)
 }
+renderfields()
+updateGradient(gradientindicator,palette)
 function loadPalettes(){
-  let paletteContainer = document.getElementById("PaletteManager")
-  paletteContainer.innerText = null
-  appconfig.savedpalettes.map((item,id) => {
-    let palettediv = document.createElement("div")
-    palettediv.innertext = "yikes"
-    palettediv.className = "div"
-    paletteContainer.appendChild(palettediv)
-    if(item.length > 1){
-      updateGradient(palettediv,item,true)
-    } else{
-      palettediv.style.backgroundColor = item[0].color
-      //palettediv.style.backgroundImage = `linear-gradient(0.25turn,${item.color},${item.color})`
-    }
-    let selectbutton = document.createElement("button")
-    selectbutton.className="ButtonC2"
-    selectbutton.innerText="USE THIS"
-    selectbutton.onclick = ()=>{
-      palette = JSON.parse(JSON.stringify([...appconfig.savedpalettes[id]]))
-      renderfields()
-      updateGradient(gradientindicator,palette)
-    }
-    palettediv.appendChild(selectbutton)
-    let removebutton = document.createElement("button")
-    removebutton.className="ButtonC2"
-    removebutton.innerText="DELETE"
-    removebutton.onclick = ()=>{
-      appconfig.savedpalettes.splice(id,1)
-      saveConfig(true)
-      paletteContainer.childNodes[id] = null
-      loadPalettes()
-    }
-    palettediv.appendChild(removebutton)
-  })
+  
+  if(appconfig.savedpalettes != undefined && appconfig.savedpalettes[0]?.value != undefined){
+    let paletteContainer = document.getElementById("PaletteManager")
+    paletteContainer.innerText = null
+    appconfig.savedpalettes.map((item,id) => {
+      let palettediv = document.createElement("div")
+      palettediv.innertext = "yikes"
+      palettediv.className = "div"
+      palettediv.style.display = "flex"
+      paletteContainer.appendChild(palettediv)
+      if(item.value.length > 1){
+        updateGradient(palettediv,item.value,true)
+      } else{
+        palettediv.style.backgroundColor = item.value[0].color
+      }
+      let selectbutton = document.createElement("button")
+      selectbutton.className="ButtonC2"
+      selectbutton.innerText="USE THIS"
+      selectbutton.onclick = ()=>{
+        palette = JSON.parse(JSON.stringify([...appconfig.savedpalettes[id].value]))
+        document.getElementById("slider-input").value = palette.length
+        renderfields()
+        updateGradient(gradientindicator,palette)
+      }
+      palettediv.appendChild(selectbutton)
+      let removebutton = document.createElement("button")
+      removebutton.className="ButtonC2"
+      removebutton.innerText="DELETE"
+      removebutton.onclick = ()=>{
+        appconfig.savedpalettes.splice(id,1)
+        saveConfig(true)
+        paletteContainer.childNodes[id] = null
+        loadPalettes()
+      }
+      palettediv.appendChild(removebutton)
+
+      let paletteName = document.createElement("input")
+      paletteName.value = item?.name
+      paletteName.className = "InputC2"
+      paletteName.onchange = (event)=>{
+        item.name = event.target.value
+        saveConfig(true)
+      }
+      palettediv.appendChild(paletteName)
+    })
+  } else if (appconfig.savedpalettes != undefined){
+    appconfig.savedpalettes.map((item,id)=>{
+      let temp = JSON.parse(JSON.stringify(item))
+      appconfig.savedpalettes[id] = JSON.parse(`{"name": "unnamed ${id}","value":${JSON.stringify(temp)}}`)
+    })
+    saveConfig(true)
+    loadPalettes()
+  }
 }
 function updateColor(event){
+  temp = hexToRgb(event.target.value)
   let length = event.target.parentNode.childNodes.length
   for(let i = 0; i < length; i++){
     if(event.target.parentNode.childNodes[i] == event.target){
@@ -176,7 +200,6 @@ function updateGradient(indicator,palette,fromconfig=false){
 }
 function colorFields(value){
   let length = palette.length
-  //let length = colorcontainer.children.length
   if (value > length){
     for(let i = 0; i < value - length;i++){
       palette.push({time:0,color:`#${Math.floor(Math.random()*16777215).toString(16)}`})
@@ -186,6 +209,9 @@ function colorFields(value){
       palette.pop(palette[length-(i)])
     }
   }
+  palette.map((item)=>{
+    item.time = null
+  })
   renderfields()
   updateGradient(gradientindicator,palette)
 }
@@ -206,7 +232,10 @@ function renderfields(){
     time.max = 100
     time.classList.add("time")
     time.placeholder = Math.floor(1/(palette.length-1)*(id)*100)
-    
+  
+    if(time.placeholder != item.time && item.time){
+      time.value = item.time
+    }
     time.onchange = updateTime
     time.style.borderBottom = `4px solid ${item.color}`
     timecontainer.appendChild(time)
@@ -214,12 +243,18 @@ function renderfields(){
 }
 function hexToRgb(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-
   return result ? {
     r: parseFloat(parseInt(result[1], 16)),
     g: parseFloat(parseInt(result[2], 16)),
     b: parseFloat(parseInt(result[3], 16))
   } : null;
+}
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r,g,b) {
+  return "#" + componentToHex(parseInt(r)) + componentToHex(parseInt(g)) + componentToHex(parseInt(b));
 }
 function selectFiles(){
   if(!filesaved && !persistant){
@@ -243,8 +278,67 @@ function selectFiles(){
     }
   }, checkTime)
 }
-function loadTheFile(){
-  file = require((filepath.slice(0,-4) + ".json"));
+function useThis(EmitterColor){
+  let parentid = EmitterColor.parentNode.parentNode.parentNode.id
+  let childid
+  for(let i = 0; i < EmitterColor.parentNode.parentNode.childNodes.length;i++){
+    if(EmitterColor.parentNode.parentNode.childNodes[i] == EmitterColor.parentNode){
+      childid = i
+    }
+  }
+  
+  let itemsA = file.entries.value.items
+
+  itemsZero = itemsA[parentid].value.items
+  itemsB = itemsZero[0].value.items
+  let itemsC = itemsB[childid].items;
+  let colorIndex = null
+  let birthColorIndex = null
+
+  for (let C = 0; C < itemsC.length; C++){
+    if (itemsC[C].key == "color"){
+      let itemsD = itemsC[C].value.items;
+      for (let D = 0; D < itemsD.length; D++) {
+        if(itemsD[D].key == "constantValue" || itemsD[D].key == "dynamics"){
+          colorIndex = C
+        }
+      }
+    } else if (itemsC[C].key == "birthColor"){
+      birthColorIndex = C
+    }
+  }
+  
+  if (colorIndex != null){
+    let itemsD = itemsC[colorIndex].value.items;
+    if(itemsD[itemsD.length-1].key == "constantValue"){
+      palette = [{time:0,color:rgbToHex(itemsD[itemsD.length -1].value[0]*256,itemsD[itemsD.length -1].value[1]*256,itemsD[itemsD.length -1].value[2]*256)}]
+    }else{
+      let E = itemsD[itemsD.length-1].value.items.length - 1 
+      let itemsE = itemsD[itemsD.length -1].value.items
+      palette = []
+      for(let F = 0; F< itemsE[E].value.items.length; F++){
+        itemsF = itemsE[E].value.items
+        palette.push({time:parseInt(itemsE[E-1].value.items[F]*100),color:rgbToHex(itemsF[F][0]*256,itemsF[F][1]*256,itemsF[F][2]*256)})
+      }
+    } 
+  }else{
+    if(birthColorIndex != null){
+      let itemsD = itemsC[birthColorIndex].value.items;
+      for (let D = 0; D < itemsD.length; D++) {
+        if(itemsD[D].key == "constantValue"){
+          palette = [{time:0,color:rgbToHex(itemsD[D].value[0]*256,itemsD[D].value[1]*256,itemsD[D].value[2]*256)}]
+        }
+      }
+    }
+  }
+  
+  document.getElementById("slider-input").value = palette.length
+  renderfields()
+  updateGradient(gradientindicator,palette)
+}
+function loadTheFile(backup=false){
+  file = backup ? filebackup : require((filepath.slice(0,-4) + ".json"))
+  saveJson(true)
   let complexEmitterList = document.getElementById("complexEmitterList")
   
   complexEmitterList.textContent = ''
@@ -264,6 +358,7 @@ function loadTheFile(){
     let EmitterColor = document.createElement('div')
     EmitterColor.className = "color"
     EmitterItem.appendChild(EmitterColor)
+    EmitterColor.onclick = (event) => useThis(event.target)
   }
   let foundemitters = false
   for (let A = 0; A < itemsA.length; A++) {
@@ -343,7 +438,7 @@ function loadTheFile(){
           let itemsD = itemsC[colorIndex].value.items;
           if(itemsD[itemsD.length-1].key == "constantValue"){
             EmitterColor.classList.add("color-solid")
-            EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*255},${itemsD[itemsD.length -1].value[1]*255},${itemsD[itemsD.length -1].value[2]*255})`
+            EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*256},${itemsD[itemsD.length -1].value[1]*256},${itemsD[itemsD.length -1].value[2]*256})`
           }else{
             let E = itemsD[itemsD.length-1].value.items.length - 1 
             let itemsE = itemsD[itemsD.length -1].value.items
@@ -351,7 +446,7 @@ function loadTheFile(){
             let colorString = ""
             for (let F = 0; F < itemsE[E].value.items.length; F++) {
               array = itemsE[E].value.items[F]
-              colorString += `RGB(${array[0]*255},${array[1]*255},${array[2]*255}) ${itemsE[E-1].value.items[F]*100}%,`
+              colorString += `RGB(${array[0]*256},${array[1]*256},${array[2]*256}) ${itemsE[E-1].value.items[F]*100}%,`
             }
             EmitterColor.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
           } 
@@ -361,7 +456,7 @@ function loadTheFile(){
             for (let D = 0; D < itemsD.length; D++) {
               if(itemsD[D].key == "constantValue"){
                 EmitterColor.classList.add("color-solid")
-                EmitterColor.style.backgroundColor = `RGB(${itemsD[D].value[0]*255},${itemsD[D].value[1]*255},${itemsD[D].value[2]*255})`
+                EmitterColor.style.backgroundColor = `RGB(${itemsD[D].value[0]*256},${itemsD[D].value[1]*256},${itemsD[D].value[2]*256})`
               }
             }
           }
@@ -440,25 +535,23 @@ function filterList(filterString){
   }
 }
 function randomColoring(colors,old){
-  let rgb = hexToRgb(colors[Math.floor(Math.random() * colors.length)].value)
+  let rgb = hexToRgb(palette[Math.floor(Math.random() * palette.length)].color)
   if(appconfig.ignoreBW){
     if((old[0] == 0 && old[1] == 0 && old[2] == 0) || (old[0] == 1 && old[1] == 1 && old[2] == 1)){
       return {
-        r: old[0] *255,
-        g: old[1] *255,
-        b: old[2] *255
+        r: old[0] *256,
+        g: old[1] *256,
+        b: old[2] *256
       }
     }
   }
-  old[0] = rgb.r/256
-  old[1] = rgb.g/256
-  old[2] = rgb.b/256
+  old[0] = rgb.r/255
+  old[1] = rgb.g/255
+  old[2] = rgb.b/255
   return rgb
 }
-function fetchColors(){
-  return document.getElementById("color-container").children
-}
 function recolorSelected(){
+  saveJson(true)
   let complexEmitterList = document.getElementById("complexEmitterList")
   filesaved = false
   persistant = false
@@ -472,76 +565,132 @@ function recolorSelected(){
       for (let B = 0; B < itemsB.length; B++) {
         if(ComplexEmitter.childNodes[1].childNodes[B].childNodes[0].checked == true){
           let EmitterColor = ComplexEmitter.childNodes[1].childNodes[B].childNodes[2]
+          
           let itemsC = itemsB[B].items;
-  
-          let colorIndex = null
-          let birthColorIndex = null
-          for (let C = 0; C < itemsC.length; C++){
-            if (itemsC[C].key == "color"){
-              let itemsD = itemsC[C].value.items;
-              for (let D = 0; D < itemsD.length; D++) {
-                if(itemsD[D].key == "constantValue" || itemsD[D].key == "dynamics"){
-                  colorIndex = C
-                }
+          
+          if(appconfig.linear && palette.length > 1){
+            
+            let gradient = [{
+              key: "dynamics",
+              type: "pointer",
+              value: {
+                items:[
+                  {
+                    key: "times",
+                    type: "list",
+                    value: {
+                      items: [],
+                      valueType: "f32"
+                    }
+                  },
+                  {
+                    key: "values",
+                    type: "list",
+                    value: {
+                      items: [],
+                      valueType: "vec4"
+                    }
+                  }
+                ],
+                name: "VfxAnimatedColorVariableData"
               }
-            } else if (itemsC[C].key == "birthColor"){
-              birthColorIndex = C
-            }
-          }
-          if(appconfig.linear && colorcontainer.childNodes.length > 1){
-            if (colorIndex != null){
-              
-            }else{
-              colorIndex = itemsC.length
+            }]
+            let colorIndex = itemsC.length
+            itemsC.map((itemD,idD)=>{
+              if(itemD.key == "color"){
+                colorIndex = idD
+              }
+            })
+            
+            if(itemsC[colorIndex] == null){
               itemsC[colorIndex] = {
                 key: "color",
                 type: "embed",
                 value:{
-                  items:[{}],
+                  items:[...gradient],
                   name: "ValueColor"
                 }
               }
-              
             }
-            let itemsD = itemsC[colorIndex].value.items;
-            let dynid = itemsD.length-1
-            let colorcount = colorcontainer.childNodes.length
-            let times =  []
-            let values = []
-            palette.map((item)=>{
-              times.push(JSON.parse(JSON.stringify(item.time/100)))
-              let temp = hexToRgb(JSON.parse(JSON.stringify(item.color)))
-              values.push([(temp.r/256),(temp.g/256),(temp.b/256),0])
-            })
-            itemsD[dynid].key = "dynamics"
-            itemsD[dynid].type = "pointer"
-            itemsD[dynid].value = {
-              items:[
-                {
-                  key: "times",
-                  type: "list",
-                  value: {
-                    items: times,
-                    valueType: "f32"
-                  }
-                },
-                {
-                  key: "values",
-                  type: "list",
-                  value: {
-                    items: values,
-                    valueType: "vec4"
-                  }
-                }
-              ],
-              name: "VfxAnimatedColorVariableData"
+            let templenght = itemsC[colorIndex].value.items.length
+            if(templenght == 1){
+              if(itemsC[colorIndex].value.items[0].key == "constantValue"){
+                itemsC[colorIndex].value.items = [...gradient]
+              }
+            } else{
+              itemsC[colorIndex].value.items.shift()
             }
+            let times = itemsC[colorIndex].value.items[0].value.items[0].value.items
             
+            values = []
+            if(times.length != palette.length){
+              times = []
+            }
+            palette.map((item,id)=>{
+              let tcolor = hexToRgb(JSON.parse(JSON.stringify(item.color)))
+              
+              let temp = (times[id] == 0 ||times[id] == 1) ? 0 : 1
+              if(times.length < palette.length){
+                times.push(item.time/100)
+              }
+              values.push([(tcolor.r/255),(tcolor.g/255),(tcolor.b/255),temp])
+              
+            })
             if(EmitterColor.classList.length > 1){
               EmitterColor.classList.remove('color-solid')
             }
+            itemsC[colorIndex].value.items[0].value.items[0].value.items = times
+            itemsC[colorIndex].value.items[0].value.items[1].value.items = values
             EmitterColor.style.backgroundImage=gradientindicator.style.backgroundImage
-          }else{
+          }
+          else if (appconfig.linear && palette.length == 1){
+            let solid = [{
+              key: "constantValue",
+              type: "vec4",
+              value: []
+            }]
+            let colorIndex = itemsC.length
+            itemsC.map((itemD,idD)=>{
+              
+              if(itemD.key == "color"){
+                colorIndex = idD
+              }
+            })
+            
+            if(itemsC[colorIndex] == null){
+              itemsC[colorIndex] = {
+                key: "color",
+                type: "embed",
+                value:{
+                  items:[...solid],
+                  name: "ValueColor"
+                }
+              }
+            }
+            let templenght = itemsC[colorIndex].value.items.length
+            let tcolor = hexToRgb(JSON.parse(JSON.stringify(palette[0].color)))
+
+            if(templenght == 1){
+              if(itemsC[colorIndex].value.items[0].key == "dynamics"){
+                itemsC[colorIndex].value.items = [...solid]
+              }
+            } else{
+              itemsC[colorIndex].value.items.pop()
+            }
+            values = [(tcolor.r/255),(tcolor.g/255),(tcolor.b/255),1]
+            itemsC[colorIndex].value.items[0].value= values
+            
+            EmitterColor.classList.add('color-solid')
+            EmitterColor.style.backgroundImage=gradientindicator.style.backgroundImage
+          }
+          else{
+            let colorIndex = itemsC.length
+            itemsC.map((itemD,idD)=>{
+              
+              if(itemD.key == "color"){
+                colorIndex = idD
+              }
+            })
             if (colorIndex != null){
               let itemsD = itemsC[colorIndex].value.items;
               for (let D = 0; D < itemsD.length; D++) {
@@ -549,7 +698,7 @@ function recolorSelected(){
                   let color = undefined
                   for (let D = 0; D < itemsD.length; D++) {
                     if(itemsD[D].key == "constantValue"){
-                      color = randomColoring(fetchColors(),itemsD[D].value)
+                      color = randomColoring(palette,itemsD[D].value)
                       
                       EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
                     }
@@ -563,7 +712,7 @@ function recolorSelected(){
                   for (let F = 0; F < itemsE[E].value.items.length; F++) {
                     array = itemsE[E].value.items[F]
                     let color = null
-                    color = randomColoring(fetchColors(),array)
+                    color = randomColoring(palette,array)
                     colorString += `RGB(${color.r},${color.g},${color.b}) ${itemsE[E-1].value.items[F]*100}%,`
                     
                   }
@@ -573,10 +722,10 @@ function recolorSelected(){
             }else{
               if(birthColorIndex != null){
                 let itemsD = itemsC[birthColorIndex].value.items;
+                let color = null
                 for (let D = 0; D < itemsD.length; D++) {
                   if(itemsD[D].key == "constantValue"){
-                    let color = null
-                    color = randomColoring(fetchColors(),itemsD[D].value)
+                    color = randomColoring(palette,itemsD[D].value)
                     EmitterColor.style.backgroundColor = `RGB(${color.r},${color.g},${color.b})`
                   }
                 }
@@ -587,31 +736,31 @@ function recolorSelected(){
       }
     }
   }
+  saveJson()
   createAlert("Recolored Selection");
 }
 function savePalette(){
-  if(palette.length >1){
-    if(typeof(appconfig.savedpalettes) != undefined){
-    }else{
-      appconfig.savedpalettes = []
-    }
-    appconfig.savedpalettes.push(JSON.parse(JSON.stringify(palette)))
-  }else{
-    appconfig.savedpalettes.push([{times:0,color:colorcontainer.childNodes[0].value}])
+  if(appconfig.savedpalettes == undefined){
+    appconfig.savedpalettes = []
   }
+  appconfig.savedpalettes.push(JSON.parse(`{"name": "unnamed ${appconfig.savedpalettes.length}","value":${JSON.stringify(palette)}}`))
   saveConfig(true)
   loadPalettes()
 }
-function importPalette(){
-  console.log(palette)
+function undoLast(){
+  loadTheFile(true)
 }
-function saveBin(skip=false){
-  jsonfile = JSON.stringify(file,null,2)
-  fs.writeFileSync((filepath.slice(0,-4) + ".json"),jsonfile,"utf8")
+function saveJson(backup = false){
+  if(backup){
+    filebackup = JSON.parse(JSON.stringify(file,null,2))
+  }else{
+    fs.writeFileSync((filepath.slice(0,-4) + ".json"),JSON.stringify(file,null,2),"utf8")
+  }
+}
+function saveBin(){
+  saveJson()
   exec(`"${appconfig.ritoBinPath}" -o bin "${(filepath.slice(0,-4) + ".json")}"`)
   filesaved = true
   persistant = false
-  if(!skip){
-    createAlert(`File saved, dont forget to delete\n.json files from directory`);
-  }
+  createAlert(`File saved, dont forget to delete\n.json files from directory`);
 }
