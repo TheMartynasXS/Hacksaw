@@ -24,10 +24,11 @@ body {
 }
 .header-button:hover {
   background-color: #20222582;
-  box-shadow: inset 0 -3px 0 0 #ee2222;
+  box-shadow: inset 0 -5px 0 0 #40a5e9;
 }
 .header-selected {
-  box-shadow: inset 0 -3px 0 0 #ee2222;
+  background-color: #20222582;
+  box-shadow: inset 0 -3px 0 0 #40a5e9;
 }
 button {
   cursor: pointer;
@@ -174,6 +175,9 @@ li {
   background-color: #7a7a7a;
   border-width: 0;
 }
+.undo{
+  box-shadow: inset 0 -3px 0 0 #40a5e9;
+}
 .ButtonC2 {
   color: white;
   width:100px;
@@ -243,7 +247,7 @@ li {
   width: 15px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #ee2222;
+  background-color:#40a5e9
 }
 #gradient-indicator {
   height: 10px;
@@ -286,7 +290,7 @@ li {
   border: 0;
 }
 .alert-box {
-  box-shadow: inset 0 -3px 0 0 #ee2222;
+  box-shadow: inset 0 -3px 0 0 #40a5e9;
   background-color: #202225;
   overflow: hidden;
   position: fixed;
@@ -315,10 +319,19 @@ li {
   height: 100%;
 }
 .important {
-  background: linear-gradient(90deg, #ee9292, #a7e9a1, #958feb);
+  color:white;
+  background: linear-gradient(90deg, #033186, #40a5e9);
+  box-shadow: inset 0 0 1px #202225;
 }
 .important2 {
-  background: linear-gradient(90deg, #958feb, #a7e9a1);
+  color:white;
+  background: linear-gradient(-90deg, #033186, #40a5e9);
+  box-shadow: inset 0 0 1px #202225;
+}
+.important:hover,
+.important2:hover{
+  box-shadow: none;
+  background: #40a5e9;
 }
 #notification {
   position: fixed;

@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const { exception } = require('console');
 const { ipcRenderer, clipboard, app} = require('electron');
 const fs = require('fs');
 const path = require('path');
@@ -9,6 +10,11 @@ let persistant = false
 window.onerror = function (msg, error, lineNo, columnNo) {
   createAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
 }
+
+const docmain = document.getElementById("Main")
+const docsettings = document.getElementById("Settings")
+const docpalettes = document.getElementById("pmcontainer")
+
 let appconfig = {};
 let file = {};
 let filebackup = {}
@@ -71,22 +77,34 @@ function saveConfig(ignore=false){
   }
   checkConfig()
 }
-
 function mainMenu(){
-  document.getElementById("Main").style.display = "block"
-  document.getElementById("Settings").style.display = "none"
-  document.getElementById("pmcontainer").style.display = "none"
+  docmain.style.display = "block"
+  docsettings.style.display = "none"
+  docpalettes.style.display = "none"
+  document.getElementById("bmain").classList.add("header-selected")
+
+  document.getElementById("bpmanager").classList.remove("header-selected")
+  document.getElementById("bsettings").classList.remove("header-selected")
 }
 function settingsMenu(){
-  document.getElementById("Main").style.display = "none"
-  document.getElementById("Settings").style.display = "block"
-  document.getElementById("pmcontainer").style.display = "none"
+  docmain.style.display = "none"
+  docsettings.style.display = "block"
+  docpalettes.style.display = "none"
+  document.getElementById("bsettings").classList.add("header-selected")
+
+  document.getElementById("bpmanager").classList.remove("header-selected")
+  document.getElementById("bmain").classList.remove("header-selected")
 
 }
 function paletteMenu(){
-  document.getElementById("Main").style.display = "none"
-  document.getElementById("Settings").style.display = "none"
-  document.getElementById("pmcontainer").style.display = "block"
+  docmain.style.display = "none"
+  docsettings.style.display = "none"
+  docpalettes.style.display = "block"
+  document.getElementById("bpmanager").classList.add("header-selected")
+
+  document.getElementById("bsettings").classList.remove("header-selected")
+  document.getElementById("bmain").classList.remove("header-selected")
+  
   loadPalettes()
 }
 let colorcontainer = document.getElementById("color-container")
@@ -108,9 +126,8 @@ function updateTime(event){
 renderfields()
 updateGradient(gradientindicator,palette)
 function loadPalettes(){
-  
+  let paletteContainer = document.getElementById("PaletteManager")
   if(appconfig.savedpalettes != undefined && appconfig.savedpalettes[0]?.value != undefined){
-    let paletteContainer = document.getElementById("PaletteManager")
     paletteContainer.innerText = null
     appconfig.savedpalettes.map((item,id) => {
       let palettediv = document.createElement("div")
@@ -133,6 +150,23 @@ function loadPalettes(){
         updateGradient(gradientindicator,palette)
       }
       palettediv.appendChild(selectbutton)
+      
+      let exportbutton = document.createElement("button")
+      exportbutton.className="ButtonC2"
+      exportbutton.innerText="EXPORT"
+      exportbutton.onclick = ()=>{
+        palette = JSON.parse(JSON.stringify([...appconfig.savedpalettes[id].value]))
+        folder = ipcRenderer.sendSync('fileselect',"folder")
+        if (folder == ""){
+          return 0
+        }
+        fs.writeFileSync(
+          folder+ "\\" + appconfig.savedpalettes[id].name +".json"
+          ,JSON.stringify(appconfig.savedpalettes[id],null,2),"utf8"
+        )
+      }
+      palettediv.appendChild(exportbutton)
+
       let removebutton = document.createElement("button")
       removebutton.className="ButtonC2"
       removebutton.innerText="DELETE"
@@ -153,13 +187,15 @@ function loadPalettes(){
       }
       palettediv.appendChild(paletteName)
     })
-  } else if (appconfig.savedpalettes != undefined){
+  } else if (appconfig.savedpalettes != undefined && appconfig.savedpalettes.length != 0){
     appconfig.savedpalettes.map((item,id)=>{
       let temp = JSON.parse(JSON.stringify(item))
       appconfig.savedpalettes[id] = JSON.parse(`{"name": "unnamed ${id}","value":${JSON.stringify(temp)}}`)
     })
     saveConfig(true)
     loadPalettes()
+  } else{
+    paletteContainer.innerText = null
   }
 }
 function updateColor(event){
@@ -261,7 +297,7 @@ function selectFiles(){
     persistant = true
     return createAlert("You may have forgotten to save the .bin file,\nsave cause next time I won't warn you.")
   }
-  filepath = ipcRenderer.sendSync('fileselect')[0]
+  filepath = ipcRenderer.sendSync('fileselect',"bin")
   if(filepath == undefined){
     return 0
   }
@@ -311,22 +347,24 @@ function useThis(EmitterColor){
   if (colorIndex != null){
     let itemsD = itemsC[colorIndex].value.items;
     if(itemsD[itemsD.length-1].key == "constantValue"){
-      palette = [{time:0,color:rgbToHex(itemsD[itemsD.length -1].value[0]*256,itemsD[itemsD.length -1].value[1]*256,itemsD[itemsD.length -1].value[2]*256)}]
+      palette = [{time:0,color:rgbToHex(itemsD[itemsD.length -1].value[0]*255,itemsD[itemsD.length -1].value[1]*255,itemsD[itemsD.length -1].value[2]*255)}]
     }else{
       let E = itemsD[itemsD.length-1].value.items.length - 1 
       let itemsE = itemsD[itemsD.length -1].value.items
       palette = []
       for(let F = 0; F< itemsE[E].value.items.length; F++){
         itemsF = itemsE[E].value.items
-        palette.push({time:parseInt(itemsE[E-1].value.items[F]*100),color:rgbToHex(itemsF[F][0]*256,itemsF[F][1]*256,itemsF[F][2]*256)})
+        
+        palette.push({time:parseInt(itemsE[E-1].value.items[F]*100),color:rgbToHex(itemsF[F][0]*255,itemsF[F][1]*255,itemsF[F][2]*255)})
       }
+      
     } 
   }else{
     if(birthColorIndex != null){
       let itemsD = itemsC[birthColorIndex].value.items;
       for (let D = 0; D < itemsD.length; D++) {
         if(itemsD[D].key == "constantValue"){
-          palette = [{time:0,color:rgbToHex(itemsD[D].value[0]*256,itemsD[D].value[1]*256,itemsD[D].value[2]*256)}]
+          palette = [{time:0,color:rgbToHex(itemsD[D].value[0]*255,itemsD[D].value[1]*255,itemsD[D].value[2]*255)}]
         }
       }
     }
@@ -438,7 +476,7 @@ function loadTheFile(backup=false){
           let itemsD = itemsC[colorIndex].value.items;
           if(itemsD[itemsD.length-1].key == "constantValue"){
             EmitterColor.classList.add("color-solid")
-            EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*256},${itemsD[itemsD.length -1].value[1]*256},${itemsD[itemsD.length -1].value[2]*256})`
+            EmitterColor.style.backgroundColor = `RGB(${itemsD[itemsD.length -1].value[0]*255},${itemsD[itemsD.length -1].value[1]*255},${itemsD[itemsD.length -1].value[2]*255})`
           }else{
             let E = itemsD[itemsD.length-1].value.items.length - 1 
             let itemsE = itemsD[itemsD.length -1].value.items
@@ -446,7 +484,7 @@ function loadTheFile(backup=false){
             let colorString = ""
             for (let F = 0; F < itemsE[E].value.items.length; F++) {
               array = itemsE[E].value.items[F]
-              colorString += `RGB(${array[0]*256},${array[1]*256},${array[2]*256}) ${itemsE[E-1].value.items[F]*100}%,`
+              colorString += `RGB(${array[0]*255},${array[1]*255},${array[2]*255}) ${Math.round(itemsE[E-1].value.items[F]*100)}%,`
             }
             EmitterColor.style.backgroundImage = `linear-gradient(0.25turn,`+ colorString.slice(0, -1) +`)`
           } 
@@ -456,7 +494,7 @@ function loadTheFile(backup=false){
             for (let D = 0; D < itemsD.length; D++) {
               if(itemsD[D].key == "constantValue"){
                 EmitterColor.classList.add("color-solid")
-                EmitterColor.style.backgroundColor = `RGB(${itemsD[D].value[0]*256},${itemsD[D].value[1]*256},${itemsD[D].value[2]*256})`
+                EmitterColor.style.backgroundColor = `RGB(${itemsD[D].value[0]*255},${itemsD[D].value[1]*255},${itemsD[D].value[2]*255})`
               }
             }
           }
@@ -471,7 +509,7 @@ function loadTheFile(backup=false){
   }
 }
 function selectRitobin(){
-  appconfig.ritoBinPath = ipcRenderer.sendSync('ritobinselect')[0]
+  appconfig.ritoBinPath = ipcRenderer.sendSync('fileselect',"ritobin")
 }
 function checkchildren(object,invert){
   for (let J = 0; J < object.childNodes[1].childNodes.length; J++) {
@@ -539,9 +577,9 @@ function randomColoring(colors,old){
   if(appconfig.ignoreBW){
     if((old[0] == 0 && old[1] == 0 && old[2] == 0) || (old[0] == 1 && old[1] == 1 && old[2] == 1)){
       return {
-        r: old[0] *256,
-        g: old[1] *256,
-        b: old[2] *256
+        r: old[0] *255,
+        g: old[1] *255,
+        b: old[2] *255
       }
     }
   }
@@ -620,14 +658,16 @@ function recolorSelected(){
             } else{
               itemsC[colorIndex].value.items.shift()
             }
+            
             let times = itemsC[colorIndex].value.items[0].value.items[0].value.items
             
             values = []
             if(times.length != palette.length){
               times = []
             }
+            let tcolor = null
             palette.map((item,id)=>{
-              let tcolor = hexToRgb(JSON.parse(JSON.stringify(item.color)))
+              tcolor = hexToRgb(JSON.parse(JSON.stringify(item.color)))
               
               let temp = (times[id] == 0 ||times[id] == 1) ? 0 : 1
               if(times.length < palette.length){
@@ -679,16 +719,18 @@ function recolorSelected(){
             }
             values = [(tcolor.r/255),(tcolor.g/255),(tcolor.b/255),1]
             itemsC[colorIndex].value.items[0].value= values
-            
             EmitterColor.classList.add('color-solid')
             EmitterColor.style.backgroundImage=gradientindicator.style.backgroundImage
           }
           else{
-            let colorIndex = itemsC.length
+            let colorIndex = null
+            let birthColorIndex = null
             itemsC.map((itemD,idD)=>{
               
               if(itemD.key == "color"){
                 colorIndex = idD
+              }else if(itemD.key == "birthColor"){
+                birthColorIndex = idD
               }
             })
             if (colorIndex != null){
@@ -713,6 +755,7 @@ function recolorSelected(){
                     array = itemsE[E].value.items[F]
                     let color = null
                     color = randomColoring(palette,array)
+                    
                     colorString += `RGB(${color.r},${color.g},${color.b}) ${itemsE[E-1].value.items[F]*100}%,`
                     
                   }
@@ -744,6 +787,12 @@ function savePalette(){
     appconfig.savedpalettes = []
   }
   appconfig.savedpalettes.push(JSON.parse(`{"name": "unnamed ${appconfig.savedpalettes.length}","value":${JSON.stringify(palette)}}`))
+  saveConfig(true)
+  loadPalettes()
+}
+function importPalette(){
+  let palettefile = JSON.parse(fs.readFileSync(ipcRenderer.sendSync('fileselect',"json")).toString())
+  appconfig.savedpalettes.push(palettefile)
   saveConfig(true)
   loadPalettes()
 }

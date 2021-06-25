@@ -1,6 +1,6 @@
 {
   "name": "binsplash",
-  "version": "1.2.3",
+  "version": "1.2.5",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -10,12 +10,23 @@
   },
   "build": {
     "appId": "com.github.devmarcius.binsplash",
+    "win": {
+      "target": [
+        "portable",
+        "nsis",
+        "zip"
+      ]
+    },
     "nsis": {
+      "artifactName": "${name}-${version}-setup.${ext}",
       "oneClick": false,
       "perMachine": false,
       "runAfterFinish": false,
       "deleteAppDataOnUninstall": true,
       "allowToChangeInstallationDirectory": true
+    },
+    "portable": {
+      "artifactName": "${name}-${version}-portable.${ext}"
     },
     "publish": [
       {
@@ -31,7 +42,5 @@
     "electron": "^12.0.6",
     "electron-builder": "^22.10.5"
   },
-  "dependencies": {
-    "react-beautiful-dnd": "^13.1.0"
-  }
+  "dependencies": {}
 }
