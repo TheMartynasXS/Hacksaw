@@ -1,13 +1,9 @@
 {
   "name": "binsplash",
-  "version": "1.2.5",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish always"
-  },
+  "productName": "binsplash",
+  "version": "2.0.0",
+  "description": "My Electron application description",
+  "main": "src/index.js",
   "build": {
     "appId": "com.github.devmarcius.binsplash",
     "win": {
@@ -36,11 +32,27 @@
       }
     ]
   },
-  "author": "DevMarcius",
-  "license": "ISC",
-  "devDependencies": {
-    "electron": "^12.0.6",
-    "electron-builder": "^22.10.5"
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-forge package",
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always",
+    "build:css": "tailwindcss -i src/style.css -o public/style.css",
+    "watch:css": "tailwindcss -i src/style.css -o public/style.css"
   },
-  "dependencies": {}
+  "keywords": [],
+  "author": {
+    "name": "DevMarcius",
+    "email": "Marcius922@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "open": "^8.2.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.3.1",
+    "electron": "13.1.6",
+    "electron-builder": "^22.11.7",
+    "tailwindcss": "^2.2.4"
+  }
 }
