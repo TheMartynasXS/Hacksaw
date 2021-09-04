@@ -642,6 +642,16 @@ video {
   transition-duration: 150ms;
 }
 
+.btn-reg-black-disabled {
+  cursor: not-allowed;
+  border-radius: 0.5rem;
+  --tw-bg-opacity: 1;
+  background-color: rgba(0, 0, 0, var(--tw-bg-opacity));
+  --tw-bg-opacity: 0;
+  --tw-text-opacity: 1;
+  color: rgba(209, 213, 219, var(--tw-text-opacity));
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

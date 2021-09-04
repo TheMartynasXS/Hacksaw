@@ -1,8 +1,8 @@
 {
   "name": "binsplash",
   "productName": "binsplash",
-  "version": "2.0.0",
-  "description": "My Electron application description",
+  "version": "2.1.0",
+  "description": "my league modding suite",
   "main": "src/index.js",
   "build": {
     "appId": "com.github.devmarcius.binsplash",
@@ -47,6 +47,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "babylonjs": "^4.2.0",
     "open": "^8.2.1"
   },
   "devDependencies": {

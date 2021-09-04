@@ -2,18 +2,18 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>HackSaw</title>
+  <title>Skin Idea Generator</title>
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
   
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./index.css">
-  
+
 </head>
-<body class="bg-gray-700 overflow-hidden">
+<body class="bg-gray-700">
   <div id="titlebar">
     <div id="drag-region">
       <div id="window-title">
-        <span id="appTitle">HACKSAW</span>
+        <span id="appTitle">SKIN IDEA GENERATOR</span>
       </div>
       <div id="window-controls">
         <div class="button rounded-lg" id="min-button">
@@ -73,19 +73,29 @@
       }
     }
   </script>
-  <div id="root" class="p-2 overflow-scroll grid grid-cols-3">
-    <button class="mx-2 my-2 flex justify-center btn-reg-black bg-opacity-10 shadow-xl" onclick="window.location.href = 'binsplash.html'">
-      <span class="self-center">BinSplash</span>
-    </button>
-    <button disabled class="mx-2 my-2 flex justify-center btn-reg-black-disabled bg-opacity-10 shadow-xl" onclick="window.location.href = 'binventor.html'">
-      <span class="self-center disabled">Binventor</span>
-    </button>
-    <button class="mx-2 my-2 flex justify-center btn-reg-black bg-opacity-10 shadow-xl" onclick="window.location.href = 'skinideas.html'">
-      <span class="self-center">Skin Idea Generator</span>
-    </button>
-    <button disabled class="mx-2 my-2 flex justify-center btn-reg-black-disabled bg-opacity-10 shadow-xl" onclick="console.log('4')">
-      <span class="self-center">BinTex</span>
-    </button>
+  <div id="root" class="flex flex-col">
+    <div class="flex px-1">
+      <button class="px-3 py-1 btn-reg-black" onclick="window.location.href = 'index.html'">Hacksaw</button>
+      <button class="px-3 py-1 btn-reg-black" onclick="FetchThemes()">Update Themes</button>
+      <button class="px-3 py-1 btn-reg-black ml-auto" id="version" onclick="OpenGitHub()">GitHub</button>
+    </div>
+    <div id="Main" class="Tab flex-col flex-1 overflow-hidden" style="display:flex">
+      <div class="mx-2 my-2 bg-gray-1100 rounded-lg text-gray-300">
+        <div class="m-2 flex">
+          <label class="mx-2">How many ideas to generate:</label>
+          <input class="rounded-md flex-1 bg-black bg-opacity-20 text-gray-300" style="width: 100px;" 
+          onchange="value = this.value" type="number" placeholder="5" id="IdeaCount"></input>
+        </div>
+      </div>
+      <div class="flex-grow flex flex-col mx-2 my-2 overflow-hidden bg-gray-1100 rounded-lg" id="IdeaList">
+      </div>
+      <div class="mx-2 my-2 bg-gray-1100 rounded-lg flex">
+        <button onclick="Generate()" class="px-3 py-1 btn-reg-black" style="flex:3">Generate</button>
+        <button onclick="SaveList()" class="px-3 py-1 flex-1 btn-reg-black">Save List</button>
+      </div>
+    </div>
   </div>
+  <script src="../src/skinideas.js" defer></script>
+  <script src="../src/utilities.js" defer></script>
 </body>
 </html>

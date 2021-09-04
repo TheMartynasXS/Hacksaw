@@ -1,3 +1,4 @@
+const Open = require('open');
 /**
  * Maps given value from one int range to another.
  * @param {List} from - initial range ex: [0,10]
@@ -61,6 +62,7 @@ function GetColor(ColorProp){
     else
     {
       let TempConst = ColorProp[ColorProp.findIndex( item => item.key == "constantValue")]
+      
       let Palette = [
         {
           time:0,
@@ -91,89 +93,88 @@ function ToBG(Palette){
   }
 }
 
-function ToDynamic(Palette,ColorValue, Advanced = false)
-{  
-  if(Prefs.Advanced)
-  {
-    if(Palette.length == ColorValue[1].value.items.length)
-    {
-      Palette.map(
-        (item,i)=>{
-          ColorValue[1].value.items[i] =
-          [
-            ReMap(item.color[0],[0,255],[0,1]),
-            ReMap(item.color[1],[0,255],[0,1]),
-            ReMap(item.color[2],[0,255],[0,1]),
-            (i == 0 || i == Palette.length-1) ? 0 : 1
-          ]
-        }
-      )
-      
-    }
-    else
-    {
-      ColorValue[0].value.items = []
-      ColorValue[1].value.items = []
-      for(let i = 0; i < Palette.length; i++)
-      {
-        ColorValue[0].value.items.push(ReMap(Palette[i].time,[0,100],[0,1]))
-        ColorValue[1].value.items.push([
-          ReMap(Palette[i].color[0],[0,255],[0,1]),
-          ReMap(Palette[i].color[1],[0,255],[0,1]),
-          ReMap(Palette[i].color[2],[0,255],[0,1]),
-          1
-        ])
-      }
-    }
-  }
-  else
-  {
-    // this works
-
-    for(let i = 0; i < ColorValue[1].value.items.length; i++)
-    {
-      let ColorBit = ColorValue[1].value.items[i]
-      if(Prefs.IgnoreBW)
-      {
-        if(!((ColorBit[0] == 0 && ColorBit[1] == 0 && ColorBit[2] == 0)
-        || (ColorBit[0] == 1 && ColorBit[1] == 1 && ColorBit[2] == 1)))
-        {
-          let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
+function ReColor(ColorProp)
+{
+  let DynamicsIndex = ColorProp.value.items.findIndex(item => item.key == "dynamics")
+  let ConstantIndex = ColorProp.value.items.findIndex(item => item.key == "constantValue")
+  if(DynamicsIndex >= 0 && Palette.length > 1)
+  { 
+    let ColorValue = ColorProp.value.items.find(item => item.key == "dynamics").value.items
     
-          for(let j = 0; j < ColorBit.length - 1; j++)
-          {
-            ColorBit[j] = ReMap(NewColor[j],[0,255],[0,1])
-          }
-        }
+    if(Prefs.Advanced)
+    {
+      let KeepTimings
+      if(ColorValue[1].value.items.length == Palette.length){
+        KeepTimings = true
       }
       else
       {
-        let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
-    
-          for(let j = 0; j < ColorBit.length - 1; j++)
+        KeepTimings = false
+        ColorValue[1].value.items = []
+        ColorValue[0].value.items = []
+      }
+      
+      Palette.map((item,i)=>{
+        if(KeepTimings == true)
+        {
+          ColorValue[0].value.items[i] = ReMap(item.time,[0,100],[0,1])
+        
+          ColorValue[1].value.items[i] =
+            [
+              ReMap(item.color[0],[0,255],[0,1]),
+              ReMap(item.color[1],[0,255],[0,1]),
+              ReMap(item.color[2],[0,255],[0,1]),
+              (i == 0 || i == Palette.length-1) ? 0 : 1
+            ]
+        }
+        else
+        {
+          ColorValue[0].value.items.push(ReMap(item.time,[0,100],[0,1]))
+        
+          ColorValue[1].value.items.push([
+              ReMap(item.color[0],[0,255],[0,1]),
+              ReMap(item.color[1],[0,255],[0,1]),
+              ReMap(item.color[2],[0,255],[0,1]),
+              (i == 0 || i == Palette.length-1) ? 0 : 1
+            ])
+        }
+      })
+      ColorProp[DynamicsIndex] = ColorValue
+    }
+    else
+    {
+      for(let i = 0; i < ColorValue[1].value.items.length; i++)
+      {
+        let ColorBit = ColorValue[1].value.items[i]
+        if(Prefs.IgnoreBW)
+        {
+          if(!((ColorBit[0] == 0 && ColorBit[1] == 0 && ColorBit[2] == 0)
+          || (ColorBit[0] == 1 && ColorBit[1] == 1 && ColorBit[2] == 1)))
           {
-            ColorBit[j] = ReMap(NewColor[j],[0,255],[0,1])
+            let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
+      
+            for(let j = 0; j < ColorBit.length - 1; j++)
+            {
+              ColorBit[j] = ReMap(NewColor[j],[0,255],[0,1])
+            }
           }
+        }
+        else
+        {
+          let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
+      
+            for(let j = 0; j < ColorBit.length - 1; j++)
+            {
+              ColorBit[j] = ReMap(NewColor[j],[0,255],[0,1])
+            }
+        }
       }
     }
+    ColorProp[DynamicsIndex] = ColorValue
   }
-  return ColorValue
-}
-
-function ToConstant(Palette,ColorValue)
-{
-  if(Prefs.Advanced)
+  else if (ConstantIndex >= 0)
   {
-    {
-      let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
-
-      ColorValue[0] = ReMap(NewColor[0],[0,255],[0,1])
-      ColorValue[1] = ReMap(NewColor[1],[0,255],[0,1])
-      ColorValue[2] = ReMap(NewColor[2],[0,255],[0,1])
-    }
-  }
-  else{
-    // this works
+    let ColorValue = ColorProp.value.items[ConstantIndex].value
     if(Prefs.IgnoreBW)
     {
       if(!((ColorValue[0] == 0 && ColorValue[1] == 0 && ColorValue[2] == 0)
@@ -181,23 +182,62 @@ function ToConstant(Palette,ColorValue)
       {
         let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
   
-        for(let j = 0; j < ColorValue.length - 1; j++)
-        {
-          ColorValue[j] = ReMap(NewColor[j],[0,255],[0,1])
-        }
+        ColorValue[0] = ReMap(NewColor[0],[0,255],[0,1])
+        ColorValue[1] = ReMap(NewColor[1],[0,255],[0,1])
+        ColorValue[2] = ReMap(NewColor[2],[0,255],[0,1])
       }
     }
     else
     {
       let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
   
-      for(let j = 0; j < ColorValue.length - 1; j++)
-      {
-        ColorValue[j] = ReMap(NewColor[j],[0,255],[0,1])
-      }
+      ColorValue[0] = ReMap(NewColor[0],[0,255],[0,1])
+      ColorValue[1] = ReMap(NewColor[1],[0,255],[0,1])
+      ColorValue[2] = ReMap(NewColor[2],[0,255],[0,1])
     }
+    ColorValue[3] = 1
+    //console.log(ColorProp.value)
   }
-  return ColorValue
+  return ColorProp
 }
+
+function CreateAlert(message)
+{
+  if (document.getElementById("dim-bg") != undefined)
+  {
+    document.getElementById("dim-bg").remove()
+    CreateAlert(message)
+  }
+  else
+  {
+    let dim = document.createElement("div")
+    dim.className = "justify-center content-center flex-1 h-full w-full flex absolute p-12 bg-black bg-opacity-50"
+    dim.id = "dim-bg"
+    document.getElementById("root").appendChild(dim)
+    let alertdiv = document.createElement("div")
+    alertdiv.className = "flex-1 rounded-md flex flex-col justify-between bg-gray-700 p-12"
+  
+    let info = document.createElement("div")
+    info.className = "flex-1 text-white"
+    info.innerText = message
+    alertdiv.appendChild(info)
+    dim.appendChild(alertdiv)
+    
+    let dismissbuttondiv = document.createElement("div")
+    dismissbuttondiv.className = "mx-2 my-2 bg-black bg-opacity-20 rounded-lg flex"
+    alertdiv.appendChild(dismissbuttondiv)
+    let alertdismiss = document.createElement("button")
+    alertdismiss.className = "btn-reg-black flex-1"
+    alertdismiss.textContent = "OK"
+    alertdismiss.onclick = () => {dim.remove()}
+    dismissbuttondiv.appendChild(alertdismiss)  
+  }
+}
+
+function OpenGitHub()
+{
+  Open('https://github.com/DevMarcius/binsplash')
+}
+
 function Clone(Object){return JSON.parse(JSON.stringify(Object))}
-module.exports = { HEXtoRGB , RGBtoHEX , ReMap , GetColor , ToBG, Clone, ToDynamic, ToConstant}
+module.exports = { HEXtoRGB , RGBtoHEX , ReMap , GetColor , ToBG, Clone, ReColor, CreateAlert}

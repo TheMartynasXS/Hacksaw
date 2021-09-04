@@ -2,18 +2,23 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>HackSaw</title>
+  <title>Binventor</title>
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
   
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./index.css">
   
+  <style>
+    *{
+      outline:none
+    }
+  </style>
 </head>
-<body class="bg-gray-700 overflow-hidden">
+<body class="bg-gray-700">
   <div id="titlebar">
     <div id="drag-region">
       <div id="window-title">
-        <span id="appTitle">HACKSAW</span>
+        <span id="appTitle">BINVENTOR</span>
       </div>
       <div id="window-controls">
         <div class="button rounded-lg" id="min-button">
@@ -73,19 +78,23 @@
       }
     }
   </script>
-  <div id="root" class="p-2 overflow-scroll grid grid-cols-3">
-    <button class="mx-2 my-2 flex justify-center btn-reg-black bg-opacity-10 shadow-xl" onclick="window.location.href = 'binsplash.html'">
-      <span class="self-center">BinSplash</span>
-    </button>
-    <button disabled class="mx-2 my-2 flex justify-center btn-reg-black-disabled bg-opacity-10 shadow-xl" onclick="window.location.href = 'binventor.html'">
-      <span class="self-center disabled">Binventor</span>
-    </button>
-    <button class="mx-2 my-2 flex justify-center btn-reg-black bg-opacity-10 shadow-xl" onclick="window.location.href = 'skinideas.html'">
-      <span class="self-center">Skin Idea Generator</span>
-    </button>
-    <button disabled class="mx-2 my-2 flex justify-center btn-reg-black-disabled bg-opacity-10 shadow-xl" onclick="console.log('4')">
-      <span class="self-center">BinTex</span>
-    </button>
+  <div id="root" class="flex flex-col overflow-hidden">
+    <div class="flex px-1">
+      <button class="px-3 py-1 btn-reg-black" onclick="window.location.href = 'index.html'">Hacksaw</button>
+      <button class="px-3 py-1 btn-reg-black" onclick="FetchThemes()">Update Themes</button>
+      <button class="px-3 py-1 btn-reg-black ml-auto" id="version" onclick="OpenGitHub()">GitHub</button>
+    </div>
+    <div class="flex flex-grow">
+      <div id="editor" class="flex-1 mx-2 my-2 bg-gray-1100 rounded-lg">
+        hello my name is Binventor
+      </div>
+      <div id="Samples" class="flex-1 mx-2 my-2 bg-gray-1100 rounded-lg">this is a sample</div>
+      <canvas id="render-canvas" class="flex-1 rounded-lg m-2" style="width: 33%;height: auto;box-shadow: inset 0 0 5px black;"></canvas>
+      <script>
+        require('../src/binventor.js')
+      </script>
+    </div>
   </div>
+  <script src="../src/utilities.js" defer></script>
 </body>
 </html>

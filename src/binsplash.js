@@ -3,52 +3,21 @@ const { ipcRenderer} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const UTIL = require('../src/utilities');
-const Open = require('open')
 
 let FileSaved = true
 let Persist = true
 window.onerror = function (msg, error, lineNo, columnNo) {
-  CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
-}
-function CreateAlert(message)
-{
-  if (document.getElementById("dim-bg") != undefined)
-  {
-    document.getElementById("dim-bg").remove()
-    CreateAlert(message)
-  }
-  else
-  {
-    let dim = document.createElement("div")
-    dim.className = "justify-center content-center flex-1 h-full w-full flex absolute p-12 bg-black bg-opacity-50"
-    dim.id = "dim-bg"
-    document.getElementById("root").appendChild(dim)
-    let alertdiv = document.createElement("div")
-    alertdiv.className = "flex-1 rounded-md flex flex-col justify-between bg-gray-700 p-12"
-  
-    let info = document.createElement("div")
-    info.className = "flex-1 text-white"
-    info.innerText = message
-    alertdiv.appendChild(info)
-    dim.appendChild(alertdiv)
-    
-    let dismissbuttondiv = document.createElement("div")
-    dismissbuttondiv.className = "mx-2 my-2 bg-black bg-opacity-20 rounded-lg flex"
-    alertdiv.appendChild(dismissbuttondiv)
-    let alertdismiss = document.createElement("button")
-    alertdismiss.className = "btn-reg-black flex-1"
-    alertdismiss.textContent = "OK"
-    alertdismiss.onclick = () => {dim.remove()}
-    dismissbuttondiv.appendChild(alertdismiss)  
-  }
+  UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
 }
 
+
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`
+let BlankConstant = `{"key":"constantValue","type":"vec4","value":[]}`
 let File = {};
 let FileCache = []
 let FilePath = ipcRenderer.sendSync('PassFile');
 
-let Palette = [NewRandomColor()]
+let Palette = [NewRandomColor(),NewRandomColor()]
 
 const PrefsPath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\config.json')
 
@@ -109,7 +78,7 @@ else
   Prefs.Advanced = document.getElementById("Advanced").checked
   Prefs.ColorSamples = []
   fs.writeFileSync(PrefsPath,JSON.stringify(Prefs,null,2),"utf8")
-  CreateAlert("You have to select Ritobin_cli.exe for the program to work")
+  UTIL.CreateAlert("You have to select Ritobin_cli.exe for the program to work")
   SwitchTab("Preferences")
   SavePrefs()
 }
@@ -124,7 +93,6 @@ MapPalette()
 
 
 if(FilePath != undefined ){
-  ToJson()
   if(fs.existsSync(FilePath.slice(0,-4) + ".json") == false)
   {
     ToJson()
@@ -133,7 +101,7 @@ if(FilePath != undefined ){
   LoadFile()
 }
 
-function NewRandomColor(){return {time:0,color:[Math.floor(Math.random()*255),Math.floor(Math.random()*255),Math.floor(Math.random()*255)]} }
+function NewRandomColor(){return {time: 0,color:[Math.floor(Math.random()*255),Math.floor(Math.random()*255),Math.floor(Math.random()*255)]} }
 
 function ChangeColorCount(Count){
   let TempLenght = parseInt(Palette.length)
@@ -199,14 +167,13 @@ function OpenBin()
 { 
   if(FileSaved == false && Persist == true)
   {
-    CreateAlert("You might have forgotten to save bin")
+    UTIL.CreateAlert("You might have forgotten to save bin")
     Persist = false
     return 0
   }
   FilePath = ipcRenderer.sendSync('FileSelect','Bin');
   if(FilePath == undefined){return 0}
   ParticleList.innerText = null
-  ToJson()
   if(fs.existsSync(FilePath.slice(0,-4) + ".json") == false)
   {
     ToJson()
@@ -219,21 +186,114 @@ function OpenBin()
 
 function LoadFile()
 {
+  ParticleList.innerText = ""
+  let ParticleObject = File.entries.value.items
+  for(let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++)
+  {
+    if(ParticleObject[PO_ID].value.name == "VfxSystemDefinitionData")
+    {
+      //console.log(ParticleObject[PO_ID])
+      ParticleName =
+        ParticleObject[PO_ID].value.items.find((item)=>{
+          if(item.key == "particleName"){return item}
+        }).value
+      
+        let ParticleDiv = document.createElement("div")
+        ParticleDiv.id = ParticleObject[PO_ID].key
+        ParticleDiv.className = "m-2 border-2 border-gray-700 rounded-md"
+        ParticleDiv.innerHTML = 
+        `<div class="ParticleTitle flex bg-gray-700 text-gray-300 rounded-sm p-1">
+          <input type="checkbox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/>
+          <div class="flex-1 text-center">${ParticleName}</div> 
+        </div>`
+        let DefData = ParticleObject[PO_ID].value.items.filter(item=>item.key == "complexEmitterDefinitionData" || item.key == "simpleEmitterDefinitionData")
+        //console.log("---")
+        for(let B = 0; B < DefData.length; B++)
+        {
+          //console.log(DefData[B].value.items)
+          let DefDataDiv = document.createElement('div')
+          ParticleDiv.appendChild(DefDataDiv)
+
+          let Props = DefData[B].value.items
+          for(let C = 0; C < Props.length; C++)
+          {
+            
+            //console.log(Props[C])
+            if(DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData")
+            {
+              let Color
+              if(Props[C].items.find( item => item.key == "color"))
+              {
+                Color =
+                UTIL.GetColor(
+                  Props[C].items.find( item => item.key == "color").value.items
+                )
+              }
+              else if(Props[C].items.find( item => item.key == "birthColor"))
+              {
+                if(Props[C].items.find( item => item.key == "birthColor").value.items.find(item => item.key == "dynamics"))
+                {
+                  Color = null
+                }
+                else
+                {
+                  Color =
+                  UTIL.GetColor(
+                    Props[C].items.find( item => item.key == "birthColor").value.items
+                  )
+                }
+              }
+              let BG = 
+              UTIL.ToBG(
+                Color
+              )
+
+              let Emitter = document.createElement('div')
+              Emitter.className = "flex p-2 hover:bg-black hover:bg-opacity-20 text-gray-300 hover:text-white"
+                let Input = document.createElement('input')
+                Input.type = "checkbox" 
+                Input.style = `${BG == null ? "visibility:hidden" : null}`
+              Emitter.appendChild(Input)
+                let Title = document.createElement('div')
+                Title.className = "mx-2 flex-1 overflow-ellipsis"
+                Title.innerText = Props[C].items[Props[C].items.findIndex( item => item.key == "emitterName")]?.value
+              Emitter.appendChild(Title)
+                let ColorDiv = document.createElement('div')
+                ColorDiv.className = `mx-1 btn-reg-black text-center cursor-picker ${Color?.length > 1 ? "dynamic" : "solid"}`
+                ColorDiv.style = `height:24px;width:80px;${BG == null ? "visibility:hidden" : "background:" + BG}`
+                ColorDiv.innerHTML = '<span class="bg-black bg-opacity-0 hover:bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity px-5 rounded-lg py-0.5">COPY<span>'
+                ColorDiv.onclick = ()=>{
+                  Palette = Color
+                  MapPalette()
+                }
+              Emitter.appendChild(ColorDiv)
+
+              DefDataDiv.appendChild(Emitter)
+            }
+          }
+        }
+        ParticleList.appendChild(ParticleDiv)
+    }
+  }
+}
+
+/*
+function LoadFile()
+{
   ParticleList.innerText = null
     File.entries.value.items.map(Particle => {
-    let ParticleDiv = document.createElement("div")
-    ParticleDiv.id = Particle.key
-    ParticleDiv.className = "m-2 border-2 border-gray-700 rounded-md"
+    if(!Particle.key.includes("Particles"))
+    {
+      return 0
+    }
     
-    
-    ParticleList.appendChild(ParticleDiv)
       let ParticleName = Particle.value.items.find((item) =>{
         return item.key == "particleName"
       })
       
       ParticleDiv.innerHTML = 
       `<div class="ParticleTitle flex bg-gray-700 text-gray-300 rounded-sm p-1 ">
-      <input type="checkbox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/><div class="flex-1 text-center">${ParticleName.value}</div>
+      <input type="checkbox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/><div class="flex-1 text-center">${ParticleName.value}</div> 
       </div>`
       
       Particle.value.items.map(DefData => {
@@ -293,6 +353,7 @@ function LoadFile()
     }
   )
 }
+*/
 
 function FilterParticles(FilterString)
 {
@@ -364,93 +425,57 @@ function RecolorSelected()
   Persist = true
   FileCache.push(UTIL.Clone(File))
 
-  let BinParticles = File.entries.value.items;
-  [...ParticleList.children].map( Particle => {   
-    if(Particle.style.display != "none")
+  let ParticleObject = File.entries.value.items;
+  let FirstIndex = ParticleObject.findIndex(item => item.value.name == "VfxSystemDefinitionData")
+  
+  for(let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++)
+  {
+    let DefData = ParticleObject[PO_ID + FirstIndex].value.items
+    let DomDefData = ParticleList.children[PO_ID].children
+    for (let B = 1; B < ParticleList.children[PO_ID].children.length; B++)
     {
-      let CurrentParticle = BinParticles[BinParticles.findIndex(BinParticle => {
-        if(BinParticle.key == Particle.id){return true}
-      })].value.items
-
-      CurrentParticle.map(DefData => {
-        if(DefData.key == "complexEmitterDefinitionData" || DefData.key == "simpleEmitterDefinitionData")
+      for (let C = 0; C < DomDefData[B].children.length; C++)
+      {
+        let DomEmitter = DomDefData[B].children[C].children
+        if(DomEmitter[0].checked)
         {
-          [...Particle.children[[...Particle.children].findIndex(item => item.id == DefData.key)].children]
-          .map((Emitter,ID) =>{
-            if(Emitter.children[0].style.visibility != "hidden" && Emitter.children[0].checked)
-            {
-              let DefDataItems = DefData.value.items[ID].items
-              
-              let ColorProp
-              if(DefDataItems[DefDataItems.findIndex(Prop => Prop.key == "color")])
-              {
-                ColorProp = DefDataItems[DefDataItems.findIndex(Prop => Prop.key == "color")].value.items
-                if(ColorProp[ColorProp.findIndex(item => item.key == "dynamics")])
-                {
-                  //this works
+          let Props = DefData[B-1].value.items[C].items
 
-                  let ColorValue = ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items 
-                  ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items = UTIL.ToDynamic(Palette,UTIL.Clone(ColorValue))
-                }
-                else 
-                {
-                  if(Prefs.Advanced && Palette.length > 1)
-                  {
-                    ColorProp.push(JSON.parse(BlankDynamic))
-                    let ColorValue = ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items
-                    ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items = UTIL.ToDynamic(Palette,UTIL.Clone(ColorValue))
-                  }
-                  else
-                  {
-                    //thisworks
-
-                    let ColorValue = ColorProp[ColorProp.findIndex(item => item.key == "constantValue")].value
-                    ColorProp[ColorProp.findIndex(item => item.key == "constantValue")].value = UTIL.ToConstant(Palette,UTIL.Clone(ColorValue))
-                  }
-                }
-                Emitter.children[2].onclick = ()=>{
-                  Palette = UTIL.GetColor(ColorProp);
-                  MapPalette()
-                }
-                Emitter.children[2].style.background = UTIL.ToBG(UTIL.GetColor(ColorProp))
-              }
-              else if(DefDataItems[DefDataItems.findIndex(Prop => Prop.key == "birthColor")])
-              {
-                ColorProp = DefDataItems[DefDataItems.findIndex(Prop => Prop.key == "birthColor")].value.items
-                if(ColorProp[ColorProp.findIndex(item => item.key == "dynamics")])
-                {
-                  //this works
-                  let ColorValue = ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items
-                  ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items = UTIL.ToDynamic(Palette,UTIL.Clone(ColorValue))
-                }
-                else
-                {
-                  if(Prefs.Advanced && Palette.length > 1)
-                  {
-                    ColorProp.push(JSON.parse(BlankDynamic))
-                    let ColorValue = ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items
-                    ColorProp[ColorProp.findIndex(item => item.key == "dynamics")].value.items = UTIL.ToDynamic(Palette,UTIL.Clone(ColorValue))
-                  }
-                  else
-                  {
-                    // this works
-
-                    let ColorValue = ColorProp[ColorProp.findIndex(item => item.key == "constantValue")].value
-                    ColorProp[ColorProp.findIndex(item => item.key == "constantValue")].value = UTIL.ToConstant(Palette,UTIL.Clone(ColorValue))
-                  }
-                }
-                Emitter.children[2].onclick = ()=>{
-                  Palette = UTIL.GetColor(ColorProp);
-                  MapPalette()
-                }
-                Emitter.children[2].style.background = UTIL.ToBG(UTIL.GetColor(ColorProp))
-              }
+          let ColorIndex = Props.findIndex(item => item?.key == "color")
+          let BirthColorIndex = Props.findIndex(item => item.key == "birthColor")
+          if(ColorIndex >= 0)
+          {
+            Props[ColorIndex] = UTIL.ReColor(Props[ColorIndex])
+            DomEmitter[2].onclick = ()=>{
+              Palette = UTIL.GetColor(Props[ColorIndex].value.items)
+              MapPalette()
             }
-          })
+            DomEmitter[2].style.background = UTIL.ToBG(UTIL.GetColor(Props[ColorIndex].value.items))
+          }
+          else if (BirthColorIndex >= 0)
+          {
+            Props.push({
+              key: "color",
+              type: "embed",
+              value:
+              {
+                items: [JSON.parse(BlankConstant)],
+                name: "ValueColor"
+              }
+            })
+            
+            ColorIndex = Props.length-1
+            Props[ColorIndex] = UTIL.ReColor(Props[ColorIndex])
+            DomEmitter[2].onclick = ()=>{
+              Palette = UTIL.GetColor(Props[ColorIndex].value.items)
+              MapPalette()
+            }
+            DomEmitter[2].style.background = UTIL.ToBG(UTIL.GetColor(Props[ColorIndex].value.items))
+          }
         }
-      })
+      }
     }
-  })
+  }
 }
 
 function Undo()
@@ -619,14 +644,10 @@ function ToBin()
   execSync(`"${Prefs.RitoBinPath}" -o bin "${(FilePath.slice(0,-4) + ".json")}"`)
 }
 
-function OpenURL()
-{
-  Open('https://github.com/DevMarcius/binsplash')
-}
-
 function SelectRitoBin()
 {
   Prefs.RitoBinPath = ipcRenderer.sendSync('FileSelect',"RitoBin")
 }
 
+ChangeColorCount(2)
 LoadSamples()

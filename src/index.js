@@ -21,7 +21,7 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools(/*{mode:'detach'}*/);
+  mainWindow.webContents.openDevTools(/*{mode:'detach'}*/);
 };
 
 app.whenReady().then(() => {

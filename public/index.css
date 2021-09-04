@@ -290,27 +290,30 @@ input:checked[type="checkbox"]:before {
 }
 
 input[type="color"] {
-	-webkit-appearance: none;
-	border: none;
-	width: 24px;
-	height: 24px;
-  background:none;
+  -webkit-appearance: none;
+  border: none;
+  width: 24px;
+  height: 24px;
+  background: none;
 }
 input[type="color"]::-webkit-color-swatch-wrapper {
-	padding: 0;
+  padding: 0;
 }
 input[type="color"]::-webkit-color-swatch {
-	border: none;
+  border: none;
   border-radius: 9999px;
 }
-input[type="number"]{
-  width:24px;
-  height:24px;
-  text-align:center;
+input[type="number"] {
+  width: 24px;
+  height: 24px;
+  text-align: center;
   background: #00000044;
   color: #fff;
   border-radius: 9999px;
 }
-input[type="number"]:disabled{
+input[type="number"]:disabled {
   opacity: 50%;
+}
+* {
+  outline: none;
 }
