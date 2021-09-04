@@ -5,7 +5,7 @@ const https = require('https')
 
 function FetchThemes()
 {
-  https.get('https://raw.githubusercontent.com/DevMarcius/Skin_Idea_Generator-Python/master/config.yaml', (resp) => {
+  https.get('https://raw.githubusercontent.com/DevMarcius/binsplash/main/Data.json', (resp) => {
     let data = '';
   
     // A chunk of data has been received.
