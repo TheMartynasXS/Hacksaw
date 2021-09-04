@@ -317,3 +317,11 @@ input[type="number"]:disabled {
 * {
   outline: none;
 }
+.disabled:before {
+  content: 'W.I.P.';
+  color: red;
+  width: 70px;
+  height: 25px;
+  border-radius: 2em;
+  border: 2px solid red;
+}

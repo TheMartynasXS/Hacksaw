@@ -1,7 +1,12 @@
+const Path = require('path');
+const fs = require('fs')
+const https = require('https')
+const { ipcRenderer} = require('electron');
+
 let IdeaCount = document.getElementById("IdeaCount")
 let IdeaList = document.getElementById("IdeaList")
-let Data = require('../Data.json')
-const https = require('https')
+
+const DataPath = Path.join(ipcRenderer.sendSync('ConfigPath') + '\\Data.json')
 
 function FetchThemes()
 {
@@ -15,12 +20,25 @@ function FetchThemes()
   
     // The whole response has been received. Print out the result.
     resp.on('end', () => {
-      console.log(data);
+      SaveData(data)
+      //console.log(JSON.parse(data))
     });
   
   }).on("error", (err) => {
     console.log("Error: " + err.message);
-  });
+  })
+}
+
+let Data = fs.existsSync(DataPath) == true ? require(DataPath) : null
+if(Data == null)
+{
+  FetchThemes()
+}
+
+function SaveData(NewData)
+{
+  fs.writeFileSync(DataPath,NewData,"utf8")
+  Data = JSON.parse(NewData)
 }
 
 function Generate()

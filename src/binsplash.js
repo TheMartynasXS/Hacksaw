@@ -1,7 +1,7 @@
 const { execSync } = require('child_process');
 const { ipcRenderer} = require('electron');
 const fs = require('fs');
-const path = require('path');
+const Path = require('path');
 const UTIL = require('../src/utilities');
 
 let FileSaved = true
@@ -19,8 +19,7 @@ let FilePath = ipcRenderer.sendSync('PassFile');
 
 let Palette = [NewRandomColor(),NewRandomColor()]
 
-const PrefsPath = path.join(ipcRenderer.sendSync('ConfigPath') + '\\config.json')
-
+const PrefsPath = Path.join(ipcRenderer.sendSync('ConfigPath') + '\\config.json')
 
 let Prefs = fs.existsSync(PrefsPath) == true ? require(PrefsPath) : null
 

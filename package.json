@@ -1,11 +1,11 @@
 {
-  "name": "binsplash",
-  "productName": "binsplash",
-  "version": "2.1.0",
+  "name": "hacksaw",
+  "productName": "hacksaw",
+  "version": "2.0.0",
   "description": "my league modding suite",
-  "main": "src/index.js",
+  "main": "src/main_process.js",
   "build": {
-    "appId": "com.github.devmarcius.binsplash",
+    "appId": "com.github.devmarcius.hacksaw",
     "win": {
       "target": [
         "portable",
