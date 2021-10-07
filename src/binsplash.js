@@ -12,6 +12,7 @@ window.onerror = function (msg, error, lineNo, columnNo) {
 
 
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`
+
 let BlankConstant = `{"key":"constantValue","type":"vec4","value":[]}`
 let File = {};
 let FileCache = []
@@ -70,7 +71,7 @@ if(Prefs != null)
   document.getElementById('Advanced').checked = Prefs.Advanced
 }
 else
-{ 
+{
   Prefs = {}
   Prefs.Version = ipcRenderer.sendSync('Version')
   Prefs.IgnoreBW = true
@@ -133,13 +134,13 @@ function MapPalette()
     let ColorInput = document.createElement('input')
     ColorInput.type = "color"
     ColorInput.className = "flex-1 mx-0.5 cursor-pointer"
-    ColorInput.onchange = (Event) => 
+    ColorInput.onchange = (Event) =>
     {
       PaletteColor.color = UTIL.HEXtoRGB(Event.target.value)
       MapPalette()
     }
     ColorInput.value = UTIL.RGBtoHEX(PaletteColor.color[0],PaletteColor.color[1],PaletteColor.color[2])
-    
+
     ColorContainer.appendChild(ColorInput)
 
     TimeInput = document.createElement('input')
@@ -148,13 +149,13 @@ function MapPalette()
     TimeInput.value = PaletteColor.time
     TimeInput.max = 100
     TimeInput.min = 0
-    TimeInput.onchange = (Event) => 
+    TimeInput.onchange = (Event) =>
     {
       PaletteColor.time = parseInt(Event.target.value)
       MapPalette()
     }
     if(ID == 0 || ID == Palette.length-1){TimeInput.disabled = true}
-    TimeContainer.appendChild(TimeInput)  
+    TimeContainer.appendChild(TimeInput)
 
     indicatorColor.push(`rgb(${PaletteColor.color[0]},${PaletteColor.color[1]},${PaletteColor.color[2]}) ${PaletteColor.time}%`)
   })
@@ -163,7 +164,7 @@ function MapPalette()
 }
 
 function OpenBin()
-{ 
+{
   if(FileSaved == false && Persist == true)
   {
     UTIL.CreateAlert("You might have forgotten to save bin")
@@ -178,7 +179,7 @@ function OpenBin()
     ToJson()
   }
   File = require(FilePath.slice(0,-4) + ".json")
-  document.getElementById('appTitle').innerText = 
+  document.getElementById('appTitle').innerText =
   `BinSplash - ${FilePath.substring(FilePath.lastIndexOf('\\') + 1)}`
   LoadFile()
 }
@@ -196,14 +197,14 @@ function LoadFile()
         ParticleObject[PO_ID].value.items.find((item)=>{
           if(item.key == "particleName"){return item}
         }).value
-      
+
         let ParticleDiv = document.createElement("div")
         ParticleDiv.id = ParticleObject[PO_ID].key
         ParticleDiv.className = "m-2 border-2 border-gray-700 rounded-md"
-        ParticleDiv.innerHTML = 
+        ParticleDiv.innerHTML =
         `<div class="ParticleTitle flex bg-gray-700 text-gray-300 rounded-sm p-1">
           <input type="checkbox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/>
-          <div class="flex-1 text-center">${ParticleName}</div> 
+          <div class="flex-1 text-center">${ParticleName}</div>
         </div>`
         let DefData = ParticleObject[PO_ID].value.items.filter(item=>item.key == "complexEmitterDefinitionData" || item.key == "simpleEmitterDefinitionData")
         //console.log("---")
@@ -216,7 +217,7 @@ function LoadFile()
           let Props = DefData[B].value.items
           for(let C = 0; C < Props.length; C++)
           {
-            
+
             //console.log(Props[C])
             if(DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData")
             {
@@ -242,7 +243,7 @@ function LoadFile()
                   )
                 }
               }
-              let BG = 
+              let BG =
               UTIL.ToBG(
                 Color
               )
@@ -250,7 +251,7 @@ function LoadFile()
               let Emitter = document.createElement('div')
               Emitter.className = "flex p-2 hover:bg-black hover:bg-opacity-20 text-gray-300 hover:text-white"
                 let Input = document.createElement('input')
-                Input.type = "checkbox" 
+                Input.type = "checkbox"
                 Input.style = `${BG == null ? "visibility:hidden" : null}`
               Emitter.appendChild(Input)
                 let Title = document.createElement('div')
@@ -285,22 +286,22 @@ function LoadFile()
     {
       return 0
     }
-    
+
       let ParticleName = Particle.value.items.find((item) =>{
         return item.key == "particleName"
       })
-      
-      ParticleDiv.innerHTML = 
+
+      ParticleDiv.innerHTML =
       `<div class="ParticleTitle flex bg-gray-700 text-gray-300 rounded-sm p-1 ">
-      <input type="checkbox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/><div class="flex-1 text-center">${ParticleName.value}</div> 
+      <input type="checkbox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/><div class="flex-1 text-center">${ParticleName.value}</div>
       </div>`
-      
+
       Particle.value.items.map(DefData => {
         if(DefData.key == "simpleEmitterDefinitionData" || DefData.key == "complexEmitterDefinitionData")
         {
           let DefDataDiv = document.createElement("div")
           //console.log(DefData)
-          
+
           DefDataDiv.id = DefData.key
           ParticleDiv.appendChild(DefDataDiv)
 
@@ -320,14 +321,14 @@ function LoadFile()
                   VfxDefData.items[VfxDefData.items.findIndex( item => item.key == "birthColor")].value.items
                 )
               }
-              let BG = 
+              let BG =
               UTIL.ToBG(
                 Color
               )
               let Emitter = document.createElement('div')
               Emitter.className = "flex p-2 hover:bg-black hover:bg-opacity-20 text-gray-300 hover:text-white"
                 let Input = document.createElement('input')
-                Input.type = "checkbox" 
+                Input.type = "checkbox"
                 Input.style = `${BG == null ? "visibility:hidden" : null}`
               Emitter.appendChild(Input)
                 let Title = document.createElement('div')
@@ -343,10 +344,10 @@ function LoadFile()
                   MapPalette()
                 }
               Emitter.appendChild(ColorDiv)
-              
+
               DefDataDiv.appendChild(Emitter)
             })
-          
+
         }
       })
     }
@@ -358,17 +359,17 @@ function FilterParticles(FilterString)
 {
   let ParticleListChildren = ParticleList.children
   let search = new RegExp(FilterString, "i")
-  for (let I = 0; I < ParticleListChildren.length; I++) 
+  for (let I = 0; I < ParticleListChildren.length; I++)
   {
-    
+
     let match = ParticleListChildren[I].children[0].children[1].textContent.match(search)
-    
+
     if(match == null)
     {
-      
+
       ParticleListChildren[I].style.display = "none"
       ParticleListChildren[I].children[0].children[0].checked = false
-      for (let J = 0; J < ParticleListChildren[I].children[1]?.children.length; J++) 
+      for (let J = 0; J < ParticleListChildren[I].children[1]?.children.length; J++)
       {
         ParticleListChildren[I].children[1].children[J].children[0].checked = false;
       }
@@ -426,7 +427,7 @@ function RecolorSelected()
 
   let ParticleObject = File.entries.value.items;
   let FirstIndex = ParticleObject.findIndex(item => item.value.name == "VfxSystemDefinitionData")
-  
+
   for(let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++)
   {
     let DefData = ParticleObject[PO_ID + FirstIndex].value.items
@@ -462,7 +463,7 @@ function RecolorSelected()
                 name: "ValueColor"
               }
             })
-            
+
             ColorIndex = Props.length-1
             Props[ColorIndex] = UTIL.ReColor(Props[ColorIndex])
             DomEmitter[2].onclick = ()=>{
@@ -515,11 +516,11 @@ function LoadSamples()
     let SampleDiv = document.createElement('div')
     SampleDiv.className = "flex m-2 p-1 rounded-lg"
     SampleDiv.style.background = UTIL.ToBG(Sample.value)
-    
+
     SampleContainer.appendChild(SampleDiv)
       let SampleButton = document.createElement("button")
       SampleButton.className="btn-reg-black bg-opacity-20 px-3"
-      SampleButton.innerText="Sample" 
+      SampleButton.innerText="Sample"
       SampleButton.onclick = ()=>
       {
         Palette = UTIL.Clone(Sample.value)
@@ -529,7 +530,7 @@ function LoadSamples()
 
       let SampleExport = document.createElement("button")
       SampleExport.className="btn-reg-black bg-opacity-20 px-3"
-      SampleExport.innerText="Export" 
+      SampleExport.innerText="Export"
       SampleExport.onclick = ()=>
       {
         ExportSamples(Sample)
@@ -538,7 +539,7 @@ function LoadSamples()
 
       let SampleDelete = document.createElement("button")
       SampleDelete.className="btn-reg-black bg-opacity-20 px-3"
-      SampleDelete.innerText="Delete" 
+      SampleDelete.innerText="Delete"
       SampleDelete.onclick = () =>
       {
         Prefs.ColorSamples.splice(ID,1)
@@ -558,7 +559,7 @@ function LoadSamples()
       SampleDiv.appendChild(SampleTitle)
   })
 }
-  
+
 function SaveSample()
 {
   Prefs.ColorSamples.push(
@@ -610,7 +611,7 @@ function ExportSamples(Samples = null)
 function ImportSample()
 {
   let Samples = JSON.parse(fs.readFileSync(ipcRenderer.sendSync('FileSelect',"Json")).toString())
-  
+
   if(Samples.constructor == [].constructor)
   {
     Samples.map(Sample => {
@@ -621,7 +622,7 @@ function ImportSample()
   {
     Prefs.ColorSamples.push(Samples)
   }
-  
+
   SavePrefs()
   LoadSamples()
 }

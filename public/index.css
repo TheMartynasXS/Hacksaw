@@ -318,6 +318,7 @@ input[type="number"]:disabled {
   outline: none;
 }
 .disabled:before {
+  position:fixed;
   content: 'W.I.P.';
   color: red;
   width: 70px;
