@@ -1,15 +1,14 @@
 {
   "name": "hacksaw",
   "productName": "hacksaw",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "my league modding suite",
-  "main": "src/main_process.js",
+  "main": "javascript/main_process.js",
   "build": {
     "appId": "com.github.devmarcius.hacksaw",
     "win": {
       "target": [
         "portable",
-        "nsis",
         "zip"
       ]
     },
@@ -36,9 +35,7 @@
     "start": "electron .",
     "package": "electron-forge package",
     "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish always",
-    "build:css": "tailwindcss -i src/style.css -o public/style.css",
-    "watch:css": "tailwindcss -i src/style.css -o public/style.css"
+    "deploy": "electron-builder build --win --publish always"
   },
   "keywords": [],
   "author": {
@@ -47,13 +44,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "babylonjs": "^4.2.0",
+    "color-convert": "^2.0.1",
+    "electron-color-picker": "^0.2.0",
     "open": "^8.2.1"
   },
   "devDependencies": {
-    "autoprefixer": "^10.3.1",
-    "electron": "13.1.6",
-    "electron-builder": "^22.11.7",
-    "tailwindcss": "^2.2.4"
+    "electron": "15.2.0",
+    "electron-builder": "^22.11.7"
   }
 }

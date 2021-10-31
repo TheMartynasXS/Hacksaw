@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>HackSaw</title>
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+
+  <link rel="stylesheet" href="../css/index.css">
+
+</head>
+
+<body class="Flex">
+  <script src="../javascript/init.js"></script>
+  <div id="Vertical-Menu" class="Vertical-Menu-Hidden">
+    <button id="Logo-Container" onclick="SideBarToggle()">
+      <div id="Logo" />
+    </button>
+    <button id="Nav1" class="NavButton Active" onclick="Tab(this)">
+      Splash
+    </button>
+    <button id="Nav2" class="Hidden NavButton" onclick="Tab(this)">
+      Stitch
+    </button>
+    <button id="Nav3" class="NavButton" onclick="Tab(this)">
+      Skin-Ideas
+    </button>
+    <button id="Nav4" class="Hidden NavButton" onclick="Tab(this)">
+      BinTex
+    </button>
+    <button id="Nav5" class="NavButton Float-Bottom" onclick="Tab(this)">
+      Settings
+    </button>
+  </div>
+  <div id="Root">
+    <div id="Splash" class="Tab Flex Flex-Col">
+      <div class="Input-Group">
+        <button class="Flex-1" onclick="SaveSample()">Save Sample</button>
+        <button class="Flex-1" onclick="OpenSampleWindow()">Color Samples</button>
+      </div>
+      <div id="Slider-Container" class="Margin-Bottom Flex-Col">
+        <input id="Slider-Input" type="range" min="2" value="2" max="20" onchange="ChangeColorCount(this.value)" />
+        <output for="slider" onforminput="value = slider.valueAsNumber;"></output>
+        <div style="overflow:hidden" id="Time-Container"></div>
+        <div id="Gradient-Indicator"></div>
+        <div id="Color-Container"></div>
+      </div>
+      <div class="Input-Group">
+        <button onclick="OpenBin()">Open Bin</button>
+        <input class="Ellipsis Flex-3" type="text" placeholder="Filter by Particle Name"
+          oninput="FilterParticles(this.value)">
+        <button onclick="CheckAll()">check</button>
+        <button onclick="UnCheckAll()">uncheck</button>
+      </div>
+      <div class="Flex-1 Flex-Col Margin-Block" id="Particle-List">
+      </div>
+      <div class="Input-Group">
+        <button onclick="RecolorSelected()" class="Flex-2" id="Recolor_Selected_Button">Recolor Selected</button>
+        <button onclick="Undo()" class="Flex-1">Undo</button>
+        <button onclick="SaveBin()" class="Flex-1">Save Bin</button>
+      </div>
+      <script src="../javascript/binsplash.js"></script>
+    </div>
+    <div id="Stitch" class="Hidden Tab Flex-Col">
+      <div class="Input-Group">
+        <button onclick="OpenPrimaryBin()" class="Flex-1">Open Primary Bin</button>
+        <button onclick="OpenSecondaryBin()" class="Flex-1">Open Secondary Bin</button>
+      </div>
+      <div class="Flex-1 Flex Margin-Block" id="BinContainer">
+        <div id="Primary" class="Flex-1 Margin-Right">
+      
+        </div>
+        <div id="Secondary" class="Flex-1 Margin-Left">
+      
+        </div>
+      </div>
+      <div class="Input-Group">
+        <button onclick="RecolorSelected()" class="Flex-1" id="Recolor_Selected_Button">Undo</button>
+        <button onclick="Stitch()" class="Flex-1">Stitch</button>
+        <button onclick="SaveBin()" class="Flex-1">Save Bin</button>
+      </div>
+      <!-- <script src="../javascript/stitch.js"></script> -->
+    </div>
+    <div id="Skin-Ideas" class="Tab Flex-Col Hidden">
+      <div class="Input-Group">
+        <div class="Label Flex-Auto">How many ideas to generate:</div>
+        <input style="width: 100px;" onchange="value = this.value" type="number" placeholder="5"
+          id="Idea-Count"></input>
+      </div>
+      <div id="Idea-List" class="Margin-Block">
+      </div>
+      <div class="Input-Group">
+        <button onclick="Generate()" class="Flex-3">Generate</button>
+        <button onclick="SaveList()" class="">Save List</button>
+      </div>
+      <script src="../javascript/skinideas.js"></script>
+    </div>
+    <div id="BinTex" class="Tab Hidden">
+      hello4
+    </div>
+    <div id="Settings" class="Tab Flex-Col Hidden">
+      <div class="Input-Group">
+        <button class="Flex-1" onclick="SelectRitoBin()" id="Select-Files">Select Ritobin_cli.exe</button>
+      </div>
+
+      <div class="Input-Group">
+        <input type="checkbox" class="SettingOptionCheckbox" id="IgnoreBW">
+        <div class="Label Flex-1">Ignore Black/White values</div>
+      </div>
+
+      <div class="Input-Group">
+        <input type="checkbox" class="SettingOptionCheckbox" id="Advanced">
+        <div class="Label Flex-1">Advanced Mode</div>
+      </div>
+
+      <div class="Input-Group" style="margin-top:auto;">
+        <button class="Flex-1" onclick="UTIL.SavePrefs()" id="SavePrefs">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+  <script src="../javascript/hacksaw.js"></script>
+</body>
+
+</html>
