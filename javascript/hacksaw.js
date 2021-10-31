@@ -45,13 +45,15 @@ else {
     Prefs.ColorSamples = []
     //fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf8")
     UTIL.CreateAlert("You have to select Ritobin_cli.exe for the program to work")
-    Tab(document.getElementById("Nav5"))
+    //Tab(document.getElementById("Nav2"))
+    
 }
 
 function Tab(Target) {
+    console.log(Target)
     if (JSON.stringify(Target.classList).match("Active") == null) {
-        if (document.getElementById('Color-Picker') != undefined) { document.getElementById('Color-Picker').remove()}
-        
+        if (document.getElementById('Color-Picker') != undefined) { document.getElementById('Color-Picker').remove() }
+
         for (let i = 0; i < Tabs.length; i++) {
             if (Tabs[i].id == Target.innerText) {
                 Tabs[i].classList.replace('Hidden', 'Flex')

@@ -206,7 +206,11 @@ function CreateAlert(message) {
     let Dismiss = document.createElement("button")
     Dismiss.className = "Flex-1"
     Dismiss.textContent = "OK"
-    Dismiss.onclick = () => { Dim.remove() }
+    Dismiss.onclick = () => { 
+      Dim.remove()
+      SideBarToggle()
+      document.getElementById("Nav5").click()
+    }
 
     DismissDiv.appendChild(Dismiss)
 
