@@ -32,7 +32,7 @@ if (Prefs != null) {
         }
 
         Prefs.Version = ipcRenderer.sendSync('Version')
-        SavePrefs()
+        UTIL.SavePrefs()
     }
     document.getElementById('IgnoreBW').checked = Prefs.IgnoreBW
     document.getElementById('Advanced').checked = Prefs.Advanced
@@ -46,7 +46,7 @@ else {
     //fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf8")
     UTIL.CreateAlert("You have to select Ritobin_cli.exe for the program to work")
     //Tab(document.getElementById("Nav2"))
-    
+
 }
 
 function Tab(Target) {
