@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HackSaw</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+
+    <link rel="stylesheet" href="../css/index.css">
+
+</head>
+
+<body class="Flex">
+    <script src="../javascript/init.js" defer></script>
+    <div id="Vertical-Menu" class="">
+        <button id="Logo-Container">
+            <div id="Logo" />
+        </button>
+        <button onclick="Tab('./binsplash.html')" class="NavButton">
+            Splash
+        </button>
+        <button onclick="Tab('./stitch.html')" class="Hidden NavButton">
+            Stitch
+        </button>
+        <button onclick="Tab('./skinideas.html')" class="NavButton">
+            Skin-Ideas
+        </button>
+        <button onclick="Tab('./bintex.html')" class="NavButton">
+            BinTex
+        </button>
+        <button onclick="Tab('./xrgb.html')" class="NavButton">
+            xrgb
+        </button>
+        <button onclick="Tab('./settings.html')" class="NavButton Float-Bottom Active">
+            Settings
+        </button>
+    </div>
+    <div id="Root">
+        <div id="Settings" class="Tab Flex-Col">
+            <div class="Input-Group">
+                <button class="Flex-1" onclick="SelectRitoBin()" id="Select-Files">Select Ritobin_cli.exe</button>
+            </div>
+
+            <div class="Input-Group">
+                <input type="checkbox" class="SettingOptionCheckbox" id="Advanced">
+                <div class="Label Flex-1">Advanced Mode</div>
+            </div>
+
+            <div class="Input-Group" style="margin-top:auto;">
+                <button class="Flex-1" onclick="UTIL.SavePrefs()" id="SavePrefs">Save Preferences</button>
+            </div>
+            <script src="../javascript/utilities.js"></script>
+        </div>
+    </div>
+</body>
+
+</html>

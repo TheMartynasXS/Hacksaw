@@ -2,14 +2,15 @@ const { app, BrowserWindow, nativeTheme, ipcRenderer } = require('electron');
 const path = require('path')
 const { ipcMain } = require('electron')
 const { dialog } = require('electron');
-
+const isDev = require('electron-is-dev')
 const fs = require('fs');
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
-    width: 720,
-    minWidth: 720,
+    width: 800,
+    minWidth: 800,
     height: 600,
+    backgroundColor: '#3a3b41',
     icon: 'build\hacksaw.ico',
     webPreferences: {
       enableRemoteModule: true,
@@ -18,9 +19,15 @@ const createWindow = () => {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../html/hacksaw.html'));
-  mainWindow.removeMenu()
-  //mainWindow.webContents.openDevTools(/*{mode:'detach'}*/);
+  mainWindow.loadFile(path.join(__dirname, '../html/binsplash.html'));
+  
+  if(isDev){
+
+    mainWindow.webContents.openDevTools({mode:'detach'});
+  }else
+  {
+    mainWindow.removeMenu()
+  }
 };
 
 

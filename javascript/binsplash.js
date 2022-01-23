@@ -1,7 +1,8 @@
 const { execSync } = require('child_process');
-const UTIL = require('../javascript/utilities');
 const CC = require('color-convert');
 const { getColorHexRGB } = require('electron-color-picker');
+
+let FileHistory = []
 
 const PickScreen = async () => {
   const color = await getColorHexRGB().catch((error) => {
@@ -12,17 +13,17 @@ const PickScreen = async () => {
   ColorInput.value = color
   let SubmitEvent = new Event('change')
   ColorInput.dispatchEvent(SubmitEvent)
-  // document.getElementById('Color-Picker').remove()
-  // Palette[getChildIndex(Target)].color = CC.hex.rgb(ColorInput.value)
-  // MapPalette()
 }
-
 function CreatePicker(Target) {
   if (document.getElementById('Color-Picker') == undefined) {
     let temp = Target.style.backgroundColor.match(/\d+/g)
+
     let ColorPicker = document.createElement('div')
     ColorPicker.className = "Flex-Col"
     ColorPicker.id = "Color-Picker"
+    ColorPicker.position = "absolute";
+    ColorPicker.top = "11em";
+
 
     let ColorPickerInputs = document.createElement('div')
     ColorPickerInputs.className = "Input-Group"
@@ -53,6 +54,9 @@ function CreatePicker(Target) {
     Hex.value = `#${CC.rgb.hex([temp[0], temp[1], temp[2]])}`
     Hex.maxLength = 7
     Hex.oninput = (Event) => {
+      if (!Event.target.value.startsWith('#')) {
+        Event.target.value = '#' + Event.target.value
+      }
       ColorInput.value = Event.target.value
     }
     ColorPickerInputs.appendChild(Hex)
@@ -67,15 +71,14 @@ function CreatePicker(Target) {
       MapPalette()
     }
 
-    document.getElementById('Root').appendChild(ColorPicker)
+    document.getElementById("Root").appendChild(ColorPicker)
   } else {
     document.getElementById('Color-Picker').remove()
     CreatePicker(Target)
   }
 }
 
-let FileSaved = true
-let Persist = true
+var FileSaved = true
 window.onerror = function (msg, error, lineNo, columnNo) {
   UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
 }
@@ -83,11 +86,11 @@ window.onerror = function (msg, error, lineNo, columnNo) {
 
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`
 
-let BlankConstant = `{"key":"constantValue","type":"vec4","value":[]}`
+let BlankConstant = `{"key":"constantValue","type":"vec4","value":[0,0,0,1]}`
 
 let FileCache = []
 
-let Palette = [NewRandomColor(), NewRandomColor()]
+let Palette = [NewRandomColor()]
 
 let ColorContainer = document.getElementById("Color-Container")
 let GradientIndicator = document.getElementById("Gradient-Indicator")
@@ -149,51 +152,29 @@ function MapPalette() {
     indicatorColor.push(`rgb(${PaletteColor.color[0]},${PaletteColor.color[1]},${PaletteColor.color[2]}) ${PaletteColor.time}%`)
   })
   if (Palette.length > 1) { GradientIndicator.style.background = `linear-gradient(0.25turn,${indicatorColor.join(",")})` }
-  else { GradientIndicator.style.background = 'none' }
+  else { GradientIndicator.style.background = `rgb(${Palette[0].color[0]},${Palette[0].color[1]},${Palette[0].color[2]})` }
 }
 function OpenBin() {
-  // if (FileSaved == false && Persist == true) {
-  //   UTIL.CreateAlert("You might have forgotten to save bin")
-  //   Persist = false
-  //   return 0
-  // }
   FilePath = ipcRenderer.sendSync('FileSelect', 'Bin');
   if (FilePath == undefined) { return 0 }
-  // ParticleList.innerText = null
   if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
     ToJson()
   }
-  File = require(FilePath.slice(0, -4) + ".json")
-  // document.getElementById('appTitle').innerText =
-  //   `Hacksaw - ${FilePath.substring(FilePath.lastIndexOf('\\') + 1)}`
+  File = UTIL.Clone(require(FilePath.slice(0, -4) + ".json"))
   LoadFile()
+  if (!FileHistory.includes(FilePath.slice(0, -4) + ".json")){
+    FileHistory.push(FilePath.slice(0, -4) + ".json")
+  }
 }
-// File = require('../skin0.json')
-// LoadFile()
 
-// function OpenBin() {
-//   if (FileSaved == false && Persist == true) {
-//     UTIL.CreateAlert("You might have forgotten to save bin")
-//     Persist = false
-//     return 0
-//   }
-//   FilePath = ipcRenderer.sendSync('FileSelect', 'Bin');
-//   if (FilePath == undefined) { return 0 }
-//   ParticleList.innerText = null
-//   if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
-//     ToJson()
-//   }
-//   File = require(FilePath.slice(0, -4) + ".json")
-//   document.getElementById('appTitle').innerText =
-//     `BinSplash - ${FilePath.substring(FilePath.lastIndexOf('\\') + 1)}`
-//   LoadFile()
-// }
-// File = require('../skin0.json')
-// LoadFile()
 
 function LoadFile() {
   ParticleList.innerText = ""
   let ParticleObject = File.entries.value.items
+  if (/ValueColor/.test(JSON.stringify(ParticleObject)) == false) {
+    UTIL.CreateAlert('No color values found')
+  }
+
   for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
     if (ParticleObject[PO_ID].value.name == "VfxSystemDefinitionData") {
       ParticleName =
@@ -217,30 +198,23 @@ function LoadFile() {
 
         let Props = DefData[B].value.items
         for (let C = 0; C < Props.length; C++) {
-
-          //console.log(Props[C])
           if (DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData") {
-            let Color
-            if (Props[C].items.find(item => item.key == "color")) {
-              Color =
-                UTIL.GetColor(
-                  Props[C].items.find(item => item.key == "color").value.items
-                )
-            }
-            else if (Props[C].items.find(item => item.key == "birthColor")) {
-              if (Props[C].items.find(item => item.key == "birthColor").value.items.find(item => item.key == "dynamics")) {
-                Color = null
-              }
-              else {
-                Color =
-                  UTIL.GetColor(
-                    Props[C].items.find(item => item.key == "birthColor").value.items
-                  )
-              }
-            }
+
+            let Color = Props[C].items.find(item => item.key == "color") != undefined ?
+              UTIL.GetColor(
+                Props[C].items.find(item => item.key == "color")
+              ) : null
+            let BirthColor = Props[C].items.find(item => item.key == "birthColor") != undefined ?
+              UTIL.GetColor(
+                Props[C].items.find(item => item.key == "birthColor")
+              ) : null
             let BG =
               UTIL.ToBG(
                 Color
+              )
+            let BCBG =
+              UTIL.ToBG(
+                BirthColor
               )
 
             let Emitter = document.createElement('div')
@@ -248,20 +222,42 @@ function LoadFile() {
             Emitter.className = "Flex Emitter-Div"
             let Input = document.createElement('input')
             Input.type = "checkbox"
-            Input.style = `${BG == null ? "visibility:hidden" : null}`
+            Input.className = `${BG == null && BCBG == null ? "Blank-Obj" : null}`
+            Input.disabled = BG == null && BCBG == null ? true : false
             Emitter.appendChild(Input)
             let Title = document.createElement('div')
             Title.className = "Label Flex-1 Ellipsis"
             Title.innerText = Props[C].items[Props[C].items.findIndex(item => item.key == "emitterName")]?.value
             Emitter.appendChild(Title)
-            let ColorDiv = document.createElement('div')
-            ColorDiv.className = `Color-Block ${Color?.length > 1 ? "Dynamic" : "Solid"}`
-            ColorDiv.style = `height:24px;width:80px;${BG == null ? "visibility:hidden" : "background:" + BG}`
-            ColorDiv.innerHTML = '<div class="Copy">COPY<div>'
-            ColorDiv.onclick = () => {
-              Palette = Color
-              MapPalette()
+
+            let BirthDiv = document.createElement('div')
+            BirthDiv.className = `Prop-Block ${BCBG == null ? "Blank-Obj" : "Pointer"}`
+            BirthDiv.style = `height:24px;width:60px;${BCBG == null ? null : "background:" + BCBG}`
+            BirthDiv.innerHTML = '<div>Birth<div>'
+
+            if (BCBG != null) {
+              BirthDiv.onclick = () => {
+                Palette = UTIL.Clone(BirthColor)
+                MapPalette()
+                document.getElementById('Slider-Input').value = Palette.length
+              }
             }
+
+            Emitter.appendChild(BirthDiv)
+
+            let ColorDiv = document.createElement('div')
+            ColorDiv.className = `Prop-Block ${BG == null ? "Blank-Obj" : "Pointer"} ${Color?.length > 1 ? "Dynamic" : "Solid"}`
+            ColorDiv.style = `height:24px;width:100px;${BG == null ? null : "background:" + BG}`
+            ColorDiv.innerHTML = '<div>COPY<div>'
+
+            if (BG != null) {
+              ColorDiv.onclick = () => {
+                Palette = UTIL.Clone(Color)
+                MapPalette()
+                document.getElementById('Slider-Input').value = Palette.length
+              }
+            }
+
             Emitter.appendChild(ColorDiv)
 
             DefDataDiv.appendChild(Emitter)
@@ -317,7 +313,7 @@ function UnCheckAll() {
 function CheckChildren(Particle, State) {
   if (Particle == undefined) { return 0 }
   for (let J = 0; J < Particle.children.length; J++) {
-    if (Particle.children[J].style.visibility != "hidden") {
+    if (Particle.children[J].style.visibility != "hidden" && Particle.children[J].children[0].disabled != true) {
       Particle.children[J].children[0].checked = State
     }
   }
@@ -325,7 +321,6 @@ function CheckChildren(Particle, State) {
 
 function RecolorSelected() {
   FileSaved = false
-  Persist = true
   FileCache.push(UTIL.Clone(File))
 
   let ParticleObject = File.entries.value.items;
@@ -343,32 +338,62 @@ function RecolorSelected() {
 
           let ColorIndex = Props.findIndex(item => item?.key == "color")
           let BirthColorIndex = Props.findIndex(item => item.key == "birthColor")
+
+          let HasConstant = /constantValue/.test(JSON.stringify(Props[ColorIndex]))
+          let HasDynamics = /dynamics/.test(JSON.stringify(Props[ColorIndex]))
+
+          if (BirthColorIndex >= 0 && /dynamics/.test(JSON.stringify(Props[BirthColorIndex]))) {
+            Props[BirthColorIndex].value.items = [UTIL.Clone(JSON.parse(BlankConstant))]
+          }
+          if (Prefs.Advanced) {
+            if (Palette.length > 1) {
+              if (ColorIndex >= 0 && HasConstant && !HasDynamics) {
+                Props[ColorIndex].value.items[0] = UTIL.Clone(JSON.parse(BlankDynamic))
+              }
+              else if (ColorIndex < 0 && BirthColorIndex >= 0) {
+                ColorIndex = Props.length
+                Props.push({
+                  key: "color",
+                  type: "embed",
+                  value: {
+                    items: [UTIL.Clone(JSON.parse(BlankDynamic))],
+                    name: "ValueColor"
+                  }
+                })
+              }
+            }
+            else {
+              if (ColorIndex < 0 && BirthColorIndex >= 0) {
+                ColorIndex = UTIL.Clone(Props.length)
+                Props.push({
+                  key: "color",
+                  type: "embed",
+                  value: {
+                    items: [UTIL.Clone(JSON.parse(BlankConstant))],
+                    name: "ValueColor"
+                  }
+                })
+              }
+            }
+          }
+          if (BirthColorIndex >= 0) {
+            Props[BirthColorIndex] = UTIL.ReColor(Props[BirthColorIndex])
+            DomEmitter[2].style.background = UTIL.ToBG(UTIL.GetColor(Props[BirthColorIndex]))
+            DomEmitter[2].onclick = () => {
+              Palette = UTIL.GetColor(Props[BirthColorIndex])
+              MapPalette()
+              document.getElementById('Slider-Input').value = Palette.length
+            }
+          }
+
           if (ColorIndex >= 0) {
             Props[ColorIndex] = UTIL.ReColor(Props[ColorIndex])
-            DomEmitter[2].onclick = () => {
-              Palette = UTIL.GetColor(Props[ColorIndex].value.items)
+            DomEmitter[3].style.background = UTIL.ToBG(UTIL.GetColor(Props[ColorIndex]))
+            DomEmitter[3].onclick = () => {
+              Palette = UTIL.GetColor(Props[ColorIndex])
               MapPalette()
+              document.getElementById('Slider-Input').value = Palette.length
             }
-            DomEmitter[2].style.background = UTIL.ToBG(UTIL.GetColor(Props[ColorIndex].value.items))
-          }
-          else if (BirthColorIndex >= 0) {
-            Props.push({
-              key: "color",
-              type: "embed",
-              value:
-              {
-                items: [JSON.parse(BlankConstant)],
-                name: "ValueColor"
-              }
-            })
-
-            ColorIndex = Props.length - 1
-            Props[ColorIndex] = UTIL.ReColor(Props[ColorIndex])
-            DomEmitter[2].onclick = () => {
-              Palette = UTIL.GetColor(Props[ColorIndex].value.items)
-              MapPalette()
-            }
-            DomEmitter[2].style.background = UTIL.ToBG(UTIL.GetColor(Props[ColorIndex].value.items))
           }
         }
       }
@@ -384,10 +409,6 @@ function Undo() {
   }
 }
 
-function SelectRitoBin() {
-  Prefs.RitoBinPath = ipcRenderer.sendSync('FileSelect', "RitoBin")
-  UTIL.SavePrefs()
-}
 
 function SwitchTab(Tab) {
   for (let ID = 0; ID < Tabs.length; ID++) {
@@ -398,51 +419,6 @@ function SwitchTab(Tab) {
       Tabs[ID].style.display = "none"
     }
   }
-}
-function LoadSamples() {
-  SampleContainer.innerText = null
-  Prefs.ColorSamples.map((Sample, ID) => {
-    let SampleDiv = document.createElement('div')
-    SampleDiv.className = "flex m-2 p-1 rounded-lg"
-    SampleDiv.style.background = UTIL.ToBG(Sample.value)
-
-    SampleContainer.appendChild(SampleDiv)
-    let SampleButton = document.createElement("button")
-    SampleButton.className = "btn-reg-black bg-opacity-20 px-3"
-    SampleButton.innerText = "Sample"
-    SampleButton.onclick = () => {
-      Palette = UTIL.Clone(Sample.value)
-      MapPalette()
-    }
-    SampleDiv.appendChild(SampleButton)
-
-    let SampleExport = document.createElement("button")
-    SampleExport.className = "btn-reg-black bg-opacity-20 px-3"
-    SampleExport.innerText = "Export"
-    SampleExport.onclick = () => {
-      ExportSamples(Sample)
-    }
-    SampleDiv.appendChild(SampleExport)
-
-    let SampleDelete = document.createElement("button")
-    SampleDelete.className = "btn-reg-black bg-opacity-20 px-3"
-    SampleDelete.innerText = "Delete"
-    SampleDelete.onclick = () => {
-      Prefs.ColorSamples.splice(ID, 1)
-      UTIL.SavePrefs()
-      LoadSamples()
-    }
-    SampleDiv.appendChild(SampleDelete)
-
-    let SampleTitle = document.createElement('input')
-    SampleTitle.className = "bg-black flex-1 bg-opacity-20 rounded-lg text-center text-gray-300"
-    SampleTitle.value = Sample.name
-    SampleTitle.onchange = (event) => {
-      Sample.name = event.target.value
-      UTIL.SavePrefs()
-    }
-    SampleDiv.appendChild(SampleTitle)
-  })
 }
 
 function SaveSample() {
@@ -477,26 +453,15 @@ function ExportSamples(Samples = null) {
   }
 }
 
-function ImportSample() {
-  let Samples = JSON.parse(fs.readFileSync(ipcRenderer.sendSync('FileSelect', "Json")).toString())
-
-  if (Samples.constructor == [].constructor) {
-    Samples.map(Sample => {
-      Prefs.ColorSamples.push(Sample)
-    })
-  }
-  else {
-    Prefs.ColorSamples.push(Samples)
-  }
-
-  UTIL.SavePrefs()
-  LoadSamples()
-}
-
 function SaveBin() {
   fs.writeFileSync((FilePath.slice(0, -4) + ".json"), JSON.stringify(File, null, 2), "utf8")
   ToBin()
   FileSaved = true
+
+  for (let i = 0; i < FileHistory.length; i++) {
+    fs.unlinkSync(FileHistory[i])
+  }
+  FileHistory = []
 }
 
 function ToJson() {
@@ -507,9 +472,4 @@ function ToBin() {
   execSync(`"${Prefs.RitoBinPath}" -o bin "${(FilePath.slice(0, -4) + ".json")}"`)
 }
 
-function SelectRitoBin() {
-  Prefs.RitoBinPath = ipcRenderer.sendSync('FileSelect', "RitoBin")
-}
-
-ChangeColorCount(2)
-//LoadSamples()
+ChangeColorCount(1)

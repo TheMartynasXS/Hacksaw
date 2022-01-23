@@ -13,6 +13,9 @@ body {
   margin: 0;
   padding: 0;
 }
+.Pointer{
+  cursor: pointer;
+}
 
 #Root {
   max-height: 100vh;
@@ -26,6 +29,12 @@ body {
   flex: auto;
   overflow:hidden;
   padding:1em;
+}
+
+.Blank-Obj{
+  background-image:linear-gradient(45deg, var(--bg-three) 25%, var(--bg-two) 25%, var(--bg-two) 50%, var(--bg-three) 50%, var(--bg-three) 75%, var(--bg-two) 75%, var(--bg-two) 100%);
+  background-size: 25px 25px;
+  border-radius: 0.4em;
 }
 
 button,
@@ -44,6 +53,7 @@ button,
 }
 .Input-Group input,
 .Input-Group button,
+.Input-Group select,
 .Input-Group .Label
 {
   margin: 0.1em;
@@ -56,6 +66,13 @@ button,
 }
 .Input-Group input[type="color"]{
   margin: 0.1em;
+}
+.Input-Group button:disabled{
+  color:var(--bg-three);
+}
+.Input-Group button:disabled:hover{
+  background: var(--bg-two);
+  cursor: default;
 }
 .Input-Group button:hover{background: var(--bg-three)}
 .Input-Group button {
@@ -129,10 +146,10 @@ input[type="checkbox"]:before {
 input:checked:before {
   transition-timing-function: ease-in-out;
   transition: 0.25s;
-  background: var(--accent-one);
+  background: var(--accent);
   left: 14px;
 }
-input[type="range"]#Slider-Input {
+input[type="range"].Range {
   -webkit-appearance: none;
   flex: 1;
   height: 24px;
@@ -143,14 +160,37 @@ input[type="range"]#Slider-Input {
   overflow: hidden;
   outline: none;
 }
-input[type="range"]#Slider-Input::-webkit-slider-thumb {
+input[type="range"].Range::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 24px;
   border-radius: 0.4em;
   height: 24px;
-  background: var(--accent-one);
+  background: var(--accent);
   position: relative;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+}
+progress{
+  border-radius: 0.4em;
+  height:auto;
+  flex:1;
+  margin:0.1em;
+  padding: 0.1em;
+  background-color: var(--bg-two); 
+}
+progress::-webkit-progress-bar {
+  background-image:linear-gradient(45deg, var(--bg-three) 25%, var(--bg-two) 25%, var(--bg-two) 50%, var(--bg-three) 50%, var(--bg-three) 75%, var(--bg-two) 75%, var(--bg-two) 100%);
+  background-size: 25px 25px;
+  border-radius: 0.4em;
+  width:auto;
+  margin-inline:0.1em;
+}
+progress::-webkit-progress-value {
+  background-color: var(--accent);
+  border-radius: 0.4em;
+  margin-inline:0.1em;
+}
+progress.Progress-Complete::-webkit-progress-value{
+  background-color: var(--accent-success);
 }
 #Slider-Input{
   margin-block-end:0.5em;
@@ -180,8 +220,6 @@ input[type="range"]#Slider-Input::-webkit-slider-thumb {
   border: 1px solid var(--bg-three);
 }
 #Color-Picker{
-  position:absolute;
-  top:11em;
   margin:0.75em;
   padding:2em;
   border-radius: 0.4em;
@@ -205,7 +243,9 @@ input[type="range"]#Slider-Input::-webkit-slider-thumb {
 .Time:disabled::placeholder {
   color: black;
 }
-
+input {
+  min-width: 50px;
+}
 input[type="color"] {
   -webkit-appearance: none;
   border: none;
@@ -247,14 +287,9 @@ input[type="color"]::-webkit-color-swatch {
 .NavButton:hover{background: var(--bg-three)}
 
 .NavButton.Active{
-  background-color: var(--bg-three);
+  color:var(--accent);
   cursor: default;
 }
-#Nav1.NavButton.Active,
-#Nav5.NavButton.Active{color:var(--accent-one);}
-#Nav2.NavButton.Active{color:var(--accent-two);}
-#Nav3.NavButton.Active{color:var(--accent-three);}
-#Nav4.NavButton.Active{color:var(--accent-four);}
 
 #Logo-Container{
   position:relative;
@@ -285,8 +320,10 @@ input[type="color"]::-webkit-color-swatch {
   overflow: hidden;
 }
 #Skin-Ideas,
+#Bin-List,
 #Idea-List{flex:1;}
 
+#Bin-List,
 #Idea-List{
   color: var(--text-one);
   padding: 0 0 0 1em;
@@ -296,7 +333,7 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #Idea-List .Idea:nth-child(2n){background: var(--bg-three);}
-#Idea-Count{color: var(--accent-three)}
+#Idea-Count{color: var(--accent)}
 
 .Idea {
   padding:0.5em;
@@ -330,27 +367,26 @@ input[type="color"]::-webkit-color-swatch {
   padding-inline-start:0.2em;
 }
 .Emitter-Div button {
-  Color: var(--accent-two);
+  Color: var(--accent);
   background: var(--bg-accent);
   border:none;
   border-radius: 0.4em;
   margin:0.1em
 }
-.Color-Block {
+.Prop-Block {
+  display:flex;
   margin:auto;
   margin-inline: 0.25em;
   padding:auto;
   text-align: center;
   border-radius: 0.4em;
 }
-.Copy{
-  position:relative;
-  top:0.3em;
-  width:2em;
+.Prop-Block div{
+  align-self: center;
   background-color: var(--bg-three);
   opacity: 40%;
-  padding-inline: 1em;
   margin:auto;
+  padding-inline: 0.4em;
   border-radius: 0.4em;
 }
 
@@ -387,9 +423,9 @@ input[type="color"]::-webkit-color-swatch {
   margin-top:auto;
 }
 ::-webkit-scrollbar-thumb {background: var(--text-one);}
-#Skin-Ideas ::-webkit-scrollbar-thumb{background: var(--accent-three);}
+#Skin-Ideas ::-webkit-scrollbar-thumb{background: var(--accent);}
 #Splash ::-webkit-scrollbar-thumb,
-#Dim ::-webkit-scrollbar-thumb {background: var(--accent-one);}
+#Dim ::-webkit-scrollbar-thumb {background: var(--accent);}
 #Dim{
   top:0px;
   left:0px;
@@ -419,10 +455,10 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 0.4em;
 }
 #Primary{
-  border-color: var(--accent-two);
+  border-color: var(--accent);
 }
 #Secondary{
-  border-color: var(--accent-four);
+  border-color: var(--accent);
 }
 .AlertContent{
   background-color: var(--bg-two);

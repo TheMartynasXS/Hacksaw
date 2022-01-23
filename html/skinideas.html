@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HackSaw</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+
+    <link rel="stylesheet" href="../css/index.css">
+
+</head>
+
+<body class="Flex">
+    <script src="../javascript/init.js" defer></script>
+    <div id="Vertical-Menu" class="">
+        <button id="Logo-Container">
+            <div id="Logo" />
+        </button>
+        <button onclick="Tab('./binsplash.html')" class="NavButton">
+            Splash
+        </button>
+        <button onclick="Tab('./stitch.html')" class="Hidden NavButton">
+            Stitch
+        </button>
+        <button onclick="Tab('./skinideas.html')" class="NavButton Active">
+            Skin-Ideas
+        </button>
+        <button onclick="Tab('./bintex.html')" class="NavButton">
+            BinTex
+        </button>
+        <button onclick="Tab('./xrgb.html')" class="NavButton">
+            xrgb
+        </button>
+        <button onclick="Tab('./settings.html')" class="NavButton Float-Bottom">
+            Settings
+        </button>
+    </div>
+    <div id="Root">
+        <div id="Splash" class="Tab Flex Flex-Col">
+            <div class="Input-Group">
+                <div class="Label Flex-Auto">How many ideas to generate:</div>
+                <input style="width: 100px;" onchange="value = this.value" type="number" placeholder="5"
+                    id="Idea-Count"></input>
+            </div>
+            <div id="Idea-List" class="Margin-Block">
+            </div>
+            <div class="Input-Group">
+                <button onclick="Generate()" class="Flex-3">Generate</button>
+                <button onclick="SaveList()" class="">Save List</button>
+            </div>
+            <script src="../javascript/skinideas.js" defer></script>
+        </div>
+    </div>
+</body>
+
+</html>
