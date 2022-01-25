@@ -42,8 +42,23 @@
             </div>
 
             <div class="Input-Group">
-                <input type="checkbox" class="SettingOptionCheckbox" id="Advanced">
-                <div class="Label Flex-1">Advanced Mode</div>
+                <div class="Label Flex-1">Preferred recoloring mode</div>
+                <select class="Flex-1" name="Mode" id="Mode">
+                    <option value="0">Simple</option>
+                    <option value="1">Advanced</option>
+                </select>
+            </div>
+            <div class="Input-Group">
+                <div class="Label Flex-1">Preferred recoloring target</div>
+                <select class="Flex-1" name="Target" id="Target">
+                    <option value="0">Both</option>
+                    <option value="1">BirthColor</option>
+                    <option value="2">Color</option>
+                </select>
+            </div>
+            <div class="Input-Group">
+                <input type="checkbox" class="SettingOptionCheckbox" id="IgnoreBW">
+                <div class="Label Flex-1">Ignore Black/White values</div>
             </div>
 
             <div class="Input-Group" style="margin-top:auto;">

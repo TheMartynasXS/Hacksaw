@@ -4,6 +4,9 @@ const { getColorHexRGB } = require('electron-color-picker');
 
 let FileHistory = []
 
+let RecolorMode = document.getElementById('Mode')
+let RecolorTarget = document.getElementById('Target')
+
 const PickScreen = async () => {
   const color = await getColorHexRGB().catch((error) => {
     console.warn('[ERROR] getColor', error)
@@ -86,7 +89,7 @@ window.onerror = function (msg, error, lineNo, columnNo) {
 
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`
 
-let BlankConstant = `{"key":"constantValue","type":"vec4","value":[0,0,0,1]}`
+let BlankConstant = `{"key":"constantValue","type":"vec4","value":[0.5,0.5,0.5,1]}`
 
 let FileCache = []
 
@@ -156,6 +159,8 @@ function MapPalette() {
 }
 function OpenBin() {
   FilePath = ipcRenderer.sendSync('FileSelect', 'Bin');
+  
+  document.title = `HackSaw - ${FilePath.split('\\').pop()}`
   if (FilePath == undefined) { return 0 }
   if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
     ToJson()
@@ -342,12 +347,13 @@ function RecolorSelected() {
           let HasConstant = /constantValue/.test(JSON.stringify(Props[ColorIndex]))
           let HasDynamics = /dynamics/.test(JSON.stringify(Props[ColorIndex]))
 
-          if (BirthColorIndex >= 0 && /dynamics/.test(JSON.stringify(Props[BirthColorIndex]))) {
+          if (BirthColorIndex >= 0 && (RecolorTarget.value == 0 || RecolorTarget.value == 1) && /dynamics/.test(JSON.stringify(Props[BirthColorIndex]))) {
             Props[BirthColorIndex].value.items = [UTIL.Clone(JSON.parse(BlankConstant))]
           }
-          if (Prefs.Advanced) {
+          if (RecolorMode.value == 1) {
             if (Palette.length > 1) {
               if (ColorIndex >= 0 && HasConstant && !HasDynamics) {
+                Props[ColorIndex].value.items = []
                 Props[ColorIndex].value.items[0] = UTIL.Clone(JSON.parse(BlankDynamic))
               }
               else if (ColorIndex < 0 && BirthColorIndex >= 0) {
@@ -374,9 +380,13 @@ function RecolorSelected() {
                   }
                 })
               }
+              else if (ColorIndex >= 0 && HasDynamics) {
+                Props[ColorIndex].value.items = []
+                Props[ColorIndex].value.items[0] = UTIL.Clone(JSON.parse(BlankConstant))
+              }
             }
           }
-          if (BirthColorIndex >= 0) {
+          if (BirthColorIndex >= 0 && (RecolorTarget.value == 0 || RecolorTarget.value == 1)) {
             Props[BirthColorIndex] = UTIL.ReColor(Props[BirthColorIndex])
             DomEmitter[2].style.background = UTIL.ToBG(UTIL.GetColor(Props[BirthColorIndex]))
             DomEmitter[2].onclick = () => {
@@ -386,7 +396,7 @@ function RecolorSelected() {
             }
           }
 
-          if (ColorIndex >= 0) {
+          if (ColorIndex >= 0 && (RecolorTarget.value == 0 || RecolorTarget.value == 2)) {
             Props[ColorIndex] = UTIL.ReColor(Props[ColorIndex])
             DomEmitter[3].style.background = UTIL.ToBG(UTIL.GetColor(Props[ColorIndex]))
             DomEmitter[3].onclick = () => {
@@ -407,6 +417,7 @@ function Undo() {
     FileCache.pop()
     LoadFile()
   }
+  FilterParticles(document.getElementById('Filter').value)
 }
 
 

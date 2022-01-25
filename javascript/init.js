@@ -11,13 +11,14 @@ const PrefsPath = `${ipcRenderer.sendSync('UserPath')}\\config.json`
 
 let Prefs = fs.existsSync(PrefsPath) ? require(PrefsPath) : {
     "Version": ipcRenderer.sendSync('Version'),
-    "Advanced": false,
+    "PreferredMode": 0,
+    "PreferredTarget": 0,
+    "IgnoreBW" : true,
     "ColorSamples": [],
     "RitoBinPath": ""
 }
-
 let SideBar = document.getElementById('Vertical-Menu')
-SideBar.onmouseover = (Event) =>{
+SideBar.onmouseover = (Event) => {
     if (Event.target.classList.contains('Vertical-Menu-Hidden') == true) {
         Event.target.classList.remove('Vertical-Menu-Hidden')
     }
@@ -29,7 +30,7 @@ SideBar.onmouseleave = (Event) => {
 }
 
 function Tab(Location) {
-    if (typeof(FileSaved) != 'undefined') {
+    if (typeof (FileSaved) != 'undefined') {
         if (FileSaved == true) {
             window.location.href = Location
         }
@@ -37,27 +38,34 @@ function Tab(Location) {
             UTIL.CreateAlert('You may have forgotten to save your bin.\n\nSave before proceeding please.')
             FileSaved = true
         }
-    }else{
+    } else {
         window.location.href = Location
     }
 }
 
+function PerTabInit(Initial = false) {
+    if (document.location.href.endsWith('settings.html')) {
+        document.getElementById('Mode').value = Prefs.PreferredMode
+        document.getElementById('Target').value = Prefs.PreferredTarget
+        document.getElementById('IgnoreBW').checked = Prefs.IgnoreBW
 
-
-if (document.location.href.endsWith('settings.html')) {
-    if (Prefs.Advanced) {
-        document.getElementById('Advanced').checked = true
-    }
-} else if (document.location.href.endsWith('binsplash.html')) {
-    if (Prefs.Advanced) {
-        GradientIndicator.style.display = "flex"
-        TimeContainer.style.display = "flex"
-    }
-    else {
-        GradientIndicator.style.display = "none"
-        TimeContainer.style.display = "none"
+    } else if (document.location.href.endsWith('binsplash.html')) {
+        if(Initial){
+            document.getElementById('Mode').value = Prefs.PreferredMode
+            document.getElementById('Target').value = Prefs.PreferredTarget
+        }
+        if (document.getElementById('Mode').value == 1) {
+            GradientIndicator.style.display = "flex"
+            TimeContainer.style.display = "flex"
+        }
+        else {
+            GradientIndicator.style.display = "none"
+            TimeContainer.style.display = "none"
+        }
     }
 }
+
+PerTabInit(true)
 
 if (CustomCss == undefined || Prefs.Version != ipcRenderer.sendSync('Version')) {
     fs.writeFileSync(CssPath, `:root {
@@ -81,3 +89,7 @@ link.rel = 'stylesheet';
 link.type = 'text/css';
 link.href = CssPath;
 document.head.appendChild(link)
+
+if (document.location.href.endsWith('settings.html') == false && Prefs.RitoBinPath == undefined) {
+    UTIL.CreateAlert('You have no RitoBin Selected.\n\nGo to settings tab to select your Ritobin_cli.exe\n\nThis step is 100% necessary for the conversion of bin files')
+}

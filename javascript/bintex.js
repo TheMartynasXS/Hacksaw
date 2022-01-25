@@ -8,16 +8,16 @@ let ParticleArray = []
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+let WadFolderPath = ""
 
 async function SelectWadFolder() {
-    let WadFolderPath = ipcRenderer.sendSync('FileSelect', "Folder")
+    WadFolderPath = ipcRenderer.sendSync('FileSelect', "Folder")
     let arrayOfFiles = []
     let Files = getAllFiles(WadFolderPath[0], arrayOfFiles)
     let Progress = document.getElementById('Progress-Range')
     Progress.classList.remove('Progress-Complete')
 
     let FilteredFiles = Files.filter(item => item.endsWith('.bin'))
-    console.log(FilteredFiles)
 
     let BinCount = document.getElementById('Bin-Count')
     BinCount.innerText = `0/${FilteredFiles.length}`
@@ -42,7 +42,7 @@ async function SelectWadFolder() {
                 }).value
                 SeparateOutput.push({
                     Particle: tempname,
-                    Files:[]
+                    Files: []
                 })
 
                 let DefData = ParticleObject[PO_ID].value.items.filter(item => item.key == "complexEmitterDefinitionData" || item.key == "simpleEmitterDefinitionData")
@@ -59,7 +59,7 @@ async function SelectWadFolder() {
                                 if (!CombinedOutput.includes(Match.replace(/"/g, ''))) {
                                     CombinedOutput.push(Match.replace(/"/g, ''))
                                 }
-                                if (!SeparateOutput[SeparateOutput.length - 1].Files.includes(Match.replace(/"/g, ''))){
+                                if (!SeparateOutput[SeparateOutput.length - 1].Files.includes(Match.replace(/"/g, ''))) {
                                     SeparateOutput[SeparateOutput.length - 1].Files.push(Match.replace(/"/g, ''))
                                 }
                             })
@@ -72,30 +72,51 @@ async function SelectWadFolder() {
         await sleep(100)
         Progress.value = i + 1
         BinCount.innerText = `${Progress.value}/${Progress.max}`
-        fs.unlinkSync(FilteredFiles[i].slice(0, -4) + ".json")
+        //fs.unlinkSync(FilteredFiles[i].slice(0, -4) + ".json")
     }
-    
+
     CombinedOutput.sort(sorter)
 
     fs.writeFileSync(WadFolderPath + '\\Combined.txt', CombinedOutput.join("\n"), "utf8")
-    
+
     SeparateOutput.sort((a, b) => (a.Particle > b.Particle) ? 1 : ((b.Particle > a.Particle) ? -1 : 0))
 
     let ResortedOutput = []
-    for(let i = 0; i < SeparateOutput.length; i++){
+    for (let i = 0; i < SeparateOutput.length; i++) {
         ResortedOutput.push(SeparateOutput[i].Particle)
         SeparateOutput[i].Files.sort(sorter)
-        for(let j = 0; j < SeparateOutput[i].Files.length;j++){
+        for (let j = 0; j < SeparateOutput[i].Files.length; j++) {
             ResortedOutput.push(`- ${SeparateOutput[i].Files[j]}`)
         }
     }
-
-
     fs.writeFileSync(WadFolderPath + '\\Separate.txt', ResortedOutput.join("\n"), "utf8")
     Progress.classList.add('Progress-Complete')
 }
+async function DeleteUnused() {
+    let arrayOfFiles = []
+    let Files = getAllFiles(WadFolderPath[0], arrayOfFiles)
+    let Combined = fs.readFileSync(WadFolderPath + '\\Combined.txt', 'utf-8').split('\n')
+    //dds | skn | skl | sco | scb | anm
+    let FilteredFiles = Files.filter(item => item.endsWith('.dds') || item.endsWith('.skn') || item.endsWith('.skl') || item.endsWith('.sco') || item.endsWith('.scb') || item.endsWith('.anm'))
 
-
+    for (let i = 0; i < FilteredFiles.length; i++) {
+        if (!Combined.includes(FilteredFiles[i].replace(/\\/g, '\/').substring(WadFolderPath[0].length + 1))) {
+            
+            fs.unlinkSync(FilteredFiles[i])
+        }
+    }
+    
+    // for(let i = 0; i < Combined.length; i++){
+    //     if (Combined[i].match(/Shared\\Particles/)){
+    //         console.log(Combined[i].substring(24))
+    //     }
+    // }
+    let JsonFiles = Files.filter(item => item.endsWith('.json'))
+    
+    for (let i = 0; i < JsonFiles.length; i++) {
+        fs.unlinkSync(JsonFiles[i])
+    }
+}
 
 //if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false)
 const getAllFiles = function (dirPath, arrayOfFiles) {

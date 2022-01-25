@@ -7,7 +7,7 @@ const Open = require('open');
  */
 function ReMap(value, from, to) {
   if (to == [0, 255]) {
-    return (Math.round((value - from[0]) * (to[1] - to[0]) / (from[1] - from[0]) + to[0]))
+    return Math.round((value - from[0]) * (to[1] - to[0]) / (from[1] - from[0]) + to[0]);
   }
   else {
     return (value - from[0]) * (to[1] - to[0]) / (from[1] - from[0]) + to[0];
@@ -81,8 +81,13 @@ function ReColor(ColorProp) {
   if (JSON.stringify(ColorValue).match('probability') != undefined) {
     ColorValue.shift()
   }
-  if (!Prefs.Advanced) {
+  if (RecolorMode.value == 0) {
     if (typeof (ColorValue[0]) == 'number') {
+      if (Prefs.IgnoreBW && ColorValue[0] == ColorValue[1] && ColorValue[1] == ColorValue[2]) {
+        if (ColorValue[0] == 0 || ColorValue[0] == 1) {
+          return ColorProp
+        }
+      }
       let temp = [
         ReMap(Palette[0].color[0], [0, 255], [0, 1]),
         ReMap(Palette[0].color[1], [0, 255], [0, 1]),
@@ -94,6 +99,12 @@ function ReColor(ColorProp) {
     }
     else {
       for (let i = 0; i < ColorValue[0].value.items.length; i++) {
+        if (Prefs.IgnoreBW && ColorValue[1].value.items[i][0] == ColorValue[1].value.items[i][1] && ColorValue[1].value.items[i][1] == ColorValue[1].value.items[i][2]) {
+          if (ColorValue[1].value.items[i][0] == 0 || ColorValue[1].value.items[i][0] == 1) {
+            ColorValue[1].value.items[i][3] = i == 0 || i == Palette.length - 1 ? 0 : 1
+            continue
+          }
+        }
         let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
         ColorValue[1].value.items[i][0] = ReMap(NewColor[0], [0, 255], [0, 1])
         ColorValue[1].value.items[i][1] = ReMap(NewColor[1], [0, 255], [0, 1])
@@ -103,6 +114,11 @@ function ReColor(ColorProp) {
   }
   else {
     if (typeof (ColorValue[0]) == 'number') {
+      if (Prefs.IgnoreBW && ColorValue[0] == ColorValue[1] && ColorValue[1] == ColorValue[2]) {
+        if (ColorValue[0] == 0 || ColorValue[0] == 1) {
+          return ColorProp
+        }
+      }
       let temp = [
         ReMap(Palette[0].color[0], [0, 255], [0, 1]),
         ReMap(Palette[0].color[1], [0, 255], [0, 1]),
@@ -113,19 +129,35 @@ function ReColor(ColorProp) {
       ColorValue[2] = temp[2]
     }
     else {
+
       for (let i = 0; i < Palette.length; i++) {
+        if (ColorValue[1].value.items[i] == undefined) {
+          ColorValue[1].value.items[i] = i == 0 || i == Palette.length - 1 ? 0 : 1
+        }
+        if (Prefs.IgnoreBW && ColorValue[1].value.items[i][0] == ColorValue[1].value.items[i][1] && ColorValue[1].value.items[i][1] == ColorValue[1].value.items[i][2]) {
+          if (ColorValue[1].value.items[i][0] == 0 || ColorValue[1].value.items[i][0] == 1) {
+            ColorValue[1].value.items[i][3] = i == 0 || i == Palette.length - 1 ? 0 : 1
+            continue
+          }
+        }
         ColorValue[0].value.items[i] = ReMap(Palette[i].time, [0, 100], [0, 1])
         let NewColor = Palette[i].color
-        ColorValue[1].value.items[i] = i == 0 || i == Palette.length - 1 ?
-          [
-            ReMap(NewColor[0], [0, 255], [0, 1]),
-            ReMap(NewColor[1], [0, 255], [0, 1]),
-            ReMap(NewColor[2], [0, 255], [0, 1]), 0
-          ] : [
-            ReMap(NewColor[0], [0, 255], [0, 1]),
-            ReMap(NewColor[1], [0, 255], [0, 1]),
-            ReMap(NewColor[2], [0, 255], [0, 1]), 1
-          ]
+
+        ColorValue[1].value.items[i] = [
+          ReMap(NewColor[0], [0, 255], [0, 1]),
+          ReMap(NewColor[1], [0, 255], [0, 1]),
+          ReMap(NewColor[2], [0, 255], [0, 1]),
+          Palette.length == 2 || i == 0 || i == Palette.length - 1 ? 1 : 0
+        ]
+        // function Assign (x){
+        //   return [
+        //     ReMap(NewColor[0], [0, 255], [0, 1]),
+        //     ReMap(NewColor[1], [0, 255], [0, 1]),
+        //     ReMap(NewColor[2], [0, 255], [0, 1]), x
+        //   ]
+        // }
+        // ColorValue[1].value.items[i] = Palette.length == 2 ? Assign(0.5)
+        // : i == 0 || i == Palette.length -1 ? Assign(0) : Assign(1)
       }
       ColorValue[0].value.items.length = Palette.length
       ColorValue[1].value.items.length = Palette.length
@@ -298,8 +330,8 @@ function CreateSampleWindow() {
 }
 function SavePrefs() {
   try {
-
-    Prefs.Advanced = document.getElementById("Advanced").checked
+    Prefs.PreferredMode = document.getElementById("Mode").value
+    Prefs.PreferredTarget = document.getElementById("Target").value
     Prefs.IgnoreBW = document.getElementById("IgnoreBW").checked
   } catch (error) {
 
@@ -350,6 +382,6 @@ function SelectRitoBin() {
 
 function Clone(Object) { return JSON.parse(JSON.stringify(Object)) }
 module.exports = {
-  SavePrefs, GetChildIndex, ReMap, GetColor, ToBG,
+  SavePrefs, SelectRitoBin, GetChildIndex, ReMap, GetColor, ToBG,
   Clone, ReColor, CreateAlert, CreateSampleWindow
 }

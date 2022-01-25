@@ -14,7 +14,7 @@
     <script src="../javascript/init.js" defer></script>
     <div id="Vertical-Menu" class="Vertical-Menu-Hidden">
         <button id="Logo-Container">
-            <div id="Logo"/>
+            <div id="Logo" />
         </button>
         <button onclick="Tab('./binsplash.html')" class="NavButton Active">
             Splash
@@ -34,20 +34,19 @@
         <button onclick="Tab('./settings.html')" class="NavButton Float-Bottom">
             Settings
         </button>
+
     </div>
     <div id="Root">
         <div id="Splash" class="Tab Flex Flex-Col">
             <div class="Input-Group">
-
-                <select name="mode" id="mode">
-                    <option value="advanced">Advanced</option>
-                    <option value="simple">Simple</option>
+                <select name="Mode" id="Mode" onchange="PerTabInit()">
+                    <option value="0">Simple</option>
+                    <option value="1">Advanced</option>
                 </select>
-
-                <select name="target" id="target">
-                    <option value="birthColor">BirthColor</option>
-                    <option value="color">Color</option>
-                    <option value="both">Both</option>
+                <select name="Target" id="Target">
+                    <option value="0">Both</option>
+                    <option value="1">BirthColor</option>
+                    <option value="2">Color</option>
                 </select>
                 <button class="Flex-1" onclick="SaveSample()">Save Sample</button>
                 <button class="Flex-1" onclick="OpenSampleWindow()">Color Samples</button>
@@ -62,7 +61,7 @@
             </div>
             <div class="Input-Group">
                 <button onclick="OpenBin()">Open Bin</button>
-                <input class="Ellipsis Flex-3" type="text" placeholder="Filter by Particle Name"
+                <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
                     oninput="FilterParticles(this.value)">
                 <button onclick="CheckAll()">check</button>
                 <button onclick="UnCheckAll()">uncheck</button>

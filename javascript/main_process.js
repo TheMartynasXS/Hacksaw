@@ -20,12 +20,11 @@ const createWindow = () => {
   });
 
   mainWindow.loadFile(path.join(__dirname, '../html/binsplash.html'));
-  
-  if(isDev){
 
-    mainWindow.webContents.openDevTools({mode:'detach'});
-  }else
-  {
+  if (isDev) {
+
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  } else {
     mainWindow.removeMenu()
   }
 };
