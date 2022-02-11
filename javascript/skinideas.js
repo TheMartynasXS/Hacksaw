@@ -2,7 +2,7 @@ const Path = require('path');
 const https = require('https')
 let IdeaCount = document.getElementById("Idea-Count")
 let IdeaList = document.getElementById("Idea-List")
-
+let IdeaChamp = document.getElementById("Idea-Champ")
 const DataPath = Path.join(ipcRenderer.sendSync('UserPath') + '\\Data.json')
 
 function FetchThemes() {
@@ -41,8 +41,9 @@ function Generate() {
   for (let i = 0; i < Temp; i++) {
     let Idea = document.createElement('div')
     Idea.className = "Idea"
-    Idea.innerText = `${Data.Themes[Math.round(Math.random() * (Data.Themes.length - 1))]} ${Data.Champions[Math.round(Math.random() * (Data.Champions.length - 1))]}`
+    Idea.innerText = `${Data.Themes[Math.round(Math.random() * (Data.Themes.length - 1))]} ${IdeaChamp.value.length > 0 ? IdeaChamp.value :Data.Champions[Math.round(Math.random() * (Data.Champions.length - 1))]}`
     IdeaList.appendChild(Idea)
   }
 }
+
 Generate()

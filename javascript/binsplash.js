@@ -17,13 +17,14 @@ const PickScreen = async () => {
   let SubmitEvent = new Event('change')
   ColorInput.dispatchEvent(SubmitEvent)
 }
+
 function CreatePicker(Target) {
-  if (document.getElementById('Color-Picker') == undefined) {
+  if (document.getElementById('Pop-Up') == undefined) {
     let temp = Target.style.backgroundColor.match(/\d+/g)
 
     let ColorPicker = document.createElement('div')
-    ColorPicker.className = "Flex-Col"
-    ColorPicker.id = "Color-Picker"
+    ColorPicker.className = "Flex-Col Outline"
+    ColorPicker.id = "Pop-Up"
     ColorPicker.position = "absolute";
     ColorPicker.top = "11em";
 
@@ -40,6 +41,10 @@ function CreatePicker(Target) {
     ColorInput.id = "RGB"
     ColorInput.type = "color"
     ColorInput.value = `#${CC.rgb.hex([temp[0], temp[1], temp[2]])}`
+    ColorInput.oninput = (E) => {
+      Hex.value = E.target.value
+      Target.style.backgroundColor = E.target.value
+    }
     ColorInput.onchange = (E) => {
       Hex.value = E.target.value
       let SubmitEvent = new Event('change')
@@ -83,7 +88,7 @@ function CreatePicker(Target) {
 
 var FileSaved = true
 window.onerror = function (msg, error, lineNo, columnNo) {
-  UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
+  UTIL.CreateAlert(`Message: ${msg}`, `Error: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
 }
 
 
@@ -159,15 +164,17 @@ function MapPalette() {
 }
 function OpenBin() {
   FilePath = ipcRenderer.sendSync('FileSelect', 'Bin');
-  
+
   document.title = `HackSaw - ${FilePath.split('\\').pop()}`
   if (FilePath == undefined) { return 0 }
   if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
     ToJson()
   }
-  File = UTIL.Clone(require(FilePath.slice(0, -4) + ".json"))
+  File = UTIL.Clone(fs.readFileSync(FilePath.slice(0, -4) + ".json", 'utf-8'))
+  console.log(File)
   LoadFile()
-  if (!FileHistory.includes(FilePath.slice(0, -4) + ".json")){
+  FileCache = []
+  if (!FileHistory.includes(FilePath.slice(0, -4) + ".json")) {
     FileHistory.push(FilePath.slice(0, -4) + ".json")
   }
 }
@@ -177,7 +184,8 @@ function LoadFile() {
   ParticleList.innerText = ""
   let ParticleObject = File.entries.value.items
   if (/ValueColor/.test(JSON.stringify(ParticleObject)) == false) {
-    UTIL.CreateAlert('No color values found')
+    UTIL.CreateAlert('Bin Empty','No color values found')
+    return 0
   }
 
   for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
@@ -247,7 +255,6 @@ function LoadFile() {
                 document.getElementById('Slider-Input').value = Palette.length
               }
             }
-
             Emitter.appendChild(BirthDiv)
 
             let ColorDiv = document.createElement('div')
@@ -262,8 +269,23 @@ function LoadFile() {
                 document.getElementById('Slider-Input').value = Palette.length
               }
             }
-
             Emitter.appendChild(ColorDiv)
+
+            let BMID = Props[C].items.findIndex(item => item.key == "blendMode")
+
+            let BlendMode = document.createElement('input')
+            BlendMode.className = `Blend-Mode ${BMID}`
+            BlendMode.type = 'number'
+            BlendMode.min = 0
+            BlendMode.max = 9
+            BlendMode.disabled = BMID >= 0 ? false : true
+            if (BMID >= 0) {
+              BlendMode.placeholder = Props[C].items[BMID].value
+              BlendMode.onchange = (Event) => {
+                Props[C].items[BMID].value = parseInt(Event.target.value)
+              }
+            }
+            Emitter.appendChild(BlendMode)
 
             DefDataDiv.appendChild(Emitter)
           }
@@ -272,6 +294,7 @@ function LoadFile() {
       ParticleList.appendChild(ParticleDiv)
     }
   }
+  UTIL.CreateAlert('Success','File Loaded Successfully')
 }
 
 function FilterParticles(FilterString) {
@@ -327,17 +350,18 @@ function CheckChildren(Particle, State) {
 function RecolorSelected() {
   FileSaved = false
   FileCache.push(UTIL.Clone(File))
-
   let ParticleObject = File.entries.value.items;
-  let FirstIndex = ParticleObject.findIndex(item => item.value.name == "VfxSystemDefinitionData")
 
   for (let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++) {
-    let DefData = ParticleObject[PO_ID + FirstIndex].value.items
+    let Adjusted_ID = ParticleObject.findIndex(item => item.key == ParticleList.childNodes[PO_ID].id)
+    let DefData = ParticleObject[Adjusted_ID].value.items
 
     let DomDefData = ParticleList.children[PO_ID].children
     for (let B = 1; B < ParticleList.children[PO_ID].children.length; B++) {
+
       for (let C = 0; C < DomDefData[B].children.length; C++) {
         let DomEmitter = DomDefData[B].children[C].children
+
         if (DomEmitter[0].checked) {
           let Props = DefData[B - 1].value.items[C].items
 
@@ -348,13 +372,13 @@ function RecolorSelected() {
           let HasDynamics = /dynamics/.test(JSON.stringify(Props[ColorIndex]))
 
           if (BirthColorIndex >= 0 && (RecolorTarget.value == 0 || RecolorTarget.value == 1) && /dynamics/.test(JSON.stringify(Props[BirthColorIndex]))) {
-            Props[BirthColorIndex].value.items = [UTIL.Clone(JSON.parse(BlankConstant))]
+            Props[BirthColorIndex].value.items = [UTIL.Clone(BlankConstant)]
           }
           if (RecolorMode.value == 1) {
             if (Palette.length > 1) {
               if (ColorIndex >= 0 && HasConstant && !HasDynamics) {
                 Props[ColorIndex].value.items = []
-                Props[ColorIndex].value.items[0] = UTIL.Clone(JSON.parse(BlankDynamic))
+                Props[ColorIndex].value.items[0] = UTIL.Clone(BlankDynamic)
               }
               else if (ColorIndex < 0 && BirthColorIndex >= 0) {
                 ColorIndex = Props.length
@@ -362,7 +386,7 @@ function RecolorSelected() {
                   key: "color",
                   type: "embed",
                   value: {
-                    items: [UTIL.Clone(JSON.parse(BlankDynamic))],
+                    items: [UTIL.Clone(BlankDynamic)],
                     name: "ValueColor"
                   }
                 })
@@ -375,14 +399,14 @@ function RecolorSelected() {
                   key: "color",
                   type: "embed",
                   value: {
-                    items: [UTIL.Clone(JSON.parse(BlankConstant))],
+                    items: [UTIL.Clone(BlankConstant)],
                     name: "ValueColor"
                   }
                 })
               }
               else if (ColorIndex >= 0 && HasDynamics) {
                 Props[ColorIndex].value.items = []
-                Props[ColorIndex].value.items[0] = UTIL.Clone(JSON.parse(BlankConstant))
+                Props[ColorIndex].value.items[0] = UTIL.Clone(BlankConstant)
               }
             }
           }
@@ -466,10 +490,12 @@ function ExportSamples(Samples = null) {
 
 function SaveBin() {
   fs.writeFileSync((FilePath.slice(0, -4) + ".json"), JSON.stringify(File, null, 2), "utf8")
+  // await UTIL.Sleep(5000)
   ToBin()
   FileSaved = true
 
   for (let i = 0; i < FileHistory.length; i++) {
+    File = null
     fs.unlinkSync(FileHistory[i])
   }
   FileHistory = []

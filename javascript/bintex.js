@@ -5,9 +5,6 @@ const sorter = require('path-sort').standalone('/')
 
 let ParticleArray = []
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 let WadFolderPath = ""
 
 async function SelectWadFolder() {
@@ -32,7 +29,7 @@ async function SelectWadFolder() {
             execSync(`"${Prefs.RitoBinPath}" -o json "${FilteredFiles[i]}"`)
         }
 
-        let tempfile = require(FilteredFiles[i].slice(0, -4) + ".json")
+        let tempfile = UTIL.Clone(fs.readFileSync(FilteredFiles[i].slice(0, -4) + ".json", 'utf-8'))
         let ParticleObject = tempfile.entries.value.items
         for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
             if (ParticleObject[PO_ID].value.name == "VfxSystemDefinitionData") {
@@ -69,7 +66,7 @@ async function SelectWadFolder() {
             }
         }
 
-        await sleep(100)
+        await UTIL.Sleep(100)
         Progress.value = i + 1
         BinCount.innerText = `${Progress.value}/${Progress.max}`
         //fs.unlinkSync(FilteredFiles[i].slice(0, -4) + ".json")
@@ -95,24 +92,14 @@ async function SelectWadFolder() {
 async function DeleteUnused() {
     let arrayOfFiles = []
     let Files = getAllFiles(WadFolderPath[0], arrayOfFiles)
-    let Combined = fs.readFileSync(WadFolderPath + '\\Combined.txt', 'utf-8').split('\n')
     //dds | skn | skl | sco | scb | anm
-    let FilteredFiles = Files.filter(item => item.endsWith('.dds') || item.endsWith('.skn') || item.endsWith('.skl') || item.endsWith('.sco') || item.endsWith('.scb') || item.endsWith('.anm'))
 
-    for (let i = 0; i < FilteredFiles.length; i++) {
-        if (!Combined.includes(FilteredFiles[i].replace(/\\/g, '\/').substring(WadFolderPath[0].length + 1))) {
-            
-            fs.unlinkSync(FilteredFiles[i])
-        }
-    }
-    
-    // for(let i = 0; i < Combined.length; i++){
-    //     if (Combined[i].match(/Shared\\Particles/)){
-    //         console.log(Combined[i].substring(24))
-    //     }
+    // for (let i = 0; i < Files.length; i++) {
+    //     Files[i].replace(/"/g, '')
     // }
+
     let JsonFiles = Files.filter(item => item.endsWith('.json'))
-    
+
     for (let i = 0; i < JsonFiles.length; i++) {
         fs.unlinkSync(JsonFiles[i])
     }

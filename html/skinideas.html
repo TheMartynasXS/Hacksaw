@@ -22,7 +22,7 @@
         <button onclick="Tab('./stitch.html')" class="Hidden NavButton">
             Stitch
         </button>
-        <button onclick="Tab('./skinideas.html')" class="NavButton Active">
+        <button disabled onclick="Tab('./skinideas.html')" class="NavButton Active">
             Skin-Ideas
         </button>
         <button onclick="Tab('./bintex.html')" class="NavButton">
@@ -38,9 +38,14 @@
     <div id="Root">
         <div id="Splash" class="Tab Flex Flex-Col">
             <div class="Input-Group">
-                <div class="Label Flex-Auto">How many ideas to generate:</div>
-                <input style="width: 100px;" onchange="value = this.value" type="number" placeholder="5"
+                <div class="Label Flex-3">How many ideas to generate:</div>
+                <input class="Flex-1" onchange="value = this.value" type="number" placeholder="5"
                     id="Idea-Count"></input>
+            </div>
+            <div class="Input-Group">
+                <div class="Label Flex-3">Preferred Champ:</div>
+                <input class="Flex-1" type="text" placeholder="Champion"
+                    id="Idea-Champ" onchange="Generate()"></input>
             </div>
             <div id="Idea-List" class="Margin-Block">
             </div>

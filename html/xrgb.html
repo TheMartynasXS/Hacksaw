@@ -28,7 +28,7 @@
         <button onclick="Tab('./bintex.html')" class="NavButton">
             BinTex
         </button>
-        <button onclick="Tab('./xrgb.html')" class="NavButton Active">
+        <button disabled onclick="Tab('./xrgb.html')" class="NavButton Active">
             xrgb
         </button>
         <button onclick="Tab('./settings.html')" class="NavButton Float-Bottom">
@@ -44,6 +44,11 @@
             <div class="Flex-Col">
                 <div class="Input-Group">
                     <div class="Label">XRGB:</div><input id="XRGB" class="Flex-1">
+                </div>
+                <div class="Input-Group">
+                    <div class="Label">XR:</div><input id="XR" class="Flex-1">
+                    <div class="Label">XG:</div><input id="XG" class="Flex-1">
+                    <div class="Label">XB:</div><input id="XB" class="Flex-1">
                 </div>
             </div>
             <script src="../javascript/xrgba.js"></script>

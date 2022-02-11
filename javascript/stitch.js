@@ -2,24 +2,6 @@ window.onerror = function (msg, error, lineNo, columnNo) {
   UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`)
 }
 
-// function OpenBin() {
-//   if (FileSaved == false && Persist == true) {
-//     UTIL.CreateAlert("You might have forgotten to save bin")
-//     Persist = false
-//     return 0
-//   }
-//   FilePath = ipcRenderer.sendSync('FileSelect', 'Bin');
-//   if (FilePath == undefined) { return 0 }
-//   ParticleList.innerText = null
-//   if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
-//     ToJson()
-//   }
-//   File = require(FilePath.slice(0, -4) + ".json")
-//   document.getElementById('appTitle').innerText =
-//     `BinSplash - ${FilePath.substring(FilePath.lastIndexOf('\\') + 1)}`
-//   LoadFile(document.getElementById("primary"))
-// }
-
 File = require('../skin0.json')
 OpenPrimaryBin()
 OpenSecondaryBin()

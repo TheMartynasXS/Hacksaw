@@ -5,10 +5,10 @@ let ColorInput = document.getElementById('RGB')
 let Hex = document.getElementById('Hex')
 let EyeDropper = document.getElementById('Eye-Dropper')
 
-let xrgb = document.getElementById('XRGB')
-// let Rinput = document.getElementById('R')
-// let Ginput = document.getElementById('G')
-// let Binput = document.getElementById('B')
+let XRGB = document.getElementById('XRGB')
+let XR = document.getElementById('XR')
+let XG = document.getElementById('XG')
+let XB = document.getElementById('XB')
 
 const PickScreen = async () => {
     const color = await getColorHexRGB().catch((error) => {
@@ -16,19 +16,30 @@ const PickScreen = async () => {
         return ''
     })
     ColorInput.value = color
-    let SubmitEvent = new Event('change')
-    ColorInput.dispatchEvent(SubmitEvent)
 
+    Hex.value = color
+    let temp = CC.hex.rgb(color)
+    temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
+    temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
+    temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
+    XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
+    XR.value = temp[0]
+    XG.value = temp[1]
+    XB.value = temp[2]
 }
 EyeDropper.onclick = () => PickScreen()
 // ColorPickerInputs.appendChild(EyeDropper)
-
-ColorInput.onchange = (E) => {
+ColorInput.oninput = (E) => {
     Hex.value = E.target.value
-    let SubmitEvent = new Event('change')
-    Hex.dispatchEvent(SubmitEvent)
+    let temp = CC.hex.rgb(E.target.value)
+    temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
+    temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
+    temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
+    XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
+    XR.value = temp[0]
+    XG.value = temp[1]
+    XB.value = temp[2]
 }
-
 Hex.oninput = (Event) => {
     if (!Event.target.value.startsWith('#')) {
         Event.target.value = '#' + Event.target.value
@@ -40,7 +51,10 @@ Hex.oninput = (Event) => {
     temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
     temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
     temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
-    xrgb.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
+    XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
+    XR.value = temp[0]
+    XG.value = temp[1]
+    XB.value = temp[2]
 }
 Hex.onchange = (Event) => {
     ColorInput.value = Event.target.value
@@ -49,10 +63,16 @@ Hex.onchange = (Event) => {
     temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
     temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
     temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
-    xrgb.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
+    XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
+    XR.value = temp[0]
+    XG.value = temp[1]
+    XB.value = temp[2]
 }
-xrgb.oninput = (Event) => {
+XRGB.oninput = (Event) => {
     let temp = Event.target.value.split(",")
+    XR.value = temp[0]
+    XG.value = temp[1]
+    XB.value = temp[2]
     temp[0] = UTIL.ReMap(temp[0], [0, 1], [0, 255])
     temp[1] = UTIL.ReMap(temp[1], [0, 1], [0, 255])
     temp[2] = UTIL.ReMap(temp[2], [0, 1], [0, 255])

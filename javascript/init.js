@@ -28,14 +28,19 @@ SideBar.onmouseleave = (Event) => {
         Event.target.classList.add('Vertical-Menu-Hidden')
     }
 }
-
+let Logo = document.getElementById('Logo-Container')
+Logo.onmouseover = (Event) => {
+    if (SideBar.classList.contains('Vertical-Menu-Hidden') == true) {
+        SideBar.classList.remove('Vertical-Menu-Hidden')
+    }
+}
 function Tab(Location) {
     if (typeof (FileSaved) != 'undefined') {
         if (FileSaved == true) {
             window.location.href = Location
         }
         else {
-            UTIL.CreateAlert('You may have forgotten to save your bin.\n\nSave before proceeding please.')
+            UTIL.CreateAlert('You may have forgotten to save your bin.','Save before proceeding please.')
             FileSaved = true
         }
     } else {
@@ -58,7 +63,7 @@ function PerTabInit(Initial = false) {
             GradientIndicator.style.display = "flex"
             TimeContainer.style.display = "flex"
         }
-        else {
+        else{
             GradientIndicator.style.display = "none"
             TimeContainer.style.display = "none"
         }
@@ -90,6 +95,12 @@ link.type = 'text/css';
 link.href = CssPath;
 document.head.appendChild(link)
 
-if (document.location.href.endsWith('settings.html') == false && Prefs.RitoBinPath == undefined) {
-    UTIL.CreateAlert('You have no RitoBin Selected.\n\nGo to settings tab to select your Ritobin_cli.exe\n\nThis step is 100% necessary for the conversion of bin files')
+if (document.location.href.endsWith('settings.html') == false && Prefs.RitoBinPath.length == 0) {
+    
+    UTIL.CreateAlert('Ritobin Installation missing',
+    `Go to settings tab to select your Ritobin_cli.exe
+
+    This step is 100% necessary for the conversion of bin files`)
+    
+    window.location.href = './settings.html'
 }

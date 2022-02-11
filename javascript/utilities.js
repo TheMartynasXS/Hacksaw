@@ -88,14 +88,11 @@ function ReColor(ColorProp) {
           return ColorProp
         }
       }
-      let temp = [
-        ReMap(Palette[0].color[0], [0, 255], [0, 1]),
-        ReMap(Palette[0].color[1], [0, 255], [0, 1]),
-        ReMap(Palette[0].color[2], [0, 255], [0, 1])
-      ]
-      ColorValue[0] = temp[0]
-      ColorValue[1] = temp[1]
-      ColorValue[2] = temp[2]
+      let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
+
+      ColorValue[0] = ReMap(NewColor[0], [0, 255], [0, 1])
+      ColorValue[1] = ReMap(NewColor[1], [0, 255], [0, 1])
+      ColorValue[2] = ReMap(NewColor[2], [0, 255], [0, 1])
     }
     else {
       for (let i = 0; i < ColorValue[0].value.items.length; i++) {
@@ -169,42 +166,10 @@ function ReColor(ColorProp) {
  * Creates an alert popup with given message
  * @param {string} message - alert message
  */
-function CreateAlert(message) {
-  if (document.getElementById("Dim") != undefined) {
-    document.getElementById("Dim").remove()
-    CreateAlert(message)
-  }
-  else {
-    let Dim = document.createElement("div")
-    Dim.id = "Dim"
-    Dim.className = "Flex-Col"
-    document.getElementById("Root").appendChild(Dim)
+function CreateAlert(Title, Body, Action = null) {
 
-    let Modal = document.createElement("div")
-    Modal.className = "Modal Flex-1 Margin Flex-Col"
-    Dim.appendChild(Modal)
-
-    let AlertContent = document.createElement("div")
-    AlertContent.className = "AlertContent Flex-1 Text"
-    AlertContent.innerText = message
-
-    Modal.appendChild(AlertContent)
-    let DismissDiv = document.createElement("div")
-    DismissDiv.className = "Input-Group Margin-Top"
-
-    let Dismiss = document.createElement("button")
-    Dismiss.className = "Flex-1"
-    Dismiss.textContent = "OK"
-    Dismiss.onclick = () => {
-      Dim.remove()
-      //SideBarToggle()
-      //document.getElementById("Nav5").click()
-    }
-
-    DismissDiv.appendChild(Dismiss)
-
-    Modal.appendChild(DismissDiv)
-  }
+  new Notification(Title, { body: Body, silent: true })
+    .onclick = Action
 }
 
 function OpenGitHub() {
@@ -379,9 +344,16 @@ function SelectRitoBin() {
   Prefs.RitoBinPath = ipcRenderer.sendSync('FileSelect', "RitoBin")
   UTIL.SavePrefs()
 }
-
-function Clone(Object) { return JSON.parse(JSON.stringify(Object)) }
+function Sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+function Clone(Object) {
+  if (typeof (Object) == 'string') {
+    return JSON.parse(Object)
+  }
+  return JSON.parse(JSON.stringify(Object))
+}
 module.exports = {
-  SavePrefs, SelectRitoBin, GetChildIndex, ReMap, GetColor, ToBG,
+  SavePrefs, SelectRitoBin, GetChildIndex, Sleep, ReMap, GetColor, ToBG,
   Clone, ReColor, CreateAlert, CreateSampleWindow
 }

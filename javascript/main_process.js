@@ -9,6 +9,7 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     minWidth: 800,
+    minHeight: 500,
     height: 600,
     backgroundColor: '#3a3b41',
     icon: 'build\hacksaw.ico',
@@ -22,7 +23,6 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, '../html/binsplash.html'));
 
   if (isDev) {
-
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     mainWindow.removeMenu()
@@ -33,7 +33,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow()
 })
-
+app.setAppUserModelId('Hacksaw')
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()

@@ -16,7 +16,7 @@
         <button id="Logo-Container">
             <div id="Logo" />
         </button>
-        <button onclick="Tab('./binsplash.html')" class="NavButton Active">
+        <button disabled onclick="Tab('./binsplash.html')" class="NavButton Active">
             Splash
         </button>
         <button onclick="Tab('./stitch.html')" class="Hidden NavButton">
@@ -39,7 +39,7 @@
     <div id="Root">
         <div id="Splash" class="Tab Flex Flex-Col">
             <div class="Input-Group">
-                <select name="Mode" id="Mode" onchange="PerTabInit()">
+                <select name="Mode" id="Mode" oninput="PerTabInit()">
                     <option value="0">Simple</option>
                     <option value="1">Advanced</option>
                 </select>
@@ -53,8 +53,7 @@
             </div>
             <div id="Slider-Container" class="Margin-Bottom Flex-Col">
                 <input class="Range" id="Slider-Input" type="range" min="1" value="1" max="20"
-                    onchange="ChangeColorCount(this.value)" />
-                <output for="slider" onforminput="value = slider.valueAsNumber;"></output>
+                    oninput="ChangeColorCount(this.value)" />
                 <div style="overflow:hidden" id="Time-Container"></div>
                 <div id="Gradient-Indicator"></div>
                 <div id="Color-Container"></div>
