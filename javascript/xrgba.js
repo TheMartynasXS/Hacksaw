@@ -10,6 +10,8 @@ let XR = document.getElementById('XR')
 let XG = document.getElementById('XG')
 let XB = document.getElementById('XB')
 
+ColorInput.value = '#' + CC.rgb.hex(Math.floor(Math.random() * 255),Math.floor(Math.random() * 255),Math.floor(Math.random() * 255))
+
 const PickScreen = async () => {
     const color = await getColorHexRGB().catch((error) => {
         console.warn('[ERROR] getColor', error)
@@ -78,4 +80,15 @@ XRGB.oninput = (Event) => {
     temp[2] = UTIL.ReMap(temp[2], [0, 1], [0, 255])
     Hex.value = `#${CC.rgb.hex(temp[0], temp[1], temp[2])}`
     ColorInput.value = Hex.value
+}
+
+function SaveColor(){
+    if(Prefs.SavedColors == undefined){ 
+        Prefs.SavedColors = []
+    }
+    else{
+        Prefs.SavedColors.push(ColorInput.value)
+    }
+    UTIL.SavePrefs()
+    PerTabInit(true)
 }

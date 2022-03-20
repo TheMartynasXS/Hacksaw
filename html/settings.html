@@ -12,30 +12,33 @@
 
 <body class="Flex">
     <script src="../javascript/init.js" defer></script>
-    <div id="Vertical-Menu" class="">
-        <button id="Logo-Container">
-            <div id="Logo" />
-        </button>
+    <div class="NavBar Flex-Col">
         <button onclick="Tab('./binsplash.html')" class="NavButton">
-            Splash
+            <img class="Icon" src="../css/svg/paintroller.svg"></img>
+            <div class="TabTitle">Splash</div>
         </button>
-        <button onclick="Tab('./stitch.html')" class="Hidden NavButton">
-            Stitch
-        </button>
+        <!-- <button onclick="Tab('./stitch.html')" class="NavButton">
+            <img class="Icon" src="../css/svg/hashtag.svg"></img>
+            <div class="TabTitle">Stitch</div>
+        </button> -->
         <button onclick="Tab('./skinideas.html')" class="NavButton">
-            Skin-Ideas
+            <img class="Icon" src="../css/svg/bulb.svg"></img>
+            <div class="TabTitle">Skin Ideas</div>
         </button>
         <button onclick="Tab('./bintex.html')" class="NavButton">
-            BinTex
+            <img class="Icon" src="../css/svg/list.svg"></img>
+            <div class="TabTitle">BinTex</div>
         </button>
         <button onclick="Tab('./xrgb.html')" class="NavButton">
-            xrgb
+            <img class="Icon" src="../css/svg/drop.svg"></img>
+            <div class="TabTitle">xrgb</div>
         </button>
-        <button disabled onclick="Tab('./settings.html')" class="NavButton Float-Bottom Active">
-            Settings
+        <button onclick="Tab('./settings.html')" disabled class="NavButton">
+            <img class="Icon" src="../css/svg/cog.svg"></img>
+            <div class="TabTitle">Settings</div>
         </button>
     </div>
-    <div id="Root">
+    <div id="Main" class="Main Flex-1">
         <div id="Settings" class="Tab Flex-Col">
             <div class="Input-Group">
                 <button class="Flex-1" onclick="SelectRitoBin()" id="Select-Files">Select Ritobin_cli.exe</button>
@@ -51,9 +54,11 @@
             <div class="Input-Group">
                 <div class="Label Flex-1">Preferred recoloring target</div>
                 <select class="Flex-1" name="Target" id="Target">
-                    <option value="0">Both</option>
+                    <option value="0">All</option>
                     <option value="1">BirthColor</option>
                     <option value="2">Color</option>
+                    <option value="3">Fresnel</option>
+                    <option value="4">Linger</option>
                 </select>
             </div>
             <div class="Input-Group">

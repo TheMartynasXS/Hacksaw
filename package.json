@@ -1,15 +1,14 @@
 {
   "name": "hacksaw",
   "productName": "hacksaw",
-  "version": "3.4.0",
+  "version": "3.4.5",
   "description": "my league modding suite",
   "main": "javascript/main_process.js",
   "build": {
     "appId": "com.github.devmarcius.hacksaw",
     "win": {
       "target": [
-        "portable",
-        "zip"
+        "portable"
       ]
     },
     "nsis": {

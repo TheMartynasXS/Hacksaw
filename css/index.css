@@ -3,10 +3,26 @@
   font-family: Jetbrains Mono;
   src: url(./font/JetBrainsMono-Regular.ttf);
 }
+
+:root {
+    --accent: #ffc24f;
+    --accent-success: #7BBA9C;
+    --accent-failure: #ff4f7b;
+
+    --text-primary: #ececec;
+    --text-secondary: #cacaca;
+
+    --bg-100: #484950;
+    --bg-200: #3a3b41;
+    --bg-300: #303136;
+    --shadow: #00000080;
+}
+
 html,
 body {
+  position: relative;
   overflow: hidden;
-  background-color: var(--bg-one);
+  background-color: var(--bg-100);
   height: 100%;
   width: 100%;
   margin: 0;
@@ -16,8 +32,9 @@ body {
   cursor: pointer;
 }
 
-#Root {
+.Main {
   max-height: 100vh;
+  margin-left: 3.75rem;
   width: auto;
   overflow: hidden;
   display:flex;
@@ -28,16 +45,17 @@ body {
 .Tab{
   flex: auto;
   overflow:hidden;
-  padding:1em;
+  padding:1rem;
 }
 
 .Blank-Obj{
-  background-image:linear-gradient(45deg, var(--bg-three) 25%, var(--bg-two) 25%, var(--bg-two) 50%, var(--bg-three) 50%, var(--bg-three) 75%, var(--bg-two) 75%, var(--bg-two) 100%);
+  background-image:linear-gradient(45deg, var(--bg-300) 25%, var(--bg-200) 25%, var(--bg-200) 50%, var(--bg-300) 50%, var(--bg-300) 75%, var(--bg-200) 75%, var(--bg-200) 100%);
   background-size: 25px 25px;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
 }
 
-button,
+button:enabled,
+select:enabled,
 .Color-Block{
   cursor:pointer;
 }
@@ -47,55 +65,64 @@ button,
   font-family: 'Jetbrains Mono';
   outline: none;
 }
+strong{
+  color:var(--accent);
+}
+mark{
+  background-color: transparent;
+  color:var(--accent-failure)
+}
 .Input-Group{
   display: flex;
-  height: 2em;
+  height: 2rem;
 }
 .Input-Group input,
 .Input-Group button,
 .Input-Group select,
 .Input-Group .Label
 {
-  margin: 0.1em;
-  padding-inline:1em;
-  background-color: var(--bg-two);
-  border-radius: 0.4em;
+  margin: 0.1rem;
+  padding-inline:1rem;
+  background-color: var(--bg-200);
+  border-radius: 0.4rem;
   border: none;
   text-align: center;
-  color: var(--text-one);
+  color: var(--text-primary);
 }
 .Input-Group input[type="color"]{
-  margin: 0.1em;
+  margin: 0.1rem;
 }
 .Input-Group button:disabled{
-  color:var(--bg-three);
+  color:var(--bg-300);
 }
 .Input-Group button:disabled:hover{
-  background: var(--bg-two);
+  background: var(--bg-200);
   cursor: default;
 }
-.Input-Group button:hover{background: var(--bg-three)}
+.Input-Group button:hover{background: var(--bg-300)}
 .Input-Group button {
   min-width: fit-content;
-  background-color: var(--bg-two);
+  background-color: var(--bg-200);
 }
 input.Blend-Mode {
-  width: 2em;
+  position: relative;
+  width: 2rem;
   min-width: 1px;
-  margin: 0.1em;
-  padding-inline:0.1em;
-  background-color: var(--bg-three);
+  margin: 0.1rem;
+  padding-inline:0.1rem;
+  background-color: var(--bg-300);
   border: none;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
   text-align: center;
-  color: var(--text-one);
+  color: var(--text-primary);
 }
+
 input.Blend-Mode:disabled{
-  background-image: linear-gradient(45deg, var(--bg-three) 25%, var(--bg-two) 25%, var(--bg-two) 50%, var(--bg-three) 50%, var(--bg-three) 75%, var(--bg-two) 75%, var(--bg-two) 100%);;
+  background-image: linear-gradient(45deg, var(--bg-300) 25%, var(--bg-200) 25%, var(--bg-200) 50%, var(--bg-300) 50%, var(--bg-300) 75%, var(--bg-200) 75%, var(--bg-200) 100%);;
 }
 .Sample{
   display: flex;
-  padding:0.3em;
+  padding:0.3rem;
 }
 .Sample input,
 .Sample button,
@@ -108,20 +135,20 @@ input.Blend-Mode:disabled{
   background-color: #00000033;
 }
 .Menu {
- background-color: var(--bg-three);
+ background-color: var(--bg-300);
 }
 .Menu button {
-  padding-inline:1em;
-  padding-block:0.5em;
-  background-color: var(--bg-three);
-  border-radius: 0.4em;
+  padding-inline:1rem;
+  padding-block:0.5rem;
+  background-color: var(--bg-300);
+  border-radius: 0.4rem;
   border: none;
   text-align: center;
-  color: var(--text-one);
+  color: var(--text-primary);
 }
 .Label {
   display:flex;
-  padding-inline: 0.75em ;
+  padding-inline: 0.75rem ;
   align-items: center;
   padding-block: auto;
 }
@@ -135,7 +162,7 @@ input[type="checkbox"] {
   min-width: 36px;
   height: 24px;
   -webkit-appearance: none;
-  background-color: var(--bg-accent);
+  background-color: var(--bg-100);
   border-radius: 0.4rem;
   transition-timing-function: ease-in-out;
   transition: 0.25s;
@@ -152,7 +179,7 @@ input[type="checkbox"]:before {
   border-radius: 0.4rem;
   top: 0;
   left: 0;
-  background: var(--bg-three);
+  background: var(--bg-300);
   transform: scale(0.75);
   transition-timing-function: ease-in-out;
   transition: 0.25s;
@@ -160,14 +187,13 @@ input[type="checkbox"]:before {
 input:checked:before {
   transition-timing-function: ease-in-out;
   transition: 0.25s;
-  background: var(--accent);
   left: 14px;
 }
 input[type="range"].Range {
   -webkit-appearance: none;
   flex: 1;
   height: 24px;
-  background: linear-gradient(to right, var(--bg-three) 0%, var(--bg-three) 100%);
+  background: linear-gradient(to right, var(--bg-300) 0%, var(--bg-300) 100%);
   background-size: 100% 10px;
   background-repeat: no-repeat;
   background-position: center;
@@ -177,37 +203,37 @@ input[type="range"].Range {
 input[type="range"].Range::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 24px;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
   height: 24px;
   background: var(--accent);
   position: relative;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
 }
 progress{
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
   height:auto;
   flex:1;
-  margin:0.1em;
-  padding: 0.1em;
-  background-color: var(--bg-two); 
+  margin:0.1rem;
+  padding: 0.1rem;
+  background-color: var(--bg-200); 
 }
 progress::-webkit-progress-bar {
-  background-image:linear-gradient(45deg, var(--bg-three) 25%, var(--bg-two) 25%, var(--bg-two) 50%, var(--bg-three) 50%, var(--bg-three) 75%, var(--bg-two) 75%, var(--bg-two) 100%);
+  background-image:linear-gradient(45deg, var(--bg-300) 25%, var(--bg-200) 25%, var(--bg-200) 50%, var(--bg-300) 50%, var(--bg-300) 75%, var(--bg-200) 75%, var(--bg-200) 100%);
   background-size: 25px 25px;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
   width:auto;
-  margin-inline:0.1em;
+  margin-inline:0.1rem;
 }
 progress::-webkit-progress-value {
   background-color: var(--accent);
-  border-radius: 0.4em;
-  margin-inline:0.1em;
+  border-radius: 0.4rem;
+  margin-inline:0.1rem;
 }
 progress.Progress-Complete::-webkit-progress-value{
   background-color: var(--accent-success);
 }
 #Slider-Input{
-  margin-block-end:0.5em;
+  margin-block-end:0.5rem;
 }
 
 #Slider-Container #Time-Container,
@@ -215,11 +241,11 @@ progress.Progress-Complete::-webkit-progress-value{
   display:flex;
 }
 #Gradient-Indicator {
-  height: 0.75em;
-  border-radius: 0.4em;
-  margin-block: 0.4em;
+  height: 0.75rem;
+  border-radius: 0.4rem;
+  margin-block: 0.4rem;
   box-sizing: border-box;
-  border: 1px solid var(--bg-three);
+  border: 1px solid var(--bg-300);
 }
 .Time,
 .Color{
@@ -229,33 +255,34 @@ progress.Progress-Complete::-webkit-progress-value{
 .Color{
   height: 19px;
   box-sizing: border-box;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
   cursor:pointer;
-  border: 1px solid var(--bg-three);
+  border: 1px solid var(--bg-300);
 }
 #Pop-Up{
-  /* margin:0.75em; */
+  /* margin:0.75rem; */
+  z-index: 10;
   position:absolute;
-  top:7em;
-  margin-left:1em;
-  padding:2em;
-  width: calc(100% - 11em);
+  top:7rem;
+  margin-left:1rem;
+  padding:2rem;
+  width: calc(100% - 11rem);
   max-height: 230px;
   overflow-y: scroll;
-  border-radius: 0.4em;
-  background-color: var(--bg-three);
+  border-radius: 0.4rem;
+  background-color: var(--bg-300);
 }
 .Time {
   border: none;
-  color: var(--text-one);
+  color: var(--text-primary);
   text-align: center;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
   justify-content: center;
   box-sizing: border-box;
-  background-color: var(--bg-two);
+  background-color: var(--bg-200);
 }
 .Time::placeholder{
-  color: var(--bg-two);
+  color: var(--bg-200);
 }
 .Time:disabled {
   opacity: 60%;
@@ -282,59 +309,70 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 input[type="color"]::-webkit-color-swatch {
   border: none;
   margin:0px;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
 }
 .Float-Right{float:right;}
 
 #Vertical-Menu{
   display:flex;
   flex-direction: column;
-  min-width:12em;
-  width:12em;
-  background: var(--bg-two);
+  min-width:12rem;
+  width:12rem;
+  background: var(--bg-200);
 }
-
+.NavBar{
+  overflow: hidden;
+  z-index: 100;
+  height: 100%;
+  position: fixed;
+  box-shadow: 0 0 0.5rem var(--shadow);
+  background-color: var(--bg-200);
+  width: 3.75rem;
+  transition: width 200ms ease-in-out;
+}
+.NavBar:hover{
+  width: 14rem
+}
+.TabTitle{
+  flex: 1;
+  margin: auto;
+  margin-left: 1rem;
+  display: none;
+}
+.NavBar:hover .TabTitle{
+  display: block;
+}
+.NavButton .Icon{
+  height: 2rem;
+  width: 2rem;
+  aspect-ratio: 1;
+  
+}
+.NavButton:enabled .Icon{
+  transition: transform 100ms ease-in-out;
+  filter:grayscale(1);
+}
 .NavButton{
+  display: flex;
+  white-space: nowrap;
   background: none;
   text-align: start;
-  padding-inline: 0.75em ;
-  padding-block: 0.75em ;
-  margin:0.1em;
+  padding-inline: 0.75rem ;
+  padding-block: 0.75rem ;
+  margin:0.1rem;
   border: none;
-  border-radius: 0.4em;
-  color: var(--text-one);
+  border-radius: 0.4rem;
+  color: var(--text-primary);
 }
-
-.NavButton:hover{background: var(--bg-three)}
-
-.NavButton.Active{
-  color:var(--accent);
-  cursor: default;
+.NavButton:last-of-type{
+  margin-top: auto;  
 }
-
-#Logo-Container{
-  position:relative;
-  border: none;
-  padding: 0;
-  background-color: var(--bg-three);
+.NavButton:enabled:hover,
+.NavButton:disabled{background-color: var(--bg-300)}
+.NavButton:hover:enabled .Icon{
+  transform: rotate(7deg) scale(1.1);
+  filter: grayscale(0);
 }
-#Logo{
-  content:url(./svg/white.svg);
-  height:2.5em;
-  width:2.5em;
-  padding:0.9em;
-  float:left;
-  text-align: start;
-}
-#Logo:hover{content:url(./svg/colored.svg)}
-
-.Vertical-Menu-Hidden{
-  
-  min-width:4.6em !important;
-  padding: 0;
-  width:4.6em !important;
-}
-.Vertical-Menu-Hidden .NavButton{display:none;}
 
 #Skin-Ideas.Tab,
 #Splash.Tab{
@@ -346,69 +384,87 @@ input[type="color"]::-webkit-color-swatch {
 
 #Bin-List,
 #Idea-List{
-  color: var(--text-one);
-  padding: 0 0 0 1em;
+  color: var(--text-primary);
+  padding: 0 0 0 1rem;
   border-radius: 0.4rem;
   overflow-y: scroll;
-  background-color: var(--bg-two);
+  background-color: var(--bg-200);
 }
 
-#Idea-List .Idea:nth-child(2n){background: var(--bg-three);}
+#Idea-List .Idea:nth-child(2n){background: var(--bg-300);}
 #Idea-Count{color: var(--accent)}
-
-.Idea {
-  padding:0.5em;
-  border-radius:0.4em;
+#Bin-List{
+ padding-block: 1rem;
 }
-#Particle-List{
-  background: var(--bg-two);
-  border-radius:  0.4em;
+.Idea {
+  padding:0.5rem;
+  border-radius:0.4rem;
+}
+#Particle-List,
+#Saved-Color-List{
+  background: var(--bg-200);
+  border-radius:  0.4rem;
   overflow-x:hidden;
   overflow-y: scroll;
 }
 
 
 .Particle-Div{
-  margin:0.5em;
-  color: var(--text-one);
+  margin:0.5rem;
+  color: var(--text-primary);
   border: 2px solid;
-  border-radius: 0.4em;
-  border-color: var(--bg-three);
+  border-radius: 0.4rem;
+  border-color: var(--bg-300);
 }
 .Particle-Div .Particle-Title-Div{
-  height: 2em;
+  height: 2rem;
   border-radius: 0.2rem 0.2rem 0 0;
-  background: var(--bg-three);
-  height: 2em;
-  padding-inline-start:0.2em;
+  background: var(--bg-300);
+  height: 2rem;
+  padding-inline-start:0.2rem;
 }
 .Emitter-Div{
-  margin:0.2em;
-  height: 2em;
-  padding-inline-start:0.2em;
+  margin:0.2rem;
+  height: 2rem;
+  padding-inline-start:0.2rem;
 }
 .Emitter-Div button {
   Color: var(--accent);
   background: var(--bg-accent);
   border:none;
-  border-radius: 0.4em;
-  margin:0.1em
+  border-radius: 0.4rem;
+  margin:0.1rem
 }
-.Prop-Block {
+.Prop-Block,
+.Prop-Block-Secondary{
+  position: relative;
   display:flex;
   margin:auto;
-  margin-inline: 0.25em;
+  margin-inline: 0.25rem;
   padding:auto;
   text-align: center;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
 }
-.Prop-Block div{
+.Prop-Block,
+.Prop-Block-Secondary{
+  width: 24px;
+  color:transparent;
+}
+.Prop-Block:hover,
+.Prop-Block-Secondary:hover{
+  color:var(--text-primary);
+}
+
+.Prop-Block:hover div,
+.Prop-Block-Secondary:hover div{
+  top:-1rem;
+  z-index: 10;
+  position: relative;
   align-self: center;
-  background-color: var(--bg-three);
-  opacity: 40%;
+  background-color: var(--bg-300);
   margin:auto;
-  padding-inline: 0.4em;
-  border-radius: 0.4em;
+  padding-inline: 0.4rem;
+  border-radius: 0.4rem;
 }
 
 
@@ -429,16 +485,16 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .Margin{
- margin:1em;
+ margin:1rem;
 }
 .Margin-Inline{
- margin-inline:1em;
+ margin-inline:1rem;
 }
 .Margin-Block{
- margin-block:1em;
+ margin-block:1rem;
 }
-.Margin-Top{margin-block-start:1em;}.Margin-Bottom{margin-block-end:1em;}
-.Margin-Left{margin-inline-start:1em;}.Margin-Right{margin-inline-end:1em;}
+.Margin-Top{margin-block-start:1rem;}.Margin-Bottom{margin-block-end:1rem;}
+.Margin-Left{margin-inline-start:1rem;}.Margin-Right{margin-inline-end:1rem;}
 
 .Float-Bottom{
   margin-top:auto;
@@ -451,26 +507,27 @@ input[type="color"]::-webkit-color-swatch {
   height:100%;
   position: absolute;
   background-color: #00000055;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
 }
 .Modal{
+  box-shadow: var(--shadow);
   overflow:hidden;
-  margin-inline: 5em;
-  margin-block: 2.5em;
-  padding: 1em;
-  background-color: var(--bg-accent);
-  border-radius: 0.4em;
+  margin-inline: 5rem;
+  margin-block: 2.5rem;
+  padding: 1rem;
+  background-color: var(--bg-100);
+  border-radius: 0.4rem;
 }
 #BinContainer{
-  background-color: var(--bg-two);
-  border-radius: 0.4em;
+  background-color: var(--bg-200);
+  border-radius: 0.4rem;
   overflow:hidden;
 }
 #Primary,
 #Secondary{
   overflow-y: scroll;
   border: 2px solid;
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
 }
 #Primary{
   border-color: var(--accent);
@@ -479,32 +536,32 @@ input[type="color"]::-webkit-color-swatch {
   border-color: var(--accent);
 }
 .AlertContent{
-  background-color: var(--bg-two);
+  background-color: var(--bg-200);
   overflow-y: scroll;
   overflow-x: hidden;
   word-wrap: break-word;
-  padding-inline-start:1em;
-  padding-block:1em;
-  border-radius: 0.4em;
+  padding-inline-start:1rem;
+  padding-block:1rem;
+  border-radius: 0.4rem;
 }
 .Text {
-  color: var(--text-one);
+  color: var(--text-primary);
 }
 .Sample{
-  height:2em;
-  margin: 0.5em;
-  border-radius: 0.4em;
+  height:2rem;
+  margin: 0.5rem;
+  border-radius: 0.4rem;
 }
 /* #Dim{
   position: absolute;
-  inset-inline: 5em;
-  inset-block: 2.5em;
-  transform: translate(2.5em);
+  inset-inline: 5rem;
+  inset-block: 2.5rem;
+  transform: translate(2.5rem);
   background-color: var(--bg-accent);
-  border-radius: 0.4em;
+  border-radius: 0.4rem;
 } */
 
-::-webkit-scrollbar {width: 1em;}
+::-webkit-scrollbar {width: 1rem;}
 ::-webkit-scrollbar-track {background: none;}
 ::-webkit-scrollbar-thumb{
   min-height: 4rem;

@@ -15,7 +15,20 @@ function ReMap(value, from, to) {
 }
 
 function GetColor(ColorProp) {
-  //return [{ time: 0, color: [0, 255, 0, 1] }]
+  if (typeof (ColorProp[0]) == 'number') {
+    let Palette = [
+      {
+        time: 0,
+        color:
+          [
+            UTIL.ReMap(ColorProp[0], [0, 1], [0, 255]),
+            UTIL.ReMap(ColorProp[1], [0, 1], [0, 255]),
+            UTIL.ReMap(ColorProp[2], [0, 1], [0, 255])
+          ]
+      }
+    ]
+    return Palette
+  }
   let ColorIndex = ColorProp.value.items.findIndex(item => item.key == "dynamics") >= 0 ?
     ColorProp.value.items.findIndex(item => item.key == "dynamics") :
     ColorProp.value.items.findIndex(item => item.key == "constantValue")
@@ -73,6 +86,14 @@ function ToBG(Palette) {
 }
 
 function ReColor(ColorProp) {
+  if (typeof (ColorProp[0]) == 'number') {
+    let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].color
+
+    ColorProp[0] = ReMap(NewColor[0], [0, 255], [0, 1])
+    ColorProp[1] = ReMap(NewColor[1], [0, 255], [0, 1])
+    ColorProp[2] = ReMap(NewColor[2], [0, 255], [0, 1])
+    return ColorProp
+  }
   let ColorIndex = ColorProp.value.items.findIndex(item => item.key == "dynamics") >= 0 ?
     ColorProp.value.items.findIndex(item => item.key == "dynamics") :
     ColorProp.value.items.findIndex(item => item.key == "constantValue")
@@ -164,7 +185,9 @@ function ReColor(ColorProp) {
 }
 /**
  * Creates an alert popup with given message
- * @param {string} message - alert message
+ * @param {string} Title - Alert Title
+ * @param {string} Message - Alert Message
+ * @param {function} Message - Secondary action after click
  */
 function CreateAlert(Title, Body, Action = null) {
 
@@ -185,7 +208,7 @@ function CreateSampleWindow() {
     let Dim = document.createElement("div")
     Dim.id = "Dim"
     Dim.className = "Flex-Col"
-    document.getElementById("Root").appendChild(Dim)
+    document.getElementById("Main").appendChild(Dim)
 
     let Modal = document.createElement("div")
     Modal.className = "Modal Flex-1 Margin Flex-Col"
@@ -305,7 +328,7 @@ function SavePrefs() {
 }
 
 function ExportSamples(Samples = null) {
-  let Folder = ipcRenderer.sendSync('FileSelect', 'Folder')
+  let Folder = ipcRenderer.sendSync('FileSelect', ['Select sample export location', 'Folder'])
   if (Folder == "") { return 0 }
 
   if (Samples == null) {
@@ -323,8 +346,11 @@ function ExportSamples(Samples = null) {
 }
 
 function ImportSample() {
-  let Samples = JSON.parse(fs.readFileSync(ipcRenderer.sendSync('FileSelect', "Json")).toString())
-
+  let ImportPath = ipcRenderer.sendSync('FileSelect', ['Select sample to import', 'Json'])
+  if (ImportPath == undefined) {
+    return 0
+  }
+  let Samples = JSON.parse(fs.readFileSync(ImportPath)).toString()
   if (Samples.constructor == [].constructor) {
     Samples.map(Sample => {
       Prefs.ColorSamples.push(Sample)
@@ -341,7 +367,7 @@ function GetChildIndex(Node) {
 }
 
 function SelectRitoBin() {
-  Prefs.RitoBinPath = ipcRenderer.sendSync('FileSelect', "RitoBin")
+  Prefs.RitoBinPath = ipcRenderer.sendSync('FileSelect', ['Select RitoBin_cli.exe', 'RitoBin'])
   UTIL.SavePrefs()
 }
 function Sleep(ms) {

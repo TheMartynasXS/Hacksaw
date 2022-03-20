@@ -41,14 +41,14 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.on('FileSelect', (event, arg) => {
-  if (arg == "Bin") {
-    dialog.showOpenDialog({ filters: [{ name: 'bin', extensions: ['bin'] }], properties: ['openFile'] }).then(val => event.returnValue = val.filePaths[0], val => nsole.log("error"))
-  } else if (arg == "Json") {
-    dialog.showOpenDialog({ filters: [{ name: 'bin', extensions: ['json'] }], properties: ['openFile'] }).then(val => event.returnValue = val.filePaths[0], val => console.log("error"))
-  } else if (arg == "Folder") {
-    dialog.showOpenDialog({ properties: ['openDirectory'] }).then(val => event.returnValue = val.filePaths, val => console.log("error"))
-  } else if (arg == "RitoBin") {
-    dialog.showOpenDialog({ filters: [{ name: 'ritobin_cli', extensions: ['exe'] }], properties: ['openFile'] }).then(val => event.returnValue = val.filePaths[0], val => console.log("error"))
+  if (arg[1] == "Bin") {
+    dialog.showOpenDialog({ title: arg[0], filters: [{ name: 'bin', extensions: ['bin'] }], properties: ['openFile'] }).then(val => event.returnValue = val.filePaths[0], val => nsole.log("error"))
+  } else if (arg[1] == "Json") {
+    dialog.showOpenDialog({ title: arg[0], filters: [{ name: 'bin', extensions: ['json'] }], properties: ['openFile'] }).then(val => event.returnValue = val.filePaths[0], val => console.log("error"))
+  } else if (arg[1] == "Folder") {
+    dialog.showOpenDialog({ title: arg[0], properties: ['openDirectory'] }).then(val => event.returnValue = val.filePaths, val => console.log("error"))
+  } else if (arg[1] == "RitoBin") {
+    dialog.showOpenDialog({ title: arg[0], filters: [{ name: 'ritobin_cli', extensions: ['exe'] }], properties: ['openFile'] }).then(val => event.returnValue = val.filePaths[0], val => console.log("error"))
   }
 })
 
