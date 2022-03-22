@@ -1,9 +1,8 @@
 const { execSync } = require('child_process');
 const CC = require('color-convert');
 const { getColorHexRGB } = require('electron-color-picker');
-const { clipboard } = require('electron')
+const { clipboard } = require('electron');
 let FileHistory = []
-
 let RecolorMode = document.getElementById('Mode')
 let RecolorTarget = document.getElementById('Target')
 
@@ -81,14 +80,14 @@ function CreatePicker(Target) {
 
     document.getElementById('Slider-Container').appendChild(ColorPicker)
   } else {
-    document.getElementById('Color-Picker').remove()
+    document.getElementById('Pop-Up').remove()
     CreatePicker(Target)
   }
 }
 
 var FileSaved = true
 window.onerror = function (msg, error, lineNo, columnNo) {
-  UTIL.CreateAlert(`Error`, `Click here to copy to clipboard`, () => { clipboard.writeText(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`) })
+  UTIL.CreateAlert(`Error`, `Click here to copy to clipboard`,true, () => { clipboard.writeText(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`) })
 }
 
 
@@ -540,7 +539,6 @@ function SaveBin() {
   fs.writeFileSync((FilePath.slice(0, -4) + ".json"), JSON.stringify(File, null, 2), "utf8")
   ToBin()
   FileSaved = true
-
   for (let i = 0; i < FileHistory.length; i++) {
     File = null
     fs.unlinkSync(FileHistory[i])
@@ -554,6 +552,7 @@ function ToJson() {
 
 function ToBin() {
   execSync(`"${Prefs.RitoBinPath}" -o bin "${(FilePath.slice(0, -4) + ".json")}"`)
+  UTIL.CreateAlert('Success', 'File Saved Successfully')
 }
 
 ChangeColorCount(1)

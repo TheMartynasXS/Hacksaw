@@ -47,8 +47,8 @@
                 <div class="Label" id="Bin-Count">0/0</div>
                 <progress id="Progress-Range" type="range" value="0" style="padding-inline: 0;"></progress>
             </div>
-            <div id="Bin-List" class="Margin-Block">
-                <p>Usage Information:</p>
+            <div class="Margin-Block Usage-Information">
+                Usage Information:
                 
                 <ol>
                     <li>
@@ -66,16 +66,22 @@
                             <li>
                                 <strong>Missing.json</strong>- Files that are missing from your folder.
                             </li>
+                            <li>
+                                List of files that are going to be deleted from the directory down below.
+                            </li>
                         </ul>
                     </li>
                     <li>
-                        <strong>Delete unused</strong> button will clear all not mentioned files in the bins from your directory.
+                        <strong>Detect</strong> button will delete listed files from the directory.
                     </li>
                 </ol>
                 <mark>More Features will be added eventually</mark>
             </div>
+            <div id="Bin-List">
+                
+            </div>
             <div class="Input-Group">
-                <button onclick="DeleteUnused()" class="Flex-3">Delete unused files</button>
+                <button onclick="DeleteUnused()" class="Flex-1">Delete</button>
             </div>
             <script src="../javascript/bintex.js"></script>
         </div>

@@ -168,8 +168,15 @@ input[type="checkbox"] {
   transition: 0.25s;
   margin: auto;
 }
+.Input-Group input[type="radio"],
+.Input-Group input[type="checkbox"] {
+  background-color: var(--bg-200);
+}
+
 input[type="radio"]:hover,
-input[type="checkbox"]:hover {cursor: pointer;}
+input[type="checkbox"]:hover {
+  cursor: pointer;
+}
 input[type="radio"]:before,
 input[type="checkbox"]:before {
   content: "";
@@ -187,8 +194,10 @@ input[type="checkbox"]:before {
 input:checked:before {
   transition-timing-function: ease-in-out;
   transition: 0.25s;
+  background-color: var(--accent);
   left: 14px;
 }
+
 input[type="range"].Range {
   -webkit-appearance: none;
   flex: 1;
@@ -264,7 +273,7 @@ progress.Progress-Complete::-webkit-progress-value{
   z-index: 10;
   position:absolute;
   top:7rem;
-  margin-left:1rem;
+  margin-left:0.5rem;
   padding:2rem;
   width: calc(100% - 11rem);
   max-height: 230px;
@@ -378,16 +387,19 @@ input[type="color"]::-webkit-color-swatch {
 #Splash.Tab{
   overflow: hidden;
 }
+
 #Skin-Ideas,
 #Bin-List,
 #Idea-List{flex:1;}
 
 #Bin-List,
-#Idea-List{
+#Idea-List,
+.Usage-Information{
   color: var(--text-primary);
   padding: 0 0 0 1rem;
   border-radius: 0.4rem;
   overflow-y: scroll;
+  overflow-x:hidden;
   background-color: var(--bg-200);
 }
 

@@ -1,5 +1,4 @@
 const Open = require('open');
-
 /**
  * Maps given value from one int range to another.
  * @param {List} from - initial range ex: [0,10]
@@ -189,9 +188,9 @@ function ReColor(ColorProp) {
  * @param {string} Message - Alert Message
  * @param {function} Message - Secondary action after click
  */
-function CreateAlert(Title, Body, Action = null) {
-
-  new Notification(Title, { body: Body, silent: true })
+function CreateAlert(Title, Body,Silent = true, Action = null) {
+  // window.alert(`${Body}`)
+  new Notification(Title, { body: Body, silent: Silent })
     .onclick = Action
 }
 

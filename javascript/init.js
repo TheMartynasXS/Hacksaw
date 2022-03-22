@@ -31,6 +31,9 @@ function Tab(Location) {
         window.location.href = Location
     }
 }
+window.addEventListener('load', function () {
+    PerTabInit(true)
+  })
 
 function PerTabInit(Initial = false) {
     if (document.location.href.endsWith('settings.html')) {
@@ -110,7 +113,7 @@ function PerTabInit(Initial = false) {
     }
 }
 
-PerTabInit(true)
+
 
 if (Prefs.Version != ipcRenderer.sendSync('Version')) {
     Prefs.Version = ipcRenderer.sendSync('Version')

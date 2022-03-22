@@ -5,6 +5,8 @@ const sorter = require('path-sort').standalone('/')
 
 let ParticleArray = []
 
+let Files2Delete = []
+
 let WadFolderPath = ""
 let ParticleTargetPath = ""
 
@@ -21,9 +23,11 @@ async function SelectWadFolder() {
 
     let BinCount = document.getElementById('Bin-Count')
     BinCount.innerText = `0/${BinFiles.length}`
-    // UTIL.CreateAlert(`Found ${files.length} bin files`)
+    if(BinFiles.length == 0){
+        UTIL.CreateAlert("Error",`Bins not found`)
+        return 0
+    }
     Progress.max = BinFiles.length
-    BinList.innerHTML = ""
 
     let CombinedOutput = []
     let SeparateOutput = []
@@ -91,19 +95,19 @@ async function SelectWadFolder() {
         if (!/(particles|shared)/gi.test(CombinedOutput[i])) {
             continue
         } {
-        
-        for (let j = 0; j < AssetFiles.length; j++) 
-            if (CombinedOutput[i].toLowerCase().replace(/\//g, '\\') == AssetFiles[j].slice(WadFolderPath.length + 1)) {
-                break
-            }
-            else if (j == AssetFiles.length - 1) {
-                MissingOutput.push(CombinedOutput[i])
-            }
+
+            for (let j = 0; j < AssetFiles.length; j++)
+                if (CombinedOutput[i].toLowerCase().replace(/\//g, '\\') == AssetFiles[j].slice(WadFolderPath.length + 1)) {
+                    break
+                }
+                else if (j == AssetFiles.length - 1) {
+                    MissingOutput.push(CombinedOutput[i])
+                }
         }
     }
     CombinedOutput.sort(sorter)
     let SortedCombinedOutput = []
-    function deasset(input){
+    function deasset(input) {
         let temp = input.split('/')
         temp.pop()
         return temp.join('/')
@@ -137,14 +141,19 @@ async function SelectWadFolder() {
     fs.writeFileSync(WadFolderPath + '\\Missing.json', JSON.stringify(MissingOutput, null, 2), "utf8")
 
     Progress.classList.add('Progress-Complete')
+    DetectUnused()
 }
-async function DeleteUnused() {
+async function DetectUnused() {
+    Files2Delete = []
+    BinList.innertext = ''
     let arrayOfFiles = []
     let Files = getAllFiles(WadFolderPath, arrayOfFiles)
-    let Combined = fs.readFileSync(WadFolderPath + '\\Combined.txt', 'utf-8').split('\n')
+
+    let Combined = UTIL.Clone(fs.readFileSync(WadFolderPath + '\\Combined.json', 'utf-8'))
 
     let JsonFiles = Files.filter(item => item.endsWith('.json'))
 
+    console.log(Combined)
     let RegStr = new RegExp(/ASSETS.+\.(?:dds|skn|skl|sco|scb|anm)/g)
 
     let AssetFiles =
@@ -162,32 +171,58 @@ async function DeleteUnused() {
 
     let UnusedCount = 0
 
+
     for (let i = 0; i < AssetFiles.length; i++) {
+        // for (let i = 0; i < 1; i++) {
         Progress.value = i
         BinCount.innerText = `${Progress.value + 1}/${Progress.max}`
         await UTIL.Sleep(10)
         for (let j = 0; j < Combined.length; j++) {
-            if (AssetFiles[i].toLowerCase().endsWith(Combined[j].replace(/\//g, '\\'))) {
-                break
-            } else if (j == Combined.length - 1) {
-                UnusedCount++
-                fs.unlinkSync(AssetFiles[i])
+            location:
+            for (let k = 0; k < Combined[j].Files.length; k++) {
+                if (AssetFiles[i].toLowerCase().endsWith(Combined[j].Files[k].replace(/\//g, '\\'))) {
+                    break location;
+                }
+                else if (j == Combined[Combined.length - 1].Files.length - 1) {
+                    UnusedCount++
+                    Files2Delete.push(AssetFiles[i])
+                    // console.log(`${AssetFiles[i]} ${Combined[j].Files[k]}`)
+                    // fs.unlinkSync(AssetFiles[i])
+                }
             }
         }
     }
+    Files2Delete.sort(sorter)
+    for (let i = 0; i < Files2Delete.length; i++) {
+        let bin = document.createElement('div')
+        bin.innerText = Files2Delete[i].slice(WadFolderPath.length + 1)
+        BinList.appendChild(bin)
+    }
 
     Progress.classList.add('Progress-Complete')
-    UTIL.CreateAlert('Unused Files Deleted', `${UnusedCount} Total files deleted`)
+    UTIL.CreateAlert('Unused Files Detected', `${UnusedCount} Total files detected`)
 
+}
+
+function DeleteUnused(){
+    let arrayOfFiles = []
+    let Files = getAllFiles(WadFolderPath, arrayOfFiles)
+    
+    BinList.innertext = ''
+    for (let i = 0; i < Files2Delete.length; i++) {
+        fs.unlinkSync(Files2Delete[i])
+    }
+    
+    let JsonFiles = Files.filter(item => item.endsWith('.json'))
 
     for (let i = 0; i < JsonFiles.length; i++) {
         fs.unlinkSync(JsonFiles[i])
     }
+    UTIL.CreateAlert(`Success!`,`Deleted ${Files2Delete.length} unused files`,false)
 }
-
 const getAllFiles = function (dirPath, arrayOfFiles) {
     files = fs.readdirSync(dirPath)
-
+    
     arrayOfFiles = arrayOfFiles || []
 
     files.forEach(function (file) {
