@@ -1,3 +1,5 @@
+warning has some issues, idk which version works for sure. Working on a fix
+
 # binsplash
 
 Discord server for support and suggestions: https://discord.gg/JNATv6fZ6D 
