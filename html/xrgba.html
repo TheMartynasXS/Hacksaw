@@ -11,7 +11,6 @@
 </head>
 
 <body class="Flex">
-    <script src="../javascript/init.js" defer></script>
     <div class="NavBar Flex-Col">
         <button onclick="Tab('./binsplash.html')" class="NavButton">
             <img class="Icon" src="../css/svg/paintroller.svg"></img>
@@ -29,7 +28,7 @@
             <img class="Icon" src="../css/svg/list.svg"></img>
             <div class="TabTitle">BinTex</div>
         </button>
-        <button onclick="Tab('./xrgb.html')" disabled class="NavButton">
+        <button onclick="Tab('./xrgba.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/drop.svg"></img>
             <div class="TabTitle">xrgb</div>
         </button>
@@ -55,10 +54,19 @@
                     <div class="Label">XB:</div><input id="XB" class="Flex-1">
                 </div>
             </div>
-            <div id="Saved-Color-List" class="Flex-1" >
-                
+            <div id="Saved-Color-List" class="Flex-1">
+
             </div>
-            <script src="../javascript/xrgba.js"></script>
+
+            <!-- <div class="AlertModalBG" id="AlertModalBG">
+                <div class="AlertModal">
+                    <button class="IconButton" onclick="document.getElementById('AlertModalBG').remove()">
+                        <img class="Icon" src="../css/svg/clear.svg"></img>
+                    </button>
+                </div>
+            </div> -->
+
+            <script src="../javascript/tabs/xrgba.js"></script>
         </div>
     </div>
 </body>

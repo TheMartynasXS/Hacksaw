@@ -1,5 +1,6 @@
+const {Tab} = require('../javascript/shared.js');
 window.onerror = function (msg, error, lineNo, columnNo) {
-  UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`,false)
+  UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`,true)
 }
 
 File = require('../skin0.json')

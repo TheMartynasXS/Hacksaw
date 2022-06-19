@@ -11,7 +11,6 @@
 </head>
 
 <body class="Flex">
-    <script src="../javascript/init.js"></script>
     <div class="NavBar Flex-Col">
         <button onclick="Tab('./binsplash.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/paintroller.svg"></img>
@@ -29,7 +28,7 @@
             <img class="Icon" src="../css/svg/list.svg"></img>
             <div class="TabTitle">BinTex</div>
         </button>
-        <button onclick="Tab('./xrgb.html')" class="NavButton">
+        <button onclick="Tab('./xrgba.html')" class="NavButton">
             <img class="Icon" src="../css/svg/drop.svg"></img>
             <div class="TabTitle">xrgb</div>
         </button>
@@ -40,44 +39,73 @@
     </div>
     <div id="Main" class="Main Flex-1">
         <div id="Splash" class="Tab Flex Flex-Col">
-            <div class="Input-Group">
-                <select name="Mode" id="Mode" oninput="PerTabInit()">
-                    <option value="0">Simple</option>
-                    <option value="1">Advanced</option>
+            <div class="Input-Group Margin-Bottom">
+                <button class="Special-Input" onclick="OpenBin()">Open Bin</button>
+                <label class="Label Flex-1" id="Title"></label>
+                <select name="Mode" id="Mode">
+                    <option value="false">Simple</option>
+                    <option value="true">Advanced</option>
                 </select>
-                <select name="Target" id="Target">
-                    <option value="0">All</option>
-                    <option value="1">BirthColor</option>
-                    <option value="2">Color</option>
-                    <option value="3">Fresnel</option>
-                    <option value="4">Linger</option>
-                </select>
-                <button class="Flex-1" onclick="SaveSample()">Save Sample</button>
-                <button class="Flex-1" onclick="OpenSampleWindow()">Color Samples</button>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox" class="Type" id="Use-Times"></input>
+                    Override Times
+                </label>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox" class="Type" id="Use-Opacity"></input>
+                    Use Opacity
+                </label>
             </div>
             <div id="Slider-Container" class="Margin-Bottom Flex-Col">
                 <input class="Range" id="Slider-Input" type="range" min="1" value="1" max="20"
                     oninput="ChangeColorCount(this.value)" />
-                <div style="overflow:hidden" id="Time-Container"></div>
-                <div id="Gradient-Indicator"></div>
-                <div id="Color-Container"></div>
+                <div style="overflow:hidden" id="Time-Container" class="Flex"></div>
+                <div id="Gradient-Indicator" class="Flex"></div>
+                <div id="Color-Container" class="Flex"></div>
+                <!-- <div id="Opacity-Container" class="Flex"></div> -->
             </div>
             <div class="Input-Group">
-                <button onclick="OpenBin()">Open Bin</button>
+                
                 <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
                     oninput="FilterParticles(this.value)">
-                <button onclick="CheckAll()">check</button>
-                <button onclick="UnCheckAll()">uncheck</button>
+                    <button onclick="SaveSample()">Save Sample</button>
+                    <button onclick="OpenSampleWindow()">Color Samples</button>
             </div>
-            <div class="Flex-1 Flex-Col Margin-Block" id="Particle-List">
+            <div class="Flex Input-Group Margin-Top">
+                <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox" onchange="CheckToggle(this)">
+                <label class="Label Flex-5"></input>Name</label>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox"  class="Type" id="T1"></input>
+                    OC</label>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox"  class="Type" id="T2"></input>
+                    RC</label>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox"  class="Type" id="T3"></input>
+                    LC</label>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox" class="Type" id="T4"></input>
+                    BC</label>
+                <label class="Label" style="padding:0.4rem">
+                    <input type="checkbox" checked class="Type" id="T5"></input>
+                    Main Color</label>
+                <label class="Label" style="padding:0.5rem;text-align: center;">
+                    BM</label>
+                <button class="Special-Input ColorHelp" onclick="ColorHelp()">?</button>
             </div>
+
+            <div class="Flex-1 Flex-Col Margin-Bottom" id="Particle-List">
+            </div>
+            
             <div class="Input-Group">
-                <button onclick="RecolorSelected()" class="Flex-2" id="Recolor_Selected_Button">Recolor
-                    Selected</button>
                 <button onclick="Undo()" class="Flex-1">Undo</button>
-                <button onclick="SaveBin()" class="Flex-1">Save Bin</button>
+                <button onclick="RecolorSelected()" class="Flex-3" id="Recolor_Selected_Button">Recolor
+                    Selected</button>
             </div>
-            <script src="../javascript/binsplash.js"></script>
+            
+            <div class="Input-Group Margin-Top">
+                <button onclick="SaveBin()" class="Flex-1 Special-Input">Save Bin</button>
+            </div>
+            <script src="../javascript/tabs/binsplash.js"></script>
         </div>
     </div>
 </body>
