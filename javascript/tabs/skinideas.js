@@ -1,8 +1,6 @@
 const Path = require("path");
-const https = require("https");
 const { ipcRenderer } = require('electron')
 const fs = require("fs");
-const path = require("path");
 let IdeaCount = document.getElementById("Idea-Count");
 let IdeaList = document.getElementById("Idea-List");
 let IdeaChamp = document.getElementById("Idea-Champ");

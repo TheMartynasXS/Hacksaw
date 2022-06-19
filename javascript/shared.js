@@ -60,6 +60,17 @@ class SampleDB {
 		}
 	}
 
+	reload(){
+		this.obj = JSON.parse(fs.readFileSync(SamplePath));
+
+		for (let i = 0; i < this.obj.length; i++) {
+			const element = this.obj[i];
+			for (let j = 0; j < element.Palette.length; j++) {
+				element.Palette[j] = new ColorHandler(element.Palette[j].vec4, element.Palette[j].time)
+			}
+		}
+	}
+
 	export(ID = undefined) {
 		let Folder = ipcRenderer.sendSync('FileSelect', ['Select sample export location', 'Folder'])
 		if (ID != undefined) {
@@ -86,6 +97,47 @@ class SampleDB {
 		}
 	}
 
+	import(){
+		let File = ipcRenderer.sendSync("FileSelect", [
+			"Import Samples",
+			"Json",
+		])
+		let Samples = JSON.parse(fs.readFileSync(File, "utf8"))
+		if(Samples.length < 1){return 0}
+
+		if(Samples[0].Palette != undefined){
+			this.obj = this.obj.concat(Samples)
+		}
+		else{
+			for(let i = 0; i < Samples.length; i++){
+				let NewPalette = []
+				for(let j = 0; j < Samples[i].value.length; j++){
+					NewPalette.push({
+						vec4: [
+							Samples[i].value[j].color[0]/255,
+						 	Samples[i].value[j].color[1]/255,
+						  Samples[i].value[j].color[2]/255,
+							Samples[i].value[j].opacity/100
+						],
+						time: Samples[i].value[j].time/100,
+
+					})
+				}
+				this.obj.push(
+					{
+						Name:	Samples[i].name,
+						Palette: NewPalette
+					}
+				)
+			}
+			
+		}
+		this.save()
+		document.getElementById('AlertModalBG').remove()
+		this.reload()
+		this.show()
+	}
+
 	show() {
 		let AlertModalBG = document.createElement('div')
 		AlertModalBG.className = "AlertModalBG"
@@ -108,7 +160,7 @@ class SampleDB {
 		let Import = document.createElement("button")
 		Import.className = "Flex-1"
 		Import.textContent = "Import"
-		Import.onclick = () => { ImportSample() }
+		Import.onclick = () => {this.import()}
 		SampleFunctions.appendChild(Import)
 
 		Modal.appendChild(SampleFunctions)
@@ -196,7 +248,6 @@ class SampleDB {
 		DismissDiv.appendChild(Dismiss)
 		Modal.appendChild(DismissDiv)
 	}
-
 
 	name(ID) {
 		let tempName = this.obj[ID].Name
@@ -310,7 +361,6 @@ function CreateAlert(Body, Copy = false, Action = null) {
 		AlertButtonGroup.appendChild(Custom)
 		
 	}
-
 
 	AlertModal.appendChild(AlertContent)
 	AlertModal.appendChild(AlertButtonGroup)
