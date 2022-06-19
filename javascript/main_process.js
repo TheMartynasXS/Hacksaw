@@ -1,6 +1,4 @@
-
-
-const { app, BrowserWindow, nativeTheme, ipcRenderer } = require("electron");
+const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { ipcMain } = require("electron");
 const { dialog } = require("electron");

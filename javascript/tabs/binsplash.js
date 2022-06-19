@@ -461,12 +461,12 @@ function LoadFile(SkipAlert = true) {
 		}
 	}
 	if (!SkipAlert) {
-		UTIL.CreateAlert("File Loaded Successfully");
+		CreateAlert("File Loaded Successfully");
 	}
 }
 
 function ColorHelp() {
-	UTIL.CreateAlert(
+	CreateAlert(
 		`
 		OC - Outline Fresnel Color, changes outline color
 		RC - Reflection Fresnel Color, changes reflective color
