@@ -9,7 +9,7 @@ function Tab(Location, FileSaved = true) {
 		if (FileSaved == true) {
 			window.location.href = Location;
 		} else {
-			UTIL.CreateAlert(
+			CreateAlert(
 				"You may have forgotten to save your bin.",
 				"Save before proceeding please."
 			);
@@ -31,6 +31,16 @@ class Preferences {
 
 	UseAdvanced(Mode = false) {
 		this.obj.UseAdvanced = Mode;
+		this.save();
+	}
+
+	RememberTargets(Remember = false){
+		this.obj.RememberTargets = Remember;
+		this.save()
+	}
+	Targets(T = undefined) {
+		
+		this.obj.Targets = T;
 		this.save();
 	}
 

@@ -51,9 +51,11 @@ app.on("window-all-closed", () => {
 //create preference file if it doesn't exist
 const DefaultPreferences = JSON.stringify(
     {
-        PreferredMode: 0,
+        PreferredMode: "false",
         IgnoreBW: true,
-        RitoBinPath: ""
+        RitoBinPath: "",
+        RememberTargets: false,
+        Targets:[false,false,false,false,true],
     }
 ,null,4)
 
@@ -107,7 +109,14 @@ ipcMain.on("UserPath", (event) => {
     event.returnValue = app.getPath("userData");
 });
 
-ipcMain.once("Update", (event) => {
-    require('update-electron-app')()
-});
+if(!isDev){
+    require('update-electron-app')({
+        repo: 'DevMarcius/Hacksaw',
+        updateInterval: '9 hour'
+      })
+}
+
+// ipcMain.once("Update", (event) => {
+//     require('update-electron-app')()
+// });
 

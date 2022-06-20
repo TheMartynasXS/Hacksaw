@@ -24,6 +24,27 @@ let T3 = document.getElementById('T3')
 let T4 = document.getElementById('T4')
 let T5 = document.getElementById('T5')
 
+
+
+if(Prefs.obj.RememberTargets == true) {
+	T1.checked = Prefs.obj.Targets[0];
+	T2.checked = Prefs.obj.Targets[1];
+	T3.checked = Prefs.obj.Targets[2];
+	T4.checked = Prefs.obj.Targets[3];
+	T5.checked = Prefs.obj.Targets[4];
+	T1.addEventListener("change",(Event)=>{
+		Prefs.Targets([Event.target.checked,T2.checked,T3.checked,T4.checked,T5.checked])});
+	T2.addEventListener("change",(Event)=>{
+		Prefs.Targets([T1.checked,Event.target.checked,T3.checked,T4.checked,T5.checked])});
+	T3.addEventListener("change",(Event)=>{
+		Prefs.Targets([T1.checked,T2.checked,Event.target.checked,T4.checked,T5.checked])});
+	T4.addEventListener("change",(Event)=>{
+		Prefs.Targets([T1.checked,T2.checked,T3.checked,Event.target.checked,T5.checked])});
+	T5.addEventListener("change",(Event)=>{
+		Prefs.Targets([T1.checked,T2.checked,T3.checked,T4.checked,Event.target.checked])});
+}
+
+
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`;
 let BlankConstant = `{"key":"constantValue","type":"vec4","value":[0.5,0.5,0.5,1]}`;
 
@@ -55,7 +76,7 @@ document.getElementById("Mode").addEventListener("change",(Event)=>{
 	}
 })
 
-document.getElementById("Mode").value = Prefs.obj.UseAdvanced;
+document.getElementById("Mode").selected = Prefs.obj.UseAdvanced;
 if (document.getElementById("Mode").value == "false") {
 	GradientIndicator.classList.replace("Flex","Hidden");
 	TimeContainer.classList.replace("Flex","Hidden");
@@ -63,8 +84,6 @@ if (document.getElementById("Mode").value == "false") {
 	GradientIndicator.classList.replace("Hidden","Flex");
 	TimeContainer.classList.replace("Hidden","Flex");
 }
-
-
 
 const PickScreen = async () => {
 	const color = await getColorHexRGB().catch((error) => {
@@ -229,8 +248,9 @@ function ChangeColorCount(Count) {
 
 
 function OpenBin() {
+	document.getElementById('CheckToggle').checked = false
 	if (FileSaved != true) {
-		UTIL.CreateAlert(
+		CreateAlert(
 			"You may have forgotten to save your bin.\nSave before proceeding please.",
 			true
 		);
