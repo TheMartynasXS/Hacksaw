@@ -108,15 +108,3 @@ ipcMain.on("FileSelect", (event, arg) => {
 ipcMain.on("UserPath", (event) => {
     event.returnValue = app.getPath("userData");
 });
-
-if(!isDev){
-    require('update-electron-app')({
-        repo: 'DevMarcius/Hacksaw',
-        updateInterval: '9 hour'
-      })
-}
-
-// ipcMain.once("Update", (event) => {
-//     require('update-electron-app')()
-// });
-

@@ -149,6 +149,7 @@ class SampleDB {
 	}
 
 	show() {
+		if(document.getElementById('AlertModalBG') != undefined) return null
 		let AlertModalBG = document.createElement('div')
 		AlertModalBG.className = "AlertModalBG"
 		AlertModalBG.id = "AlertModalBG"
@@ -260,6 +261,7 @@ class SampleDB {
 	}
 
 	name(ID) {
+		if(document.getElementById('AlertModalBG') != undefined) return null
 		let tempName = this.obj[ID].Name
 		let AlertModalBG = document.createElement('div')
 		AlertModalBG.className = "AlertModalBG"

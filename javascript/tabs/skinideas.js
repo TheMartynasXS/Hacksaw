@@ -5,7 +5,7 @@ let IdeaCount = document.getElementById("Idea-Count");
 let IdeaList = document.getElementById("Idea-List");
 let IdeaChamp = document.getElementById("Idea-Champ");
 const DataPath = Path.join(ipcRenderer.sendSync("UserPath") + "\\Data.json");
-const {Tab} = require('../javascript/shared.js');
+const {Tab} = require('../javascript/utils.js');
 
 
 let Data = require('../javascript/Data.json');

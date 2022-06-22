@@ -1,5 +1,5 @@
-const {Tab} = require('../javascript/shared.js');
-const {Prefs, Samples, CreateAlert} = require('../javascript/shared.js');
+const {Tab} = require('../javascript/utils.js');
+const {Prefs, Samples, CreateAlert} = require('../javascript/utils.js');
 
 const { execSync } = require("child_process");
 const {ColorTranslator} = require('colortranslator')
@@ -24,8 +24,6 @@ let T3 = document.getElementById('T3')
 let T4 = document.getElementById('T4')
 let T5 = document.getElementById('T5')
 
-
-
 if(Prefs.obj.RememberTargets == true) {
 	T1.checked = Prefs.obj.Targets[0];
 	T2.checked = Prefs.obj.Targets[1];
@@ -44,10 +42,8 @@ if(Prefs.obj.RememberTargets == true) {
 		Prefs.Targets([T1.checked,T2.checked,T3.checked,T4.checked,Event.target.checked])});
 }
 
-
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`;
 let BlankConstant = `{"key":"constantValue","type":"vec4","value":[0.5,0.5,0.5,1]}`;
-
 
 let Palette = [new ColorHandler];
 
@@ -246,7 +242,6 @@ function ChangeColorCount(Count) {
 	document.getElementById("Slider-Input").value = Palette.length;
 }
 
-
 function OpenBin() {
 	document.getElementById('CheckToggle').checked = false
 	if (FileSaved != true) {
@@ -283,17 +278,16 @@ function LoadFile(SkipAlert = true) {
 	ParticleList.innerText = "";
 	let Container = File.entries.value.items;
 	if (/ValueColor/.test(JSON.stringify(Container)) == false) {
-		UTIL.CreateAlert("No color values found", false);
+		CreateAlert("No color values found", false);
 		return 0;
 	}
-
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		if (Container[PO_ID].value.name == "VfxSystemDefinitionData") {
 			ParticleName = Container[PO_ID].value.items.find((item) => {
 				if (item.key == "particleName") {
 					return item;
 				}
-			}).value;
+			}).value ?? `unknown ${PO_ID}`;
 
 			let ParticleDiv = document.createElement("div");
 			ParticleDiv.id = Container[PO_ID].key;
@@ -354,7 +348,7 @@ function LoadFile(SkipAlert = true) {
 
 						let OutlineDiv = document.createElement("div")
 						if (OFCID >= 0) {
-							let OFColor = GetColor(RDProp[OFCID].value.items)
+							let OFColor = GetColor(RDProp[OFCID])
 							OFBG = ToBG(OFColor)
 
 							OutlineDiv.onclick = () => {
@@ -369,7 +363,7 @@ function LoadFile(SkipAlert = true) {
 
 						let ReflectiveDiv = document.createElement("div")
 						if (RFCID >= 0) {
-							let RFColor = GetColor(RDProp[RFCID].value.items)
+							let RFColor = GetColor(RDProp[RFCID])
 							RFBG = ToBG(RFColor)
 
 							ReflectiveDiv.onclick = () => {
@@ -676,7 +670,7 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 }
 function RecolorSelected() {
 	FileSaved = false;
-	FileCache.push(File);
+	FileCache.push(JSON.parse(JSON.stringify(File)));
 	let Container = File.entries.value.items;
 
 	for (let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++) {
@@ -704,7 +698,7 @@ function RecolorSelected() {
 
 					if (OFCID >= 0 && T1.checked) {
 						RDProp[OFCID] = RecolorProp(RDProp[OFCID], true)
-						let OFColor = GetColor(RDProp[OFCID].value.items)
+						let OFColor = GetColor(RDProp[OFCID])
 						DomEmitter[2].style.background = ToBG(OFColor)
 
 						DomEmitter[2].onclick = () => {
@@ -716,7 +710,7 @@ function RecolorSelected() {
 					}
 					if (RFCID >= 0 && T2.checked) {
 						RDProp[RFCID] = RecolorProp(RDProp[RFCID], true)
-						let RFColor = GetColor(RDProp[RFCID].value.items)
+						let RFColor = GetColor(RDProp[RFCID])
 						DomEmitter[3].style.background = ToBG(RFColor)
 
 						DomEmitter[3].onclick = () => {
@@ -768,7 +762,7 @@ function RecolorSelected() {
 
 function Undo() {
 	if (FileCache.length > 0) {
-		File = FileCache[FileCache.length - 1]
+		File = JSON.parse(JSON.stringify(FileCache[FileCache.length - 1]))
 		FileCache.pop();
 		LoadFile(true);
 	}

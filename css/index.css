@@ -674,7 +674,8 @@ input[type="color"]::-webkit-color-swatch {
   box-shadow: var(--shadow);
   overflow: hidden;
   margin-inline: 5rem;
-  margin-block: 2.5rem;
+  margin-block:2.5rem;
+  max-height: calc(100vh - 7.5rem);
   padding: 1rem;
   background-color: var(--bg-100);
   border-radius: 0.4rem;

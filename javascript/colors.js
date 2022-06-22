@@ -2,6 +2,8 @@ const {ColorTranslator} = require('colortranslator')
 let x = Math.random
 
 function GetColor(Property){
+    if(Property?.type == 'vec4') return [new ColorHandler(Property.value)]
+    
     let DynID = Property.findIndex(item => item.key == 'dynamics')
     let ConstID = Property.findIndex(item => item.key == 'constantValue')
     if (DynID >= 0) {
