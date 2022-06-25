@@ -486,12 +486,12 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #Skin-Ideas,
-#Bin-List,
+#Unlink-List,
 #Idea-List {
   flex: 1;
 }
 
-#Bin-List,
+#Unlink-List,
 #Idea-List,
 .Usage-Information {
   color: var(--text-primary);
@@ -510,7 +510,7 @@ input[type="color"]::-webkit-color-swatch {
   color: var(--accent)
 }
 
-#Bin-List {
+#Unlink-List {
   padding-block: 1rem;
 }
 
@@ -525,6 +525,9 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 0.4rem;
   overflow-x: hidden;
   overflow-y: scroll;
+}
+.Saved-Color-Item{
+  height: 1.6rem;
 }
 
 .Particle-Div {

@@ -30,7 +30,7 @@
         </button>
         <button onclick="Tab('./xrgba.html')" class="NavButton">
             <img class="Icon" src="../css/svg/drop.svg"></img>
-            <div class="TabTitle">xrgb</div>
+            <div class="TabTitle">xrgba</div>
         </button>
         <button onclick="Tab('./settings.html')" class="NavButton">
             <img class="Icon" src="../css/svg/cog.svg"></img>
@@ -43,8 +43,8 @@
                 <button class="Flex-1" onclick="SelectWadFolder()" id="Select-Files">Select Wad Folder</button>
             </div>
             <div class="Input-Group">
-                <div class="Label" id="Bin-Count">0/0</div>
-                <progress id="Progress-Range" type="range" value="0" style="padding-inline: 0;"></progress>
+                <div class="Label Flex-1" id="Bin-Count">...</div>
+                <progress id="Progress-Range" class="Flex-2" type="range" value="0" style="padding-inline: 0;"></progress>
             </div>
             <div class="Margin-Block Usage-Information">
                 Usage Information:
@@ -76,13 +76,13 @@
                 </ol>
                 <mark>More Features will be added eventually</mark>
             </div>
-            <div id="Bin-List">
+            <div id="Unlink-List">
                 
             </div>
             <div class="Input-Group">
-                <button onclick="DeleteUnused()" class="Flex-1">Delete</button>
+                <button onclick="DeleteUnused()" id="Delete-Unused" class="Flex-1">Delete</button>
             </div>
-            <script src="../javascript/tabs/bintex.js"></script>
+            <script src="../javascript/tabs/bintex.js" defer></script>
         </div>
     </div>
 

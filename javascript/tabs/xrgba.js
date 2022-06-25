@@ -1,123 +1,176 @@
 
-window.location.href = "C:/Projects/hacksaw/html/binsplash.html"
-// let SavedColorDiv = document.getElementById("Saved-Color-List");
-//     SavedColorDiv.innerHTML = null;
-// Prefs.SavedColors?.map((item, ID) => {
-//     let SampleDom = document.createElement("div");
-//     SampleDom.className = "Input-Group Sample";
-//     SampleDom.style.background = item;
+const {Tab} = require('../javascript/utils.js');
 
-//     let SwapDiv = document.createElement("div");
-//     SwapDiv.className = "Flex";
-    
-//     SampleDom.appendChild(SwapDiv);
+const {ColorHandler, GetColor, ToBG} = require('../javascript/colors.js');
+const {ColorTranslator} = require('colortranslator')
+const path = require('path');
+const { ipcRenderer } = require('electron');
+const fs = require('fs');
 
-//     let Delete = document.createElement("button");
-//     Delete.innerText = "Delete";
-//     Delete.onclick = (Event) => {
-//         Prefs.SavedColors.splice(ID, 1);
-//         Event.target.parentNode.remove();
-//         UTIL.SavePrefs();
-//         PerTabInit(true);
-//     };
-//     SampleDom.appendChild(Delete);
+let Color = new ColorHandler();
 
-//     SavedColorDiv.appendChild(SampleDom);
-// });
+let ColorInput = document.getElementById('RGB')
+let Hex = document.getElementById('Hex')
+let XRGBA = document.getElementById('XRGB')
+let XR = document.getElementById('XR')
+let XG = document.getElementById('XG')
+let XB = document.getElementById('XB')
+let XA = document.getElementById('XA')
 
-// const CC = require('color-convert')
-// const { getColorHexRGB } = require('electron-color-picker');
-// let ColorPicker = document.getElementById('Color-Picker')
-// let ColorInput = document.getElementById('RGB')
-// let Hex = document.getElementById('Hex')
-// let EyeDropper = document.getElementById('Eye-Dropper')
+SetFields()
+function SetFields(){
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  Hex.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XR.value = temp[0]
+  XG.value = temp[1]
+  XB.value = temp[2]
+  XA.value = temp[3]
+}
 
-// const {Tab} = require('../javascript/shared.js');
+ColorInput.addEventListener('input',(e)=>{
+  Color.input(e.target.value);
+  let temp = Round()
+  Hex.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XR.value = temp[0]
+  XG.value = temp[1]
+  XB.value = temp[2]
+  XA.value = temp[3]
+})
+Hex.addEventListener('input',(e)=>{
+  let fixed = e.target.value
+  while (fixed.length < 7) fixed = fixed + '0'
+  Color.input(fixed);
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XR.value = temp[0]
+  XG.value = temp[1]
+  XB.value = temp[2]
+  XA.value = temp[3]
+})
+XRGBA.addEventListener('input',(e)=>{
+  let list = e.target.value.slice(1,e.target.value.length-2).split(',')
+  Color = new ColorHandler([list[0],list[1],list[2],list[3]])
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  Hex.value = Color.obj.HEX
+  XR.value = temp[0]
+  XG.value = temp[1]
+  XB.value = temp[2]
+  XA.value = temp[3]
+})
+XR.addEventListener('input',(e)=>{
+  Color = new ColorHandler([e.target.value,Color.vec4[1],Color.vec4[2],Color.vec4[3]])
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  Hex.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XG.value = temp[1]
+  XB.value = temp[2]
+  XA.value = temp[3]
+})
+XG.addEventListener('input',(e)=>{
+  Color = new ColorHandler([Color.vec4[0],XG.value,Color.vec4[2],Color.vec4[3]])
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  Hex.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XR.value = temp[0]
+  XB.value = temp[2]
+  XA.value = temp[3]
+})
+XB.addEventListener('input',(e)=>{
+  Color = new ColorHandler([Color.vec4[0],Color.vec4[1],XB.value,Color.vec4[3]])
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  Hex.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XR.value = temp[0]
+  XG.value = temp[1]
+  XA.value = temp[3]
+})
+XA.addEventListener('input',(e)=>{
+  Color.input(Hex.value,e.target.value,0,1);
+  let temp = Round()
+  ColorInput.value = Color.obj.HEX
+  Hex.value = Color.obj.HEX
+  XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
+  XR.value = temp[0]
+  XG.value = temp[1]
+  XB.value = temp[2]
+})
 
-// let XRGB = document.getElementById('XRGB')
-// let XR = document.getElementById('XR')
-// let XG = document.getElementById('XG')
-// let XB = document.getElementById('XB')
+function Round(){
+  let dPoint = 10000000
+  return [
+    Math.ceil(Color.vec4[0]*dPoint)/dPoint,
+    Math.ceil(Color.vec4[1]*dPoint)/dPoint,
+    Math.ceil(Color.vec4[2]*dPoint)/dPoint,
+    Math.ceil(Color.vec4[3]*dPoint)/dPoint
+  ]
+}
 
-// ColorInput.value = '#' + CC.rgb.hex(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))
+const { getColorHexRGB } = require('electron-color-picker');
 
-// const PickScreen = async () => {
-//     const color = await getColorHexRGB().catch((error) => {
-//         console.warn('[ERROR] getColor', error)
-//         return ''
-//     })
-//     ColorInput.value = color
+document.getElementById('Eye-Dropper').addEventListener('click',async(e)=>{
+  let NewColor = await getColorHexRGB().catch((error) => {
+    console.warn('[ERROR] getColor', error)
+    return ''
+  }) 
+  Color.input(NewColor)
+  SetFields()
+})
 
-//     Hex.value = color
-//     let temp = CC.hex.rgb(color)
-//     temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
-//     temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
-//     temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
-//     XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
-//     XR.value = temp[0]
-//     XG.value = temp[1]
-//     XB.value = temp[2]
-// }
-// EyeDropper.onclick = () => PickScreen()
-// // ColorPickerInputs.appendChild(EyeDropper)
-// ColorInput.oninput = (E) => {
-//     Hex.value = E.target.value
-//     let temp = CC.hex.rgb(E.target.value)
-//     temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
-//     temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
-//     temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
-//     XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
-//     XR.value = temp[0]
-//     XG.value = temp[1]
-//     XB.value = temp[2]
-// }
-// Hex.oninput = (Event) => {
-//     if (!Event.target.value.startsWith('#')) {
-//         Event.target.value = '#' + Event.target.value
-//     }
+const UserData = ipcRenderer.sendSync("UserPath")
+const xRGBAPath = path.join(UserData, "xRGBADB.json")
 
-//     ColorInput.value = Event.target.value
+let SavedColorDiv = document.getElementById("Saved-Color-List")
 
-//     let temp = CC.hex.rgb(Event.target.value)
-//     temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
-//     temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
-//     temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
-//     XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
-//     XR.value = temp[0]
-//     XG.value = temp[1]
-//     XB.value = temp[2]
-// }
-// Hex.onchange = (Event) => {
-//     ColorInput.value = Event.target.value
+function SaveColor(){
+  SavedColors.add(Color)
+  SavedColors.render()
+}
+class xRGBADB {
+	constructor(xRGBAPath) {
+		this.obj = JSON.parse(fs.readFileSync(xRGBAPath));
+	}
+  
+  render(){
+    SavedColorDiv.innerHTML = ""
+    for(let i = 0; i < this.obj.length; i++){
+      let SampleDom = document.createElement("div");
+      SampleDom.className = "Input-Group Sample Pointer";
+      SampleDom.style.backgroundColor = `RGB(${this.obj[i][0]*255},${this.obj[i][1]*255},${this.obj[i][2]*255})`
 
-//     let temp = CC.hex.rgb(Event.target.value)
-//     temp[0] = parseFloat(UTIL.ReMap(temp[0], [0, 255], [0, 1]).toPrecision(6))
-//     temp[1] = parseFloat(UTIL.ReMap(temp[1], [0, 255], [0, 1]).toPrecision(6))
-//     temp[2] = parseFloat(UTIL.ReMap(temp[2], [0, 255], [0, 1]).toPrecision(6))
-//     XRGB.value = `${temp[0]} , ${temp[1]} , ${temp[2]}`
-//     XR.value = temp[0]
-//     XG.value = temp[1]
-//     XB.value = temp[2]
-// }
-// XRGB.oninput = (Event) => {
-//     let temp = Event.target.value.split(",")
-//     XR.value = temp[0]
-//     XG.value = temp[1]
-//     XB.value = temp[2]
-//     temp[0] = UTIL.ReMap(temp[0], [0, 1], [0, 255])
-//     temp[1] = UTIL.ReMap(temp[1], [0, 1], [0, 255])
-//     temp[2] = UTIL.ReMap(temp[2], [0, 1], [0, 255])
-//     Hex.value = `#${CC.rgb.hex(temp[0], temp[1], temp[2])}`
-//     ColorInput.value = Hex.value
-// }
+      SampleDom.onclick =()=>{
+        Color = new ColorHandler([this.obj[i][0],this.obj[i][1],this.obj[i][2],this.obj[i][3]])
+        SetFields()
+      }
 
-// function SaveColor() {
-//     if (Prefs.SavedColors == undefined) {
-//         Prefs.SavedColors = []
-//     }
-//     else {
-//         Prefs.SavedColors.push(ColorInput.value)
-//     }
-//     UTIL.SavePrefs()
-//     PerTabInit(true)
-// }
+      let Delete = document.createElement("button");
+      Delete.innerText = "Delete";
+      Delete.onclick = (Event) => {
+        this.obj.splice(i,1)
+        this.save()
+        this.render()
+      };
+      SampleDom.appendChild(Delete);
+      SavedColorDiv.appendChild(SampleDom)
+    }
+  }
+
+  add(Color) {
+		this.obj.push(
+			Color.vec4
+		)
+		this.save()
+	}
+
+	save() { fs.writeFileSync(xRGBAPath, JSON.stringify(this.obj, null, 2)); }
+}
+const SavedColors = new xRGBADB(xRGBAPath);
+
+SavedColors.render()

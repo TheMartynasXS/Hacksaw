@@ -8,6 +8,7 @@ const fs = require("fs");
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json")
 
 const SamplePath = path.join(app.getPath("userData"), "SampleDB.json")
+const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json")
 
 const createWindow = (htmlDir) => {
     const mainWindow = new BrowserWindow({
@@ -31,6 +32,9 @@ const createWindow = (htmlDir) => {
 app.whenReady().then(() => {
     if (!fs.existsSync(SamplePath)) {
         fs.writeFileSync(SamplePath, "[]", "utf8")
+    }
+    if (!fs.existsSync(xRGBAPath)) {
+        fs.writeFileSync(xRGBAPath, "[]", "utf8")
     }
     if (!fs.existsSync(PrefsPath)) {
         fs.writeFileSync(PrefsPath, DefaultPreferences, "utf8")

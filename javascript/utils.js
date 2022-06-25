@@ -382,6 +382,8 @@ function CreateAlert(Body, Copy = false, Action = null) {
 
 }
 
+
+
 module.exports = {
 	Tab, Prefs, Samples, Sleep, CreateAlert
 }

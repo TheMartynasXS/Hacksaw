@@ -30,7 +30,7 @@
         </button>
         <button onclick="Tab('./xrgba.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/drop.svg"></img>
-            <div class="TabTitle">xrgb</div>
+            <div class="TabTitle">xrgba</div>
         </button>
         <button onclick="Tab('./settings.html')" class="NavButton">
             <img class="Icon" src="../css/svg/cog.svg"></img>
@@ -39,33 +39,23 @@
     </div>
     <div id="Main" class="Main Flex-1">
         <div id="Splash" class="Tab Flex Flex-Col">
-
             <div class="Input-Group"><button id="Eye-Dropper">EyeDropper</button><input id="RGB" type="color">
                 <div class="Label">Hex:</div><input id="Hex" class="Flex-Auto" maxlength="7">
                 <button class="Flex-1" onclick="SaveColor()">Save Color</button>
             </div>
-            <div class="Flex-Col">
+            <div class="Flex-Col Margin-Bottom">
                 <div class="Input-Group">
-                    <div class="Label">XRGB:</div><input id="XRGB" class="Flex-1">
+                    <div class="Label">XRGBA:</div><input id="XRGB" class="Flex-1">
                 </div>
                 <div class="Input-Group">
-                    <div class="Label">XR:</div><input id="XR" class="Flex-1">
-                    <div class="Label">XG:</div><input id="XG" class="Flex-1">
-                    <div class="Label">XB:</div><input id="XB" class="Flex-1">
+                    <div class="Label">XR:</div><input id="XR" type="number" class="Flex-1">
+                    <div class="Label">XG:</div><input id="XG" type="number" class="Flex-1">
+                    <div class="Label">XB:</div><input id="XB" type="number" class="Flex-1">
+                    <div class="Label">XA:</div><input id="XA" type="number" class="Flex-1">
                 </div>
             </div>
             <div id="Saved-Color-List" class="Flex-1">
-
             </div>
-
-            <!-- <div class="AlertModalBG" id="AlertModalBG">
-                <div class="AlertModal">
-                    <button class="IconButton" onclick="document.getElementById('AlertModalBG').remove()">
-                        <img class="Icon" src="../css/svg/clear.svg"></img>
-                    </button>
-                </div>
-            </div> -->
-
             <script src="../javascript/tabs/xrgba.js"></script>
         </div>
     </div>

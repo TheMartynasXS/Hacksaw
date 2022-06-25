@@ -1,6 +1,7 @@
 const {ColorTranslator} = require('colortranslator')
-let x = Math.random
 
+function Clamp (num, min = 0, max = 1){return Math.min(Math.max(num, min), max);}
+let x = Math.random
 function GetColor(Property){
     if(Property?.type == 'vec4') return [new ColorHandler(Property.value)]
     
@@ -40,19 +41,19 @@ function ToBG(Palette){
 
 class ColorHandler {
     constructor(vec4 = [x(),x(),x(),x()],time = 0){
-        this.vec4 = vec4
+        this.vec4 = [Clamp(vec4[0]),Clamp(vec4[1]),Clamp(vec4[2]),Clamp(vec4[3])]
         this.time = time
         this.obj = new ColorTranslator({
-            r:vec4[0]*255,
-            g:vec4[1]*255,
-            b:vec4[2]*255,
-            a:vec4[3]
+            r:this.vec4[0]*255,
+            g:this.vec4[1]*255,
+            b:this.vec4[2]*255,
+            a:this.vec4[3]
         })
     }
 
     input(hex,alpha = this.obj.A){
         this.obj = new ColorTranslator(hex)
-        this.obj.setA(alpha)
+        this.obj.setA(Clamp(alpha))
         this.vec4 = [
             this.obj.R/255,
             this.obj.G/255,
