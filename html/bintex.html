@@ -46,9 +46,8 @@
                 <div class="Label Flex-1" id="Bin-Count">...</div>
                 <progress id="Progress-Range" class="Flex-2" type="range" value="0" style="padding-inline: 0;"></progress>
             </div>
-            <div class="Margin-Block Usage-Information">
+            <div class="Margin-Block Usage-Information" style="padding-block:0.5rem">
                 Usage Information:
-                
                 <ol>
                     <li>
                         Select a folder which contains <strong>Assets</strong> and <strong>Data</strong> folders.
@@ -57,16 +56,19 @@
                         Upon completion it will generate:
                         <ul>
                             <li>
-                                <strong>Combined.json</strong>- Ordered list of files by path.
+                                <strong>.BTX</strong> - temporary bin files used to read for the unused files.
                             </li>
                             <li>
-                                <strong>Separate.json</strong>- Ordered list of files by bin which file is mentioned in.
+                                <strong>Combined.json</strong> - Ordered list of files by path.
                             </li>
                             <li>
-                                <strong>Missing.json</strong>- Files that are missing from your folder.
+                                <strong>Separate.json</strong> - Ordered list of files by bin which file is mentioned in.
                             </li>
                             <li>
-                                List of files that are going to be deleted from the directory down below.
+                                <strong>Missing.json</strong> - Files that are missing from your folder.
+                            </li>
+                            <li>
+                                List of files that are going to be <mark>deleted</mark> from the directory down below.
                             </li>
                         </ul>
                     </li>
@@ -76,11 +78,13 @@
                 </ol>
                 <mark>More Features will be added eventually</mark>
             </div>
-            <div id="Unlink-List">
+            <div id="Unlink-List" class="Margin-Bottom">
                 
             </div>
             <div class="Input-Group">
-                <button onclick="DeleteUnused()" id="Delete-Unused" class="Flex-1">Delete</button>
+                <button onclick="DeleteUnused()" id="Delete-Unused" class="Flex-1">
+                    <strong><mark>Delete</mark></strong>
+                </button>
             </div>
             <script src="../javascript/tabs/bintex.js" defer></script>
         </div>

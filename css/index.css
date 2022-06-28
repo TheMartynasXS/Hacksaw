@@ -302,6 +302,9 @@ progress::-webkit-progress-value {
 progress.Progress-Complete::-webkit-progress-value {
   background-color: var(--accent-success);
 }
+progress.Progress-Delete::-webkit-progress-value {
+  background-color: var(--accent-failure);
+}
 
 #Slider-Input {
   margin-block-end: 0.5rem;
@@ -786,6 +789,13 @@ input[type="color"]::-webkit-color-swatch {
   background: var(--accent);
 }
 
-.Outline {
-  border: 2px solid var(--accent);
+.Confirm-0{
+  --gap:0.2rem;
+  outline: var(--gap) dotted var(--accent-failure);
+}
+.Confirm-1{
+  outline: var(--gap) dashed var(--accent-failure);
+}
+.Confirm-2{
+  outline: var(--gap) solid var(--accent-failure);
 }

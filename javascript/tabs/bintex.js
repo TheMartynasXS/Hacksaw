@@ -11,6 +11,8 @@ const UnlinkList = document.getElementById("Unlink-List");
 let Progress = document.getElementById('Progress-Range')
 let BinCount = document.getElementById('Bin-Count')
 
+let UnusedButton = document.getElementById('Delete-Unused')
+
 let ParticleArray = [];
 
 let Files2Delete = [];
@@ -31,7 +33,7 @@ async function SelectWadFolder(Path = undefined){
       CreateAlert("Invalid Path")
       return 0;
   }
-  document.getElementById('Delete-Unused').disabled = true
+  UnusedButton.disabled = true
   let Progress = document.getElementById('Progress-Range')
   let BinCount = document.getElementById('Bin-Count')
   Progress.classList.remove('Progress-Complete')
@@ -51,11 +53,16 @@ async function SelectWadFolder(Path = undefined){
   await ReadBTX()
 }
 
+
 let SeparateOutput = []
 let CombinedOutput = []
 let MissingOutput = []
 
 async function ReadBTX(){
+  SeparateOutput = []
+  CombinedOutput = []
+  MissingOutput = []
+
   for(let i = 0; i < BTXFiles.length; i++){
     let ParticleObject = JSON.parse(fs.readFileSync(BTXFiles[i])).entries.value.items
     for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
@@ -111,53 +118,70 @@ async function ReadBTX(){
   fs.writeFileSync(`${WadPath}\\Missing.json`, JSON.stringify(MissingOutput,null,2))
 
   await GetUnused()
-  document.getElementById('Delete-Unused').disabled = false
 }
 
 async function GetUnused(){
-  BinCount.innerText = `Detecting Unused - 0/...`
-
-  Progress.classList.remove('Progress-Complete')
+  //BinCount.innerText = `Detecting Unused - 0/...`
 
   let Assets 
   Assets = getAllFiles(WadPath, Assets).filter(
     file => file.endsWith(".dds") || file.endsWith(".skn") || file.endsWith(".skl") || file.endsWith(".sco") || file.endsWith(".scb") || file.endsWith(".anm") || file.endsWith(".btx")
   )
   
-
   for(let i = 0; i < CombinedOutput.length; i++){
     CombinedOutput[i] = path.join(WadPath,CombinedOutput[i])
   }
 
-  Progress.max = Assets.length
+
+
+  Progress.value = Progress.max
   for(let i = 0; i < Assets.length; i++){
-    if(!CombinedOutput.includes(Assets[i])){
-      await sleep(20)
-      BinCount.innerText = `Detecting Unused - ${i + 1}/${Progress.max}`
-      Progress.value = i + 1
+    if(!CombinedOutput.includes(Assets[i]) && /(\\particles\\|\\mod\\|shared\\|\.btx)/gi.test(Assets[i])){
       Files2Delete.push(Assets[i])
       let FileName = document.createElement('div')
       FileName.innerText = Assets[i].slice(WadPath.length + 1)
       UnlinkList.appendChild(FileName)
     }
   }
-  Progress.classList.add('Progress-Complete')
+
+  BinCount.innerText = `Detected Unused - ${Files2Delete.length}`
+  UnusedButton.disabled = false
 }
 
+let Confirm = 0
 async function DeleteUnused(){
-
+  switch (Confirm) {
+    case 2:
+    case 1:
+    case 0:
+      
+      console.log(Confirm)
+      UnusedButton.classList.add(`Confirm-${Confirm}`)
+      Confirm++
+      return 0
+    default:
+      Confirm = 0
+      break;
+  }
+  UnusedButton.className = "Flex-1"
+  
+  Progress.classList.replace('Progress-Complete','Progress-Delete')
   Progress.max = Files2Delete.length
   BinCount.innerText = `Deleting Unused - 0/${Progress.max}`
 
   if(Files2Delete.length > 0){
     for(let i = 0; i < Files2Delete.length; i++){
       await sleep(20)
+      Progress.value = i
+      UnlinkList.removeChild(UnlinkList.firstChild)
       fs.unlinkSync(Files2Delete[i])
       BinCount.innerText = `Deleting Unused - ${i + 1}/${Progress.max}`
     }
   }else{
     CreateAlert("No files to delete")
   }
+  UnlinkList.innerText = ""
+  Progress.classList.replace('Progress-Delete','Progress-Complete')
 }
 
 function getAllFiles(dir, files_) {
