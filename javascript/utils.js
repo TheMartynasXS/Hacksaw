@@ -2,20 +2,15 @@ const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { ColorHandler, ToBG } = require('./colors.js');
-const {clipboard} = require('electron');
+const { clipboard } = require('electron');
 
 function Tab(Location, FileSaved = true) {
-	if (typeof FileSaved != "undefined") {
-		if (FileSaved == true) {
-			window.location.href = Location;
-		} else {
-			CreateAlert(
-				"You may have forgotten to save your bin.",
-				"Save before proceeding please."
-			);
-		}
-	} else {
+	if (FileSaved == true) {
 		window.location.href = Location;
+	} else {
+		CreateAlert(
+			"You may have forgotten to save your bin.\nSave before proceeding please.",
+		false	, { function: () => { window.location.href = Location }, Title: 'Leave Anyways' });
 	}
 }
 
@@ -34,12 +29,12 @@ class Preferences {
 		this.save();
 	}
 
-	RememberTargets(Remember = false){
+	RememberTargets(Remember = false) {
 		this.obj.RememberTargets = Remember;
 		this.save()
 	}
 	Targets(T = undefined) {
-		
+
 		this.obj.Targets = T;
 		this.save();
 	}
@@ -70,7 +65,7 @@ class SampleDB {
 		}
 	}
 
-	reload(){
+	reload() {
 		this.obj = JSON.parse(fs.readFileSync(SamplePath));
 
 		for (let i = 0; i < this.obj.length; i++) {
@@ -107,40 +102,40 @@ class SampleDB {
 		}
 	}
 
-	import(){
+	import() {
 		let File = ipcRenderer.sendSync("FileSelect", [
 			"Import Samples",
 			"Json",
 		])
 		let Samples = JSON.parse(fs.readFileSync(File, "utf8"))
-		if(Samples.length < 1){return 0}
+		if (Samples.length < 1) { return 0 }
 
-		if(Samples[0].Palette != undefined){
+		if (Samples[0].Palette != undefined) {
 			this.obj = this.obj.concat(Samples)
 		}
-		else{
-			for(let i = 0; i < Samples.length; i++){
+		else {
+			for (let i = 0; i < Samples.length; i++) {
 				let NewPalette = []
-				for(let j = 0; j < Samples[i].value.length; j++){
+				for (let j = 0; j < Samples[i].value.length; j++) {
 					NewPalette.push({
 						vec4: [
-							Samples[i].value[j].color[0]/255,
-						 	Samples[i].value[j].color[1]/255,
-						  Samples[i].value[j].color[2]/255,
-							Samples[i].value[j].opacity/100
+							Samples[i].value[j].color[0] / 255,
+							Samples[i].value[j].color[1] / 255,
+							Samples[i].value[j].color[2] / 255,
+							Samples[i].value[j].opacity / 100
 						],
-						time: Samples[i].value[j].time/100,
+						time: Samples[i].value[j].time / 100,
 
 					})
 				}
 				this.obj.push(
 					{
-						Name:	Samples[i].name,
+						Name: Samples[i].name,
 						Palette: NewPalette
 					}
 				)
 			}
-			
+
 		}
 		this.save()
 		document.getElementById('AlertModalBG').remove()
@@ -149,7 +144,7 @@ class SampleDB {
 	}
 
 	show() {
-		if(document.getElementById('AlertModalBG') != undefined) return null
+		if (document.getElementById('AlertModalBG') != undefined) return null
 		let AlertModalBG = document.createElement('div')
 		AlertModalBG.className = "AlertModalBG"
 		AlertModalBG.id = "AlertModalBG"
@@ -171,7 +166,7 @@ class SampleDB {
 		let Import = document.createElement("button")
 		Import.className = "Flex-1"
 		Import.textContent = "Import"
-		Import.onclick = () => {this.import()}
+		Import.onclick = () => { this.import() }
 		SampleFunctions.appendChild(Import)
 
 		Modal.appendChild(SampleFunctions)
@@ -261,7 +256,7 @@ class SampleDB {
 	}
 
 	name(ID) {
-		if(document.getElementById('AlertModalBG') != undefined) return null
+		if (document.getElementById('AlertModalBG') != undefined) return null
 		let tempName = this.obj[ID].Name
 		let AlertModalBG = document.createElement('div')
 		AlertModalBG.className = "AlertModalBG"
@@ -371,7 +366,7 @@ function CreateAlert(Body, Copy = false, Action = null) {
 			AlertModalBG.remove()
 		}
 		AlertButtonGroup.appendChild(Custom)
-		
+
 	}
 
 	AlertModal.appendChild(AlertContent)

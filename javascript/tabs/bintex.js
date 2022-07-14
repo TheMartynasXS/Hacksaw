@@ -53,7 +53,6 @@ async function SelectWadFolder(Path = undefined){
   await ReadBTX()
 }
 
-
 let SeparateOutput = []
 let CombinedOutput = []
 let MissingOutput = []

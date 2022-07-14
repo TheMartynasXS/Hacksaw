@@ -55,7 +55,7 @@ app.on("window-all-closed", () => {
 //create preference file if it doesn't exist
 const DefaultPreferences = JSON.stringify(
     {
-        PreferredMode: "false",
+        PreferredMode: false,
         IgnoreBW: true,
         RitoBinPath: "",
         RememberTargets: false,

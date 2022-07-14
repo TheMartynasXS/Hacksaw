@@ -1,13 +1,13 @@
-const {Tab} = require('../javascript/utils.js');
-const {Prefs, Samples, CreateAlert} = require('../javascript/utils.js');
+const { Tab } = require('../javascript/utils.js');
+const { Prefs, Samples, CreateAlert, Sleep } = require('../javascript/utils.js');
 
 const { execSync } = require("child_process");
-const {ColorTranslator} = require('colortranslator')
+const { ColorTranslator } = require('colortranslator')
 const { getColorHexRGB } = require("electron-color-picker");
-const {ipcRenderer} = require('electron');
+const { ipcRenderer } = require('electron');
 const fs = require('fs')
 
-const {ColorHandler, GetColor, ToBG} = require('../javascript/colors.js');
+const { ColorHandler, GetColor, ToBG } = require('../javascript/colors.js');
 
 let FileCache = [];
 let FileHistory = [];
@@ -24,22 +24,27 @@ let T3 = document.getElementById('T3')
 let T4 = document.getElementById('T4')
 let T5 = document.getElementById('T5')
 
-if(Prefs.obj.RememberTargets == true) {
+if (Prefs.obj.RememberTargets == true) {
 	T1.checked = Prefs.obj.Targets[0];
 	T2.checked = Prefs.obj.Targets[1];
 	T3.checked = Prefs.obj.Targets[2];
 	T4.checked = Prefs.obj.Targets[3];
 	T5.checked = Prefs.obj.Targets[4];
-	T1.addEventListener("change",(Event)=>{
-		Prefs.Targets([Event.target.checked,T2.checked,T3.checked,T4.checked,T5.checked])});
-	T2.addEventListener("change",(Event)=>{
-		Prefs.Targets([T1.checked,Event.target.checked,T3.checked,T4.checked,T5.checked])});
-	T3.addEventListener("change",(Event)=>{
-		Prefs.Targets([T1.checked,T2.checked,Event.target.checked,T4.checked,T5.checked])});
-	T4.addEventListener("change",(Event)=>{
-		Prefs.Targets([T1.checked,T2.checked,T3.checked,Event.target.checked,T5.checked])});
-	T5.addEventListener("change",(Event)=>{
-		Prefs.Targets([T1.checked,T2.checked,T3.checked,T4.checked,Event.target.checked])});
+	T1.addEventListener("change", (Event) => {
+		Prefs.Targets([Event.target.checked, T2.checked, T3.checked, T4.checked, T5.checked])
+	});
+	T2.addEventListener("change", (Event) => {
+		Prefs.Targets([T1.checked, Event.target.checked, T3.checked, T4.checked, T5.checked])
+	});
+	T3.addEventListener("change", (Event) => {
+		Prefs.Targets([T1.checked, T2.checked, Event.target.checked, T4.checked, T5.checked])
+	});
+	T4.addEventListener("change", (Event) => {
+		Prefs.Targets([T1.checked, T2.checked, T3.checked, Event.target.checked, T5.checked])
+	});
+	T5.addEventListener("change", (Event) => {
+		Prefs.Targets([T1.checked, T2.checked, T3.checked, T4.checked, Event.target.checked])
+	});
 }
 
 let BlankDynamic = `{"key":"dynamics","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"VfxAnimatedColorVariableData"}}`;
@@ -62,23 +67,23 @@ window.onerror = function (msg, error, lineNo, columnNo) {
 	);
 };
 
-document.getElementById("Mode").addEventListener("change",(Event)=>{
+document.getElementById("Mode").addEventListener("change", (Event) => {
 	if (Event.target.value == "false") {
-		GradientIndicator.classList.replace("Flex","Hidden");
-		TimeContainer.classList.replace("Flex","Hidden");
+		GradientIndicator.classList.replace("Flex", "Hidden");
+		TimeContainer.classList.replace("Flex", "Hidden");
 	} else {
-		GradientIndicator.classList.replace("Hidden","Flex");
-		TimeContainer.classList.replace("Hidden","Flex");
+		GradientIndicator.classList.replace("Hidden", "Flex");
+		TimeContainer.classList.replace("Hidden", "Flex");
 	}
 })
 
-document.getElementById("Mode").selected = Prefs.obj.UseAdvanced;
+document.getElementById("Mode").value = String(Prefs.obj.UseAdvanced);
 if (document.getElementById("Mode").value == "false") {
-	GradientIndicator.classList.replace("Flex","Hidden");
-	TimeContainer.classList.replace("Flex","Hidden");
+	GradientIndicator.classList.replace("Flex", "Hidden");
+	TimeContainer.classList.replace("Flex", "Hidden");
 } else {
-	GradientIndicator.classList.replace("Hidden","Flex");
-	TimeContainer.classList.replace("Hidden","Flex");
+	GradientIndicator.classList.replace("Hidden", "Flex");
+	TimeContainer.classList.replace("Hidden", "Flex");
 }
 
 const PickScreen = async () => {
@@ -92,7 +97,7 @@ const PickScreen = async () => {
 	ColorInput.dispatchEvent(SubmitEvent);
 };
 
-function CreatePicker(Target,PaletteIndex) {
+function CreatePicker(Target, PaletteIndex) {
 	if (document.getElementById("Color-Picker") == undefined) {
 		let temp = Target.style.backgroundColor.match(/\d+/g);
 
@@ -114,11 +119,11 @@ function CreatePicker(Target,PaletteIndex) {
 		ColorInput.id = "RGB";
 		ColorInput.type = "color";
 
-		ColorInput.value = ColorTranslator.toHEX({r:temp[0],g:temp[1],b:temp[2]});
+		ColorInput.value = ColorTranslator.toHEX({ r: temp[0], g: temp[1], b: temp[2] });
 		ColorInput.oninput = (E) => {
 			Hex.value = E.target.value;
 			Target.style.backgroundColor = E.target.value;
-			Palette[PaletteIndex].input(ColorInput.value,Alpha.value)
+			Palette[PaletteIndex].input(ColorInput.value, Alpha.value)
 			MapPalette();
 		};
 		ColorPickerInputs.appendChild(ColorInput);
@@ -131,14 +136,14 @@ function CreatePicker(Target,PaletteIndex) {
 		let Hex = document.createElement("input");
 		Hex.id = "Hex";
 		Hex.className = 'Flex-1'
-		Hex.value = ColorTranslator.toHEX({r:temp[0],g:temp[1],b:temp[2]})
+		Hex.value = ColorTranslator.toHEX({ r: temp[0], g: temp[1], b: temp[2] })
 		Hex.maxLength = 7;
 		Hex.oninput = (Event) => {
 			if (!Event.target.value.startsWith("#")) {
 				Event.target.value = "#" + Event.target.value;
 			}
 			ColorInput.value = Event.target.value;
-			Palette[PaletteIndex].input(ColorInput.value,Alpha.value)
+			Palette[PaletteIndex].input(ColorInput.value, Alpha.value)
 			MapPalette();
 		};
 		ColorPickerInputs.appendChild(Hex);
@@ -155,8 +160,8 @@ function CreatePicker(Target,PaletteIndex) {
 		Alpha.maxLength = 7;
 
 		Alpha.oninput = (Event) => {
-			
-			Palette[PaletteIndex].input(ColorInput.value,Alpha.value)
+
+			Palette[PaletteIndex].input(ColorInput.value, Alpha.value)
 			MapPalette();
 		};
 
@@ -174,7 +179,7 @@ function CreatePicker(Target,PaletteIndex) {
 		document.getElementById("Slider-Container").appendChild(ColorPicker);
 	} else {
 		document.getElementById("Color-Picker").remove();
-		CreatePicker(Target,PaletteIndex);
+		CreatePicker(Target, PaletteIndex);
 	}
 }
 
@@ -189,11 +194,11 @@ function MapPalette() {
 		ColorDiv.className = "Color Flex-1";
 		ColorDiv.style.backgroundColor = PaletteItem.obj.HEX;
 		ColorDiv.onclick = (Event) => {
-			CreatePicker(Event.target,PaletteIndex);
+			CreatePicker(Event.target, PaletteIndex);
 		}
 		ColorDiv
 		ColorContainer.appendChild(ColorDiv);
-		
+
 		let TimeInput = document.createElement("input");
 		TimeInput.type = "number";
 		TimeInput.className = "Time Flex-Auto";
@@ -201,7 +206,7 @@ function MapPalette() {
 		TimeInput.max = 100;
 		TimeInput.min = 0;
 		TimeInput.onchange = (Event) => {
-			ParticleItem.time = parseInt(Event.target.value) / 100;
+			PaletteItem.time = parseInt(Event.target.value) / 100;
 			MapPalette();
 		};
 		if (PaletteIndex == 0 || PaletteIndex == Palette.length - 1) {
@@ -210,9 +215,9 @@ function MapPalette() {
 		TimeContainer.appendChild(TimeInput);
 
 		indicatorColor.push(
-			`${PaletteItem.obj.HEX} ${Math.round(PaletteItem.time*100)}%`
+			`${PaletteItem.obj.HEX} ${Math.round(PaletteItem.time * 100)}%`
 		);
-		
+
 		if (Palette.length > 1) {
 			GradientIndicator.style.background = `linear-gradient(0.25turn,${indicatorColor.join(
 				","
@@ -242,13 +247,12 @@ function ChangeColorCount(Count) {
 	document.getElementById("Slider-Input").value = Palette.length;
 }
 
-function OpenBin() {
+async function OpenBin() {
 	document.getElementById('CheckToggle').checked = false
 	if (FileSaved != true) {
 		CreateAlert(
 			"You may have forgotten to save your bin.\nSave before proceeding please.",
-			true
-		);
+			false, { function: async () => { FileSaved = true; await OpenBin() }, Title: 'Leave Anyways' });
 		FileSaved = true;
 		return 0;
 	}
@@ -262,7 +266,7 @@ function OpenBin() {
 	}
 	document.getElementById("Title").innerText = FilePath.split("\\").pop();
 	if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
-		ToJson();
+		await ToJson();
 	}
 
 	File = JSON.parse(fs.readFileSync(FilePath.slice(0, -4) + ".json", "utf-8"))
@@ -636,11 +640,11 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 				for (let i = 0; i < Palette.length; i++) {
 					let NewColor = Palette[i].vec4
 					DynTimes[i] = 1 / (Palette.length - 1) * i
-					DynColors[i] = i > TempCount - 1 ? [0,0,0,1] : DynColors[i] == undefined ? [0,0,0,1] : DynColors[i]
+					DynColors[i] = i > TempCount - 1 ? [0, 0, 0, 1] : DynColors[i] == undefined ? [0, 0, 0, 1] : DynColors[i]
 					DynColors[i][0] = NewColor[0]
 					DynColors[i][1] = NewColor[1]
 					DynColors[i][2] = NewColor[2]
-					DynColors[i][3] = UseOpacity.checked? i < Palette.length ? NewColor[3] : DynColors[i][3] : DynColors[i][3]
+					DynColors[i][3] = UseOpacity.checked ? i < Palette.length ? NewColor[3] : DynColors[i][3] : DynColors[i][3]
 
 					for (let i = 0; i < TempCount - Palette.length; i++) {
 						DynTimes.pop()
@@ -771,33 +775,38 @@ function Undo() {
 }
 
 
-function SaveBin() {
+async function SaveBin() {
 	fs.writeFileSync(
 		FilePath.slice(0, -4) + ".json",
 		JSON.stringify(File, null, 2),
 		"utf8"
 	);
-	ToBin();
+	await ToBin();
 	FileSaved = true;
 	for (let i = 0; i < FileHistory.length; i++) {
-		File = null;
-		fs.unlinkSync(FileHistory[i]);
+		if (fs.existsSync(FileHistory[i])) {
+			fs.unlinkSync(FileHistory[i]);
+		}
 	}
-	FileHistory = [];
+	FileHistory = []
 }
 
-function ToJson() {
+
+
+async function ToJson() {
+	await Sleep(200)
 	execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}"`);
 }
 
-function ToBin() {
-	try{
+async function ToBin() {
+	await Sleep(200)
+	try {
 		let res = execSync(
 			`"${Prefs.obj.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}"`
 		);
 		CreateAlert("File Saved Successfully");
 	}
-	catch(err){
+	catch (err) {
 		CreateAlert(err.stderr.toString())
 	}
 }
@@ -811,3 +820,4 @@ function OpenSampleWindow() {
 }
 
 ChangeColorCount(2);
+
