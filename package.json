@@ -8,8 +8,7 @@
     "appId": "com.github.devmarcius.hacksaw",
     "win": {
       "target": [
-        "portable",
-        "zip"
+        "portable"
       ]
     },
     "nsis": {
