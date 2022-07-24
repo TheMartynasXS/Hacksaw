@@ -207,7 +207,7 @@ class SampleDB {
 
 			let UseThis = document.createElement('button')
 			UseThis.onclick = () => {
-				Palette = this.obj[ID].Palette;
+				Palette = JSON.parse(JSON.stringify(this.obj[ID].Palette));
 				AlertModalBG.remove()
 				MapPalette()
 				ChangeColorCount(this.obj[ID].length);
@@ -292,6 +292,7 @@ class SampleDB {
 	}
 
 	add(Palette) {
+
 		this.obj.push(
 			{
 				Name: `untitled ${this.obj.length + 1}`,
@@ -309,7 +310,7 @@ class SampleDB {
 				temp[i].Palette[j].obj = undefined
 			}
 		}
-		fs.writeFileSync(SamplePath, JSON.stringify(temp))
+		fs.writeFileSync(SamplePath, JSON.stringify(temp, null, 2))
 	}
 
 }

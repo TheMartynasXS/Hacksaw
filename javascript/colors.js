@@ -29,36 +29,32 @@ function GetColor(Property){
 
 function ToBG(Palette){
     if(Palette.length == 1){
-        return `${Palette[0].obj.RGB} ${Palette[0].time}%`
+        return `${Palette[0].hex} ${Palette[0].time}%`
     } else if (Palette.length > 1){
         let result = []
         for(let i = 0; i < Palette.length; i++){
-            result.push(`${Palette[i].obj.RGB} ${Math.round(Palette[i].time * 100)}%`)
+            result.push(`${Palette[i].hex} ${Math.round(Palette[i].time * 100)}% `)
         }
         return `linear-gradient(0.25turn,${result.join(', ')})`
     }
+    
 }
 
 class ColorHandler {
     constructor(vec4 = [x(),x(),x(),x()],time = 0){
         this.vec4 = [Clamp(vec4[0]),Clamp(vec4[1]),Clamp(vec4[2]),Clamp(vec4[3])]
+        this.hex = ColorTranslator.toHEX({r:vec4[0]*255,g:vec4[1]*255,b:vec4[2]*255})
         this.time = time
-        this.obj = new ColorTranslator({
-            r:this.vec4[0]*255,
-            g:this.vec4[1]*255,
-            b:this.vec4[2]*255,
-            a:this.vec4[3]
-        })
     }
 
-    input(hex,alpha = this.obj.A){
-        this.obj = new ColorTranslator(hex)
-        this.obj.setA(Clamp(alpha))
+    input(hex,alpha = this.vec4[3]){
+        let temp = ColorTranslator.toRGB(hex,false)
+        this.hex = hex
         this.vec4 = [
-            this.obj.R/255,
-            this.obj.G/255,
-            this.obj.B/255,
-            alpha
+           temp.r/255,
+           temp.g/255,
+           temp.b/255,
+           alpha
         ]
     }
 }

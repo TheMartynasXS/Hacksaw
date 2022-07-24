@@ -41,12 +41,13 @@
         <div id="Splash" class="Tab Flex Flex-Col">
             <div class="Input-Group Margin-Bottom">
                 <button class="Special-Input" onclick="OpenBin()">Open Bin</button>
-                <label class="Label Flex-1" id="Title"><strong><- Select a file</strong></label>
+                <label class="Label Flex-1" id="Title"><strong>
+                        <- Select a file</strong></label>
                 <label class="Label" id="Title"><strong>Recoloring Mode:</strong></label>
                 <select name="Mode" id="Mode">
                     <option value="random">Random</option>
                     <option value="linear">Linear</option>
-                    <option value="wrap">wrap</option>
+                    <option value="wrap">Wrap</option>
                 </select>
             </div>
             <div id="Slider-Container" class="Margin-Bottom Flex-Col">
@@ -58,20 +59,21 @@
             <div class="Input-Group">
                 <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
                     oninput="FilterParticles(this.value)">
-                    <button onclick="SaveSample()">Save Sample</button>
-                    <button onclick="OpenSampleWindow()">Color Samples</button>
+                <button onclick="SaveSample()">Save Sample</button>
+                <button onclick="OpenSampleWindow()">Color Samples</button>
             </div>
             <div class="Flex Input-Group Margin-Top">
-                <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox" onchange="CheckToggle(this)">
+                <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox"
+                    onchange="CheckToggle(this)">
                 <label class="Label Flex-5"></input>Name</label>
                 <label class="Label" style="padding:0.4rem">
-                    <input type="checkbox"  class="Type" id="T1"></input>
+                    <input type="checkbox" class="Type" id="T1"></input>
                     OC</label>
                 <label class="Label" style="padding:0.4rem">
-                    <input type="checkbox"  class="Type" id="T2"></input>
+                    <input type="checkbox" class="Type" id="T2"></input>
                     RC</label>
                 <label class="Label" style="padding:0.4rem">
-                    <input type="checkbox"  class="Type" id="T3"></input>
+                    <input type="checkbox" class="Type" id="T3"></input>
                     LC</label>
                 <label class="Label" style="padding:0.4rem">
                     <input type="checkbox" class="Type" id="T4"></input>
@@ -86,13 +88,13 @@
 
             <div class="Flex-1 Flex-Col Margin-Bottom" id="Particle-List">
             </div>
-            
+
             <div class="Input-Group">
                 <button onclick="Undo()" class="Flex-1">Undo</button>
                 <button onclick="RecolorSelected()" class="Flex-3" id="Recolor_Selected_Button">Recolor
                     Selected</button>
             </div>
-            
+
             <div class="Input-Group Margin-Top">
                 <button onclick="SaveBin()" class="Flex-1 Special-Input">Save Bin</button>
             </div>

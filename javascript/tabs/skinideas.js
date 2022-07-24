@@ -7,8 +7,7 @@ let IdeaChamp = document.getElementById("Idea-Champ");
 const DataPath = Path.join(ipcRenderer.sendSync("UserPath") + "\\Data.json");
 const {Tab} = require('../javascript/utils.js');
 
-
-let Data = require('../javascript/Data.json');
+const Data = require('../javascript/Data.json');
 
 function Generate() {
     IdeaList.innerText = "";

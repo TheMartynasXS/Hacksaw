@@ -19,7 +19,6 @@ function Stitch(){
     let DomDefData = Secondary.children[PO_ID].children
     for (let B = 1; B < Secondary.children[PO_ID].children.length; B++) {
       for (let C = DomDefData[B].children.length - 1; C >= 0; C--) {
-        //console.log(DomDefData[B].children[C])
         let DomEmitter = DomDefData[B].children[C].children
         if (DomEmitter[0].checked) {
           
@@ -125,8 +124,6 @@ function OpenSecondaryBin() {
 
         let Props = DefData[B].value.items
         for (let C = 0; C < Props.length; C++) {
-
-          //console.log(Props[C])
           if (DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData") {
             
             let Emitter = document.createElement('div')
