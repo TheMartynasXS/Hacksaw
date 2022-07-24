@@ -1,7 +1,7 @@
 {
   "name": "hacksaw",
   "productName": "hacksaw",
-  "version": "3.5.9",
+  "version": "3.5.10",
   "description": "my league modding suite",
   "main": "javascript/main_process.js",
   "build": {

@@ -55,15 +55,13 @@ app.on("window-all-closed", () => {
 //create preference file if it doesn't exist
 const DefaultPreferences = JSON.stringify(
     {
-        PreferredMode: false,
+        PreferredMode: 'random',
         IgnoreBW: true,
         RitoBinPath: "",
         RememberTargets: false,
         Targets:[false,false,false,false,true],
     }
 ,null,4)
-
-
 
 ipcMain.on("FileSelect", (event, arg) => {
     if (arg[1] == "Bin") {

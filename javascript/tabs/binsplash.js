@@ -15,8 +15,6 @@ let FileSaved = true;
 
 let RecolorMode = document.getElementById("Mode");
 let RecolorTarget = document.getElementById("Target");
-let UseTimes = document.getElementById('Use-Times');
-let UseOpacity = document.getElementById("Use-Opacity");
 
 let T1 = document.getElementById('T1')
 let T2 = document.getElementById('T2')
@@ -54,7 +52,6 @@ let Palette = [new ColorHandler];
 
 let ColorContainer = document.getElementById("Color-Container");
 let GradientIndicator = document.getElementById("Gradient-Indicator");
-let TimeContainer = document.getElementById("Time-Container");
 let OpacityContainer = document.getElementById("Opacity-Container");
 let ParticleList = document.getElementById("Particle-List");
 let SampleContainer = document.getElementById("SampleContainer");
@@ -68,22 +65,16 @@ window.onerror = function (msg, error, lineNo, columnNo) {
 };
 
 document.getElementById("Mode").addEventListener("change", (Event) => {
-	if (Event.target.value == "false") {
-		GradientIndicator.classList.replace("Flex", "Hidden");
-		TimeContainer.classList.replace("Flex", "Hidden");
-	} else {
-		GradientIndicator.classList.replace("Hidden", "Flex");
-		TimeContainer.classList.replace("Hidden", "Flex");
+	switch(Event.target.value){
+		case "random":
+			GradientIndicator.classList.replace("Flex", "Hidden");
+			break
+		default:
+			GradientIndicator.classList.replace("Hidden", "Flex");
 	}
 })
-
-document.getElementById("Mode").value = String(Prefs.obj.UseAdvanced);
-if (document.getElementById("Mode").value == "false") {
+if(document.getElementById("Mode").value == "random"){
 	GradientIndicator.classList.replace("Flex", "Hidden");
-	TimeContainer.classList.replace("Flex", "Hidden");
-} else {
-	GradientIndicator.classList.replace("Hidden", "Flex");
-	TimeContainer.classList.replace("Hidden", "Flex");
 }
 
 const PickScreen = async () => {
@@ -105,7 +96,7 @@ function CreatePicker(Target, PaletteIndex) {
 		ColorPicker.className = "Flex-Col Outline";
 		ColorPicker.id = "Color-Picker";
 		ColorPicker.position = "absolute";
-		ColorPicker.style.top = document.getElementById("Mode").value == "true" ? `12em` : "9em";
+		ColorPicker.style.top = document.getElementById("Mode").value == "random" ? "8.5em":"10em" ;
 
 		let ColorPickerInputs = document.createElement("div");
 		ColorPickerInputs.className = "Input-Group";
@@ -185,7 +176,6 @@ function CreatePicker(Target, PaletteIndex) {
 
 function MapPalette() {
 	ColorContainer.innerText = null;
-	TimeContainer.innerText = null;
 
 	let indicatorColor = [];
 
@@ -198,21 +188,6 @@ function MapPalette() {
 		}
 		ColorDiv
 		ColorContainer.appendChild(ColorDiv);
-
-		let TimeInput = document.createElement("input");
-		TimeInput.type = "number";
-		TimeInput.className = "Time Flex-Auto";
-		TimeInput.value = Math.round(PaletteItem.time * 100);
-		TimeInput.max = 100;
-		TimeInput.min = 0;
-		TimeInput.onchange = (Event) => {
-			PaletteItem.time = parseInt(Event.target.value) / 100;
-			MapPalette();
-		};
-		if (PaletteIndex == 0 || PaletteIndex == Palette.length - 1) {
-			TimeInput.disabled = true;
-		}
-		TimeContainer.appendChild(TimeInput);
 
 		indicatorColor.push(
 			`${PaletteItem.obj.HEX} ${Math.round(PaletteItem.time * 100)}%`
@@ -280,6 +255,22 @@ async function OpenBin() {
 
 function LoadFile(SkipAlert = true) {
 	ParticleList.innerText = "";
+	console.log(File.linked.value.items)
+
+	let Relative = ""
+	for (let i = 0; i < File.linked.value.items.length; i++) {
+		Relative += `<p>${File.linked.value.items[i]}</p>`
+	}
+	CreateAlert(
+		`
+			<strong>.bin files that are related to this bin</strong>
+			refer to <mark>OBSIDIAN_PACKED_MAPPING.txt</mark> for bins with long names.\n 
+			${
+				Relative
+			}
+		`
+	)
+
 	let Container = File.entries.value.items;
 	if (/ValueColor/.test(JSON.stringify(Container)) == false) {
 		CreateAlert("No color values found", false);
@@ -497,27 +488,33 @@ function ColorHelp() {
 
 function FilterParticles(FilterString) {
 	let ParticleListChildren = ParticleList.children;
-	let search = new RegExp(FilterString, "i");
-	for (let I = 0; I < ParticleListChildren.length; I++) {
-		let match =
-			ParticleListChildren[I].children[0].children[1].textContent.match(
-				search
-			);
 
-		if (match == null) {
-			ParticleListChildren[I].style.display = "none";
-			ParticleListChildren[I].children[0].children[0].checked = false;
-			for (
-				let J = 0;
-				J < ParticleListChildren[I].children[1]?.children.length;
-				J++
-			) {
-				ParticleListChildren[I].children[1].children[
-					J
-				].children[0].checked = false;
+	let search 
+	try {
+		search = new RegExp(FilterString, "i");
+	} catch (error) {}
+
+	if(search != undefined){
+		for (let I = 0; I < ParticleListChildren.length; I++) {
+			let match = ParticleListChildren[I].children[0].children[1].textContent.match(
+					search
+				);
+	
+			if (match == null) {
+				ParticleListChildren[I].style.display = "none";
+				ParticleListChildren[I].children[0].children[0].checked = false;
+				for (
+					let J = 0;
+					J < ParticleListChildren[I].children[1]?.children.length;
+					J++
+				) {
+					ParticleListChildren[I].children[1].children[
+						J
+					].children[0].checked = false;
+				}
+			} else {
+				ParticleListChildren[I].style.display = null;
 			}
-		} else {
-			ParticleListChildren[I].style.display = null;
 		}
 	}
 }
@@ -553,7 +550,7 @@ function IsBW(A, B, C) { return A == B && B == C ? A == 0 || A == 1 : false }
 
 function RecolorProp(ColorProp, ConstOnly = false) {
 	if (ConstOnly) {
-		let NewColor = RecolorMode.value == "false" ?
+		let NewColor = RecolorMode.value == "random" ?
 			Palette[Math.round(Math.random() * (Palette.length - 1))].vec4 :
 			Palette[0].vec4
 
@@ -572,106 +569,126 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 	let ConstID = PropType.findIndex(item => item.key == 'constantValue')
 	let DynID = PropType.findIndex(item => item.key == 'dynamics')
 
-	if (RecolorMode.value == "false") {
-		if (DynID >= 0) {
-			let DynValue = PropType[DynID].value.items
-			let DynTimes = DynValue[0].value.items
-			let DynColors = DynValue[1].value.items
-
-			for (let i = 0; i < DynColors.length; i++) {
-				if (!(Prefs.obj.IgnoreBW && IsBW(
-					DynColors[i][0],
-					DynColors[i][1],
-					DynColors[i][2]
-				))) {
-					let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].vec4
-					DynColors[i][0] = NewColor[0]
-					DynColors[i][1] = NewColor[1]
-					DynColors[i][2] = NewColor[2]
-				}
-			}
-
-		} else {
-			let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].vec4
-
-			if (!(Prefs.obj.IgnoreBW &&
-				IsBW(
-					PropType[ConstID].value[0],
-					PropType[ConstID].value[1],
-					PropType[ConstID].value[2]
-				))) {
-				PropType[ConstID].value[0] = NewColor[0]
-				PropType[ConstID].value[1] = NewColor[1]
-				PropType[ConstID].value[2] = NewColor[2]
-			}
-		}
-	} else if (RecolorMode.value == "true") {
-		if (Palette.length > 1 && DynID < 0) {
-			PropType[ConstID] = JSON.parse(BlankDynamic)
-		}
-		else if (Palette.length == 1 && ConstID < 0) {
-			PropType[DynID] = JSON.parse(BlankConstant)
-		}
-
-		ConstID = PropType.findIndex(item => item.key == 'constantValue')
-		DynID = PropType.findIndex(item => item.key == 'dynamics')
-
-		if (DynID >= 0) {
-			let DynValue = PropType[DynID].value.items
-			let DynTimes = DynValue[0].value.items
-			let TempCount = DynTimes.length
-			let DynColors = DynValue[1].value.items
-
-			if (DynTimes.length > Palette.length) {
-				for (let i = 0; i < Palette.length; i++) {
-					let NewColor = Palette[i].vec4
-					DynTimes[i] = UseTimes.checked ? Palette[i].time : i == Palette.length - 1 ? 1 : DynTimes[i]
-					DynColors[i][0] = NewColor[0]
-					DynColors[i][1] = NewColor[1]
-					DynColors[i][2] = NewColor[2]
-					DynColors[i][3] = UseOpacity.checked ? NewColor[3] : DynColors[i][3]
-					for (let i = 0; i < DynTimes.length - Palette.length; i++) {
-						DynTimes.pop()
-						DynColors.pop()
+	switch (RecolorMode.value) {
+		case "random":
+			if (DynID >= 0) {
+				let DynValue = PropType[DynID].value.items
+				let DynTimes = DynValue[0].value.items
+				let DynColors = DynValue[1].value.items
+	
+				for (let i = 0; i < DynColors.length; i++) {
+					if (!(Prefs.obj.IgnoreBW && IsBW(
+						DynColors[i][0],
+						DynColors[i][1],
+						DynColors[i][2]
+					))) {
+						let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].vec4
+						DynColors[i][0] = NewColor[0]
+						DynColors[i][1] = NewColor[1]
+						DynColors[i][2] = NewColor[2]
 					}
 				}
+	
+			} else {
+				let NewColor = Palette[Math.round(Math.random() * (Palette.length - 1))].vec4
+	
+				if (!(Prefs.obj.IgnoreBW &&
+					IsBW(
+						PropType[ConstID].value[0],
+						PropType[ConstID].value[1],
+						PropType[ConstID].value[2]
+					))) {
+					PropType[ConstID].value[0] = NewColor[0]
+					PropType[ConstID].value[1] = NewColor[1]
+					PropType[ConstID].value[2] = NewColor[2]
+				}
 			}
-			else if (TempCount <= Palette.length) {
-				for (let i = 0; i < Palette.length; i++) {
-					let NewColor = Palette[i].vec4
-					DynTimes[i] = 1 / (Palette.length - 1) * i
-					DynColors[i] = i > TempCount - 1 ? [0, 0, 0, 1] : DynColors[i] == undefined ? [0, 0, 0, 1] : DynColors[i]
+			break;
+		case "linear":
+			if (Palette.length > 1 && DynID < 0) {
+				PropType[ConstID] = JSON.parse(BlankDynamic)
+			}
+			else if (Palette.length == 1 && ConstID < 0) {
+				PropType[DynID] = JSON.parse(BlankConstant)
+			}
+	
+			ConstID = PropType.findIndex(item => item.key == 'constantValue')
+			DynID = PropType.findIndex(item => item.key == 'dynamics')
+	
+			if (DynID >= 0) {
+				let DynValue = PropType[DynID].value.items
+				let DynTimes = DynValue[0].value.items
+				let DynColors = DynValue[1].value.items
+	
+				for(let i = 0; i < DynTimes.length; i++) {
+					let NewColor = i > Palette.length - 1 ? Palette[Palette.length-1].vec4 :Palette[i].vec4
 					DynColors[i][0] = NewColor[0]
 					DynColors[i][1] = NewColor[1]
 					DynColors[i][2] = NewColor[2]
-					DynColors[i][3] = UseOpacity.checked ? i < Palette.length ? NewColor[3] : DynColors[i][3] : DynColors[i][3]
-
-					for (let i = 0; i < TempCount - Palette.length; i++) {
-						DynTimes.pop()
-						DynColors.pop()
-					}
+				}
+			} else {
+				let NewColor = Palette[0].vec4
+	
+				if (!(Prefs.IgnoreBW &&
+					IsBW(
+						PropType[ConstID].value[0],
+						PropType[ConstID].value[1],
+						PropType[ConstID].value[2]
+					))) {
+					PropType[ConstID].value[0] = NewColor[0]
+					PropType[ConstID].value[1] = NewColor[1]
+					PropType[ConstID].value[2] = NewColor[2]
+					PropType[ConstID].value[3] = NewColor[3]
+	
+					ColorProp.value.items = PropType
 				}
 			}
-		} else {
-			let NewColor = Palette[0].vec4
-
-			if (!(Prefs.IgnoreBW &&
-				IsBW(
-					PropType[ConstID].value[0],
-					PropType[ConstID].value[1],
-					PropType[ConstID].value[2]
-				))) {
-				PropType[ConstID].value[0] = NewColor[0]
-				PropType[ConstID].value[1] = NewColor[1]
-				PropType[ConstID].value[2] = NewColor[2]
-				PropType[ConstID].value[3] = NewColor[3]
-
-				ColorProp.value.items = PropType
+			break
+		case "wrap":
+			if (Palette.length > 1 && DynID < 0) {
+				PropType[ConstID] = JSON.parse(BlankDynamic)
 			}
-		}
+			else if (Palette.length == 1 && ConstID < 0) {
+				PropType[DynID] = JSON.parse(BlankConstant)
+			}
+	
+			ConstID = PropType.findIndex(item => item.key == 'constantValue')
+			DynID = PropType.findIndex(item => item.key == 'dynamics')
+	
+			if (DynID >= 0) {
+				let DynValue = PropType[DynID].value.items
+				let DynTimes = DynValue[0].value.items
+				let TempCount = DynTimes.length
+				let DynColors = DynValue[1].value.items
+	
+				for(let i = 0; i < DynTimes.length; i++) {
+					let NewColor = Palette[i%Palette.length].vec4
+					DynColors[i][0] = NewColor[0]
+					DynColors[i][1] = NewColor[1]
+					DynColors[i][2] = NewColor[2]
+				}
+			} else {
+				let NewColor = Palette[0].vec4
+	
+				if (!(Prefs.IgnoreBW &&
+					IsBW(
+						PropType[ConstID].value[0],
+						PropType[ConstID].value[1],
+						PropType[ConstID].value[2]
+					))) {
+					PropType[ConstID].value[0] = NewColor[0]
+					PropType[ConstID].value[1] = NewColor[1]
+					PropType[ConstID].value[2] = NewColor[2]
+					PropType[ConstID].value[3] = NewColor[3]
+	
+					ColorProp.value.items = PropType
+				}
+			}
+			break
 	}
 	return ColorProp
 }
+
 function RecolorSelected() {
 	FileSaved = false;
 	FileCache.push(JSON.parse(JSON.stringify(File)));
@@ -753,7 +770,7 @@ function RecolorSelected() {
 						DomEmitter[6].style.background = ToBG(MCColor)
 
 						DomEmitter[6].onclick = () => {
-							Palette = MCColor
+							Palette = JSON.parse(JSON.stringify(MCColor))
 							MapPalette();
 							document.getElementById("Slider-Input").value = Palette.length;
 						};
@@ -783,11 +800,6 @@ async function SaveBin() {
 	);
 	await ToBin();
 	FileSaved = true;
-	for (let i = 0; i < FileHistory.length; i++) {
-		if (fs.existsSync(FileHistory[i])) {
-			fs.unlinkSync(FileHistory[i]);
-		}
-	}
 	FileHistory = []
 }
 
@@ -804,7 +816,7 @@ async function ToBin() {
 		let res = execSync(
 			`"${Prefs.obj.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}"`
 		);
-		CreateAlert("File Saved Successfully");
+		CreateAlert("<strong>File Saved Successfully</strong><p>don't forget to delete the json files</p>");
 	}
 	catch (err) {
 		CreateAlert(err.stderr.toString())

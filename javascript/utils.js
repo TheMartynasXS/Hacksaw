@@ -10,7 +10,7 @@ function Tab(Location, FileSaved = true) {
 	} else {
 		CreateAlert(
 			"You may have forgotten to save your bin.\nSave before proceeding please.",
-		false	, { function: () => { window.location.href = Location }, Title: 'Leave Anyways' });
+			false, { function: () => { window.location.href = Location }, Title: 'Leave Anyways' });
 	}
 }
 
@@ -24,8 +24,8 @@ class Preferences {
 		this.obj = JSON.parse(fs.readFileSync(PrefsPath));
 	}
 
-	UseAdvanced(Mode = false) {
-		this.obj.UseAdvanced = Mode;
+	SetMode(Mode = 'linear') {
+		this.obj.PreferredMode = Mode;
 		this.save();
 	}
 
@@ -333,7 +333,7 @@ function CreateAlert(Body, Copy = false, Action = null) {
 
 	let AlertContent = document.createElement('div')
 	AlertContent.className = 'Flex-1 AlertContent'
-	AlertContent.innerText = Body
+	AlertContent.innerHTML = Body
 
 	let AlertButtonGroup = document.createElement('div')
 	AlertButtonGroup.className = "Input-Group Flex"

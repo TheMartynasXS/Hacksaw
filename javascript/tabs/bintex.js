@@ -120,8 +120,6 @@ async function ReadBTX(){
 }
 
 async function GetUnused(){
-  //BinCount.innerText = `Detecting Unused - 0/...`
-
   let Assets 
   Assets = getAllFiles(WadPath, Assets).filter(
     file => file.endsWith(".dds") || file.endsWith(".skn") || file.endsWith(".skl") || file.endsWith(".sco") || file.endsWith(".scb") || file.endsWith(".anm") || file.endsWith(".btx")
@@ -153,8 +151,6 @@ async function DeleteUnused(){
     case 2:
     case 1:
     case 0:
-      
-      console.log(Confirm)
       UnusedButton.classList.add(`Confirm-${Confirm}`)
       Confirm++
       return 0

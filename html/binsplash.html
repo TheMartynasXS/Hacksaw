@@ -41,27 +41,19 @@
         <div id="Splash" class="Tab Flex Flex-Col">
             <div class="Input-Group Margin-Bottom">
                 <button class="Special-Input" onclick="OpenBin()">Open Bin</button>
-                <label class="Label Flex-1" id="Title"></label>
+                <label class="Label Flex-1" id="Title"><strong><- Select a file</strong></label>
+                <label class="Label" id="Title"><strong>Recoloring Mode:</strong></label>
                 <select name="Mode" id="Mode">
-                    <option value="false">Simple</option>
-                    <option value="true">Advanced</option>
+                    <option value="random">Random</option>
+                    <option value="linear">Linear</option>
+                    <option value="wrap">wrap</option>
                 </select>
-                <label class="Label" style="padding:0.4rem">
-                    <input type="checkbox" class="Type" id="Use-Times"></input>
-                    Override Times
-                </label>
-                <label class="Label" style="padding:0.4rem">
-                    <input type="checkbox" class="Type" id="Use-Opacity"></input>
-                    Use Opacity
-                </label>
             </div>
             <div id="Slider-Container" class="Margin-Bottom Flex-Col">
                 <input class="Range" id="Slider-Input" type="range" min="1" value="1" max="20"
                     oninput="ChangeColorCount(this.value)" />
-                <div style="overflow:hidden" id="Time-Container" class="Flex"></div>
                 <div id="Gradient-Indicator" class="Flex"></div>
                 <div id="Color-Container" class="Flex"></div>
-                <!-- <div id="Opacity-Container" class="Flex"></div> -->
             </div>
             <div class="Input-Group">
                 <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
