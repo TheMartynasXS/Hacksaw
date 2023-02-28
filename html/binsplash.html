@@ -57,15 +57,16 @@
                 <div id="Color-Container" class="Flex"></div>
             </div>
             <div class="Input-Group">
-                <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
-                    oninput="FilterParticles(this.value)">
+                <label class="Label Flex-1"></label>
+                <button onclick="ReverseSample()">↹</button>
                 <button onclick="SaveSample()">Save Sample</button>
                 <button onclick="OpenSampleWindow()">Color Samples</button>
             </div>
             <div class="Flex Input-Group Margin-Top">
                 <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox"
                     onchange="CheckToggle(this)">
-                <label class="Label Flex-5"></input>Name</label>
+                <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
+                    oninput="FilterParticles(this.value)">
                 <label class="Label" style="padding:0.4rem">
                     <input type="checkbox" class="Type" id="T1"></input>
                     OC</label>

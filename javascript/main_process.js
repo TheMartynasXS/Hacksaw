@@ -40,7 +40,7 @@ app.whenReady().then(() => {
         fs.writeFileSync(PrefsPath, DefaultPreferences, "utf8")
         createWindow("../html/settings.html");
     }
-    else{
+    else {
         createWindow("../html/binsplash.html");
     }
 });
@@ -59,9 +59,9 @@ const DefaultPreferences = JSON.stringify(
         IgnoreBW: true,
         RitoBinPath: "",
         RememberTargets: false,
-        Targets:[false,false,false,false,true],
+        Targets: [false, false, false, false, true],
     }
-,null,4)
+    , null, 4)
 
 ipcMain.on("FileSelect", (event, arg) => {
     if (arg[1] == "Bin") {

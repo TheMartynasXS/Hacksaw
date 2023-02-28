@@ -1,7 +1,7 @@
 {
   "name": "hacksaw",
   "productName": "hacksaw",
-  "version": "3.5.10",
+  "version": "3.5.14",
   "description": "my league modding suite",
   "main": "javascript/main_process.js",
   "build": {
@@ -42,11 +42,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "color-convert": "^2.0.1",
-    "colortranslator": "^1.9.2",
     "electron-color-picker": "^0.2.0",
     "electron-is-dev": "^2.0.0",
     "get-github-tag": "^1.1.0",
+    "lodash": "^4.17.21",
     "open": "^8.4.0",
     "path-sort": "^0.1.0",
     "update-electron-app": "^2.0.1"

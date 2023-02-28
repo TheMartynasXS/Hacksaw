@@ -444,10 +444,6 @@ input[type="color"]::-webkit-color-swatch {
   flex: 1;
   margin: auto;
   margin-left: 1rem;
-  display: none;
-}
-
-.NavBar:hover .TabTitle {
   display: block;
 }
 

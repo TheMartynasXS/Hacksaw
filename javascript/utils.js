@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { ColorHandler, ToBG } = require('./colors.js');
 const { clipboard } = require('electron');
+const _ = require("lodash")
 
 function Tab(Location, FileSaved = true) {
 	if (FileSaved == true) {
@@ -175,6 +176,7 @@ class SampleDB {
 		Modal.appendChild(AlertContent)
 
 		for (let ID = 0; ID < this.obj.length; ID++) {
+			console.log(this.obj[ID])
 			let SampleDom = document.createElement("div")
 			SampleDom.className = "Input-Group Sample"
 			SampleDom.style.background = ToBG(this.obj[ID].Palette)
@@ -207,7 +209,7 @@ class SampleDB {
 
 			let UseThis = document.createElement('button')
 			UseThis.onclick = () => {
-				Palette = JSON.parse(JSON.stringify(this.obj[ID].Palette));
+				Palette = _.cloneDeep(this.obj[ID].Palette)
 				AlertModalBG.remove()
 				MapPalette()
 				ChangeColorCount(this.obj[ID].length);
