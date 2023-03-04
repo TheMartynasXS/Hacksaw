@@ -9,9 +9,13 @@ function Tab(Location, FileSaved = true) {
 	if (FileSaved == true) {
 		window.location.href = Location;
 	} else {
-		CreateAlert(
-			"You may have forgotten to save your bin.\nSave before proceeding please.",
-			false, { function: () => { window.location.href = Location }, Title: 'Leave Anyways' });
+		CreateMessage({
+			type: "warning",
+			buttons: ["Continue", "Cancel"],
+			title: "File not saved",
+			message: "You may have forgotten to save your bin.\nSave before proceeding please."
+		}, () => { window.location.href = Location })
+		return 0;
 	}
 }
 
@@ -22,7 +26,7 @@ const SamplePath = path.join(UserData, "SampleDB.json")
 
 class Preferences {
 	constructor(PrefsPath) {
-		this.obj = JSON.parse(fs.readFileSync(PrefsPath));
+		this.obj = ipcRenderer.sendSync("get-ssx")[0]
 	}
 
 	SetMode(Mode = 'linear') {
@@ -50,13 +54,14 @@ class Preferences {
 		this.save();
 	}
 
-	save() { fs.writeFileSync(PrefsPath, JSON.stringify(this.obj, null, 2)); }
+	save() {
+		ipcRenderer.send("update-settings", JSON.stringify(this.obj, null, 2))
+	}
 }
 const Prefs = new Preferences(PrefsPath);
-
 class SampleDB {
 	constructor(SamplePath) {
-		this.obj = JSON.parse(fs.readFileSync(SamplePath));
+		this.obj = ipcRenderer.sendSync("get-ssx")[1]
 
 		for (let i = 0; i < this.obj.length; i++) {
 			const element = this.obj[i];
@@ -312,7 +317,7 @@ class SampleDB {
 				temp[i].Palette[j].obj = undefined
 			}
 		}
-		fs.writeFileSync(SamplePath, JSON.stringify(temp, null, 2))
+		ipcRenderer.send("update-samples", JSON.stringify(temp, null, 2))
 	}
 
 }
@@ -322,66 +327,18 @@ function Sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function CreateAlert(Body, Copy = false, Action = null) {
-	let Alert = document.getElementById('AlertModalBG')
-
-	if (Alert != undefined) { Alert.remove() }
-
-	let AlertModalBG = document.createElement('div')
-	AlertModalBG.className = "AlertModalBG"
-	AlertModalBG.id = "AlertModalBG"
-
-	let AlertModal = document.createElement('div')
-	AlertModal.className = "AlertModal Flex-Col"
-
-	let AlertContent = document.createElement('div')
-	AlertContent.className = 'Flex-1 AlertContent'
-	AlertContent.innerHTML = Body
-
-	let AlertButtonGroup = document.createElement('div')
-	AlertButtonGroup.className = "Input-Group Flex"
-
-	if (Copy) {
-		let CopyToClipboard = document.createElement('button')
-		CopyToClipboard.className = "Flex-1"
-		CopyToClipboard.innerText = "Copy To Clipboard"
-		CopyToClipboard.onclick = () => {
-			clipboard.writeText(Body)
-		}
-		AlertButtonGroup.appendChild(CopyToClipboard)
+function CreateMessage(
+	options = {
+		type: "error", title: "", message: "", defaultId: 0, cancelId: 0,
+		detail: "", checkboxLabel: "", checkboxChecked: false
+	}, action = ()=>{}) {
+	let data = ipcRenderer.sendSync("Message", options)
+	if (data?.response == 0 || action != undefined) {
+		action()
 	}
-
-	let CloseAlert = document.createElement('button')
-	CloseAlert.className = "Flex-1"
-	CloseAlert.innerText = "Close"
-	CloseAlert.onclick = () => {
-		AlertModalBG.remove()
-	}
-
-	AlertButtonGroup.appendChild(CloseAlert)
-
-	if (Action != null) {
-		let Custom = document.createElement('button')
-		Custom.className = "Flex-1"
-		Custom.innerText = Action.Title
-		Custom.onclick = () => {
-			Action.function()
-			AlertModalBG.remove()
-		}
-		AlertButtonGroup.appendChild(Custom)
-
-	}
-
-	AlertModal.appendChild(AlertContent)
-	AlertModal.appendChild(AlertButtonGroup)
-
-	AlertModalBG.appendChild(AlertModal)
-	document.body.appendChild(AlertModalBG)
 
 }
 
-
-
 module.exports = {
-	Tab, Prefs, Samples, Sleep, CreateAlert
+	Tab, Prefs, Samples, Sleep, CreateMessage
 }

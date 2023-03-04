@@ -2,8 +2,8 @@
 
 const { execSync, exec } = require("child_process");
 const sorter = require("path-sort").standalone('/');
-const {Tab,Prefs,CreateAlert} = require('../javascript/utils.js');
-const {ipcRenderer} = require("electron");
+const { Tab, Prefs } = require('../javascript/utils.js');
+const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 
@@ -23,26 +23,30 @@ let AllFiles = []
 let BinFiles = []
 let BTXFiles = []
 
-async function SelectWadFolder(Path = undefined){
+async function SelectWadFolder(Path = undefined) {
   WadPath = Path ?? ipcRenderer.sendSync("FileSelect", [
     "Select wad folder",
     "Folder",
   ])[0];
-  if(!fs.existsSync(path.join(WadPath,"data")) &&
-    !fs.existsSync(path.join(WadPath,"assets"))){
-      CreateAlert("Invalid Path")
-      return 0;
+  if (!fs.existsSync(path.join(WadPath, "data")) &&
+    !fs.existsSync(path.join(WadPath, "assets"))) {
+    CreateMessage({
+      type: "info",
+      title: "Error",
+      message: "Invalid Path"
+    })
+    return 0;
   }
   UnusedButton.disabled = true
   let Progress = document.getElementById('Progress-Range')
   let BinCount = document.getElementById('Bin-Count')
   Progress.classList.remove('Progress-Complete')
   AllFiles = []
-  
+
   AllFiles = getAllFiles(WadPath, AllFiles)
   BinFiles = getAllFiles(WadPath, BinFiles).filter(file => file.endsWith(".bin"))
   Progress.max = BinFiles.length
-  for(let i = 0; i < BinFiles.length; i++){
+  for (let i = 0; i < BinFiles.length; i++) {
     ToJson(BinFiles[i])
     Progress.value = i + 1
     BinCount.innerText = `Converting Bins - ${Progress.value}/${Progress.max}`
@@ -57,23 +61,23 @@ let SeparateOutput = []
 let CombinedOutput = []
 let MissingOutput = []
 
-async function ReadBTX(){
+async function ReadBTX() {
   SeparateOutput = []
   CombinedOutput = []
   MissingOutput = []
 
-  for(let i = 0; i < BTXFiles.length; i++){
+  for (let i = 0; i < BTXFiles.length; i++) {
     let ParticleObject = JSON.parse(fs.readFileSync(BTXFiles[i])).entries.value.items
     for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
       if (ParticleObject[PO_ID].value.name == "VfxSystemDefinitionData") {
 
         let tempname = ParticleObject[PO_ID].value.items.find((item) => {
-            if (item.key == "particleName") { return item }
+          if (item.key == "particleName") { return item }
         }).value.toLowerCase()
         SeparateOutput.push({
-            Particle: tempname,
-            Bin: BTXFiles[i].replace(/\.btx$/, ".bin"),
-            Files:[]
+          Particle: tempname,
+          Bin: BTXFiles[i].replace(/\.btx$/, ".bin"),
+          Files: []
         })
 
         let DefData = ParticleObject[PO_ID].value.items.filter(item => item.key == "complexEmitterDefinitionData" || item.key == "simpleEmitterDefinitionData")
@@ -81,7 +85,7 @@ async function ReadBTX(){
           let Props = DefData[B].value.items
           for (let C = 0; C < Props.length; C++) {
             if (DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData") {
-              
+
               let StringObj = JSON.stringify(DefData[B], null, 2)
               let RegStr = new RegExp(/\"ASSETS.+\.(?:dds|skn|skl|sco|scb|anm)\"/gi)
 
@@ -89,10 +93,10 @@ async function ReadBTX(){
 
               Matches?.forEach(Match => {
                 if (!CombinedOutput.includes(Match.replace(/"/g, '').toLowerCase())) {
-                    CombinedOutput.push(Match.replace(/"/g, '').toLowerCase())
+                  CombinedOutput.push(Match.replace(/"/g, '').toLowerCase())
                 }
-                if (!SeparateOutput[SeparateOutput.length - 1].Files.includes(Match.replace(/"/g, '').toLowerCase())){
-                    SeparateOutput[SeparateOutput.length - 1].Files.push(Match.replace(/"/g, '').toLowerCase())
+                if (!SeparateOutput[SeparateOutput.length - 1].Files.includes(Match.replace(/"/g, '').toLowerCase())) {
+                  SeparateOutput[SeparateOutput.length - 1].Files.push(Match.replace(/"/g, '').toLowerCase())
                 }
               })
             }
@@ -102,38 +106,38 @@ async function ReadBTX(){
     }
   }
   SeparateOutput.sort((a, b) => (a.Particle > b.Particle) ? 1 : ((b.Particle > a.Particle) ? -1 : 0))
-  
-  for(let i = 0; i < SeparateOutput.length; i++){
+
+  for (let i = 0; i < SeparateOutput.length; i++) {
     SeparateOutput[i].Files.sort(sorter)
   }
   fs.writeFileSync(`${WadPath}\\Separate.json`, JSON.stringify(SeparateOutput, null, 2))
   CombinedOutput.sort((a, b) => (a > b) ? 1 : ((b > a) ? -1 : 0))
-  fs.writeFileSync(`${WadPath}\\Combined.json`, JSON.stringify(CombinedOutput,null,2))
-  for(let i = 0; i < CombinedOutput.length; i++){
-    if(!fs.existsSync(path.join(WadPath,CombinedOutput[i]))){
+  fs.writeFileSync(`${WadPath}\\Combined.json`, JSON.stringify(CombinedOutput, null, 2))
+  for (let i = 0; i < CombinedOutput.length; i++) {
+    if (!fs.existsSync(path.join(WadPath, CombinedOutput[i]))) {
       MissingOutput.push(CombinedOutput[i])
     }
   }
-  fs.writeFileSync(`${WadPath}\\Missing.json`, JSON.stringify(MissingOutput,null,2))
+  fs.writeFileSync(`${WadPath}\\Missing.json`, JSON.stringify(MissingOutput, null, 2))
 
   await GetUnused()
 }
 
-async function GetUnused(){
-  let Assets 
+async function GetUnused() {
+  let Assets
   Assets = getAllFiles(WadPath, Assets).filter(
     file => file.endsWith(".dds") || file.endsWith(".skn") || file.endsWith(".skl") || file.endsWith(".sco") || file.endsWith(".scb") || file.endsWith(".anm") || file.endsWith(".btx")
   )
-  
-  for(let i = 0; i < CombinedOutput.length; i++){
-    CombinedOutput[i] = path.join(WadPath,CombinedOutput[i])
+
+  for (let i = 0; i < CombinedOutput.length; i++) {
+    CombinedOutput[i] = path.join(WadPath, CombinedOutput[i])
   }
 
 
 
   Progress.value = Progress.max
-  for(let i = 0; i < Assets.length; i++){
-    if(!CombinedOutput.includes(Assets[i]) && /(\\particles\\|\\mod\\|shared\\|\.btx)/gi.test(Assets[i])){
+  for (let i = 0; i < Assets.length; i++) {
+    if (!CombinedOutput.includes(Assets[i]) && /(\\particles\\|\\mod\\|shared\\|\.btx)/gi.test(Assets[i])) {
       Files2Delete.push(Assets[i])
       let FileName = document.createElement('div')
       FileName.innerText = Assets[i].slice(WadPath.length + 1)
@@ -146,7 +150,7 @@ async function GetUnused(){
 }
 
 let Confirm = 0
-async function DeleteUnused(){
+async function DeleteUnused() {
   switch (Confirm) {
     case 2:
     case 1:
@@ -159,24 +163,28 @@ async function DeleteUnused(){
       break;
   }
   UnusedButton.className = "Flex-1"
-  
-  Progress.classList.replace('Progress-Complete','Progress-Delete')
+
+  Progress.classList.replace('Progress-Complete', 'Progress-Delete')
   Progress.max = Files2Delete.length
   BinCount.innerText = `Deleting Unused - 0/${Progress.max}`
 
-  if(Files2Delete.length > 0){
-    for(let i = 0; i < Files2Delete.length; i++){
+  if (Files2Delete.length > 0) {
+    for (let i = 0; i < Files2Delete.length; i++) {
       await sleep(20)
       Progress.value = i
       UnlinkList.removeChild(UnlinkList.firstChild)
       fs.unlinkSync(Files2Delete[i])
       BinCount.innerText = `Deleting Unused - ${i + 1}/${Progress.max}`
     }
-  }else{
-    CreateAlert("No files to delete")
+  } else {
+    CreateMessage({
+      type: "info",
+      title: "Clean",
+      message: "No files to delete"
+    })
   }
   UnlinkList.innerText = ""
-  Progress.classList.replace('Progress-Delete','Progress-Complete')
+  Progress.classList.replace('Progress-Delete', 'Progress-Complete')
 }
 
 function getAllFiles(dir, files_) {
@@ -195,7 +203,7 @@ function getAllFiles(dir, files_) {
 
 function ToJson(FilePath) {
   let TempFile = FilePath.replace(/\.bin$/, ".btx")
-  if(!fs.existsSync(TempFile)){
+  if (!fs.existsSync(TempFile)) {
     execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" "${TempFile}"`);
   }
 }

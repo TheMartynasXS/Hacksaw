@@ -1,19 +1,22 @@
-const {Tab} = require('../javascript/shared.js');
-window.onerror = function (msg, error, lineNo, columnNo) {
-  UTIL.CreateAlert(`Message: ${msg}\n\nError: ${error},\n\nRaised at: ${lineNo} : ${columnNo}`,true)
-}
-
+const { Tab } = require('../javascript/shared.js');
+window.onerror = function (msg, file, lineNo, columnNo) {
+  ipcRenderer.send("Message", {
+    type: "error",
+    title: file + " @ line: " + lineNo + " col: " + columnNo,
+    Message: msg
+  })
+};
 File = require('../skin0.json')
 OpenPrimaryBin()
 OpenSecondaryBin()
-function Stitch(){
+function Stitch() {
   FileSaved = false
   Persist = true
   // FileCache.push(UTIL.Clone(File))
   let ParticleObject = File.entries.value.items;
   let FirstIndex = ParticleObject.findIndex(item => item.value.name == "VfxSystemDefinitionData")
-  
-  
+
+
   for (let PO_ID = 0; PO_ID < Secondary.children.length; PO_ID++) {
     let DefData = ParticleObject[PO_ID + FirstIndex].value.items
     let DomDefData = Secondary.children[PO_ID].children
@@ -21,9 +24,9 @@ function Stitch(){
       for (let C = DomDefData[B].children.length - 1; C >= 0; C--) {
         let DomEmitter = DomDefData[B].children[C].children
         if (DomEmitter[0].checked) {
-          
-          DefData[B-1].value.items.slice(C)
-          let Props = DefData[B-1].value.items[C].items
+
+          DefData[B - 1].value.items.slice(C)
+          let Props = DefData[B - 1].value.items[C].items
           Primary.children[Active].appendChild(DomDefData[B].children[C])
           DomDefData[B].children[C].remove()
         }
@@ -75,19 +78,19 @@ function OpenPrimaryBin() {
               console.log(ParticleObject[PO_ID].value.items)
               Props.splice(C, 1)
               Event.target.parentNode.remove()
-              for(let i = 0; i < DefData.length; i++){
-                ParticleObject[PO_ID].value.items[i] = DefData [i]
+              for (let i = 0; i < DefData.length; i++) {
+                ParticleObject[PO_ID].value.items[i] = DefData[i]
               }
-            //   ParticleObject[PO_ID].value.items.splice(0,DefData.length)
-              
-            //   ParticleObject[PO_ID].value.items.unshift(DefData)
+              //   ParticleObject[PO_ID].value.items.splice(0,DefData.length)
+
+              //   ParticleObject[PO_ID].value.items.unshift(DefData)
             }
             Emitter.appendChild(Input)
             let Title = document.createElement('div')
             Title.className = "Label Flex-1 Ellipsis"
             Title.innerText = Props[C].items[Props[C].items.findIndex(item => item.key == "emitterName")]?.value
             Emitter.appendChild(Title)
-            
+
 
             DefDataDiv.appendChild(Emitter)
           }
@@ -125,7 +128,7 @@ function OpenSecondaryBin() {
         let Props = DefData[B].value.items
         for (let C = 0; C < Props.length; C++) {
           if (DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData") {
-            
+
             let Emitter = document.createElement('div')
 
             Emitter.className = "Flex Emitter-Div"
@@ -136,7 +139,7 @@ function OpenSecondaryBin() {
             Title.className = "Label Flex-1 Ellipsis"
             Title.innerText = Props[C].items[Props[C].items.findIndex(item => item.key == "emitterName")]?.value
             Emitter.appendChild(Title)
-            
+
 
             DefDataDiv.appendChild(Emitter)
           }

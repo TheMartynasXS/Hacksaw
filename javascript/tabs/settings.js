@@ -1,9 +1,5 @@
 const {Tab, Prefs, CreateAlert} = require('../javascript/utils.js');
 
-if(Prefs.obj.RitoBinPath == ""){
-    CreateAlert("You have not selected RitoBin_cli.exe yet.", false, {Title:"Select",function:SelectRitoBin});
-    
-}
 function SelectRitoBin(){
     Prefs.RitoBinPath();
 }

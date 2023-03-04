@@ -2,6 +2,7 @@
   font-family: Jetbrains Mono;
   src: url(./font/JetBrainsMono-Regular.ttf);
 }
+
 :root {
   --accent: #ffc24f;
   --accent-success: #7BBA9C;
@@ -48,8 +49,9 @@ body {
 }
 
 .Blank-Obj {
-  box-sizing:border-box; border: dashed 2px var(--bg-300);
-  cursor:default;
+  box-sizing: border-box;
+  border: dashed 2px var(--bg-300);
+  cursor: default;
 }
 
 button:enabled,
@@ -57,8 +59,10 @@ select:enabled,
 .Color-Block {
   cursor: pointer;
 }
-option{
+
+option {
   text-indent: 0;
+  text-align: left;
 }
 
 * {
@@ -68,7 +72,7 @@ option{
 }
 
 button,
-.Label{
+.Label {
   user-select: none;
 }
 
@@ -102,7 +106,8 @@ mark {
 .Input-Group input[type="color"] {
   margin: 0.1rem;
 }
-.Input-Group input{
+
+.Input-Group input {
   width: 10px;
 }
 
@@ -205,12 +210,14 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .Type {
-  filter: grayscale(1) brightness(1);
+  /* filter: grayscale(1) brightness(1); */
   cursor: pointer;
+  accent-color: #64656d;
 }
 
 .Type:hover {
-  filter: grayscale(1) brightness(2);
+  /* filter: grayscale(1) brightness(2); */
+  accent-color: var(--accent);
 }
 
 .Input-Group .Special-Input {
@@ -308,6 +315,7 @@ progress::-webkit-progress-value {
 progress.Progress-Complete::-webkit-progress-value {
   background-color: var(--accent-success);
 }
+
 progress.Progress-Delete::-webkit-progress-value {
   background-color: var(--accent-failure);
 }
@@ -327,8 +335,8 @@ progress.Progress-Delete::-webkit-progress-value {
 
 .Time,
 .Color {
+  flex: 1;
   min-width: 1rem;
-  display: flex;
 }
 
 .Color {
@@ -531,7 +539,8 @@ input[type="color"]::-webkit-color-swatch {
   overflow-x: hidden;
   overflow-y: scroll;
 }
-.Saved-Color-Item{
+
+.Saved-Color-Item {
   height: 1.6rem;
 }
 
@@ -541,6 +550,18 @@ input[type="color"]::-webkit-color-swatch {
   border: 2px solid;
   border-radius: 0.4rem;
   border-color: var(--bg-300);
+}
+
+#Title {
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+#Title::-webkit-scrollbar {
+  cursor: pointer;
+  position: absolute;
+  height: 0.4rem;
+  bottom: 10px;
 }
 
 .Particle-Div .Particle-Title-Div {
@@ -577,14 +598,15 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 0.4rem;
 }
 
-.Prop-Block{
+.Prop-Block {
   width: 7.8rem;
 }
+
 .Prop-Block-Secondary {
   width: 2.9rem;
 }
 
-.ColorHelp{
+.ColorHelp {
   padding: 0px !important;
   margin-right: 0px !important;
   margin-left: 0.8rem !important;
@@ -682,7 +704,7 @@ input[type="color"]::-webkit-color-swatch {
   box-shadow: var(--shadow);
   overflow: hidden;
   margin-inline: 5rem;
-  margin-block:2.5rem;
+  margin-block: 2.5rem;
   max-height: calc(100vh - 7.5rem);
   padding: 1rem;
   background-color: var(--bg-100);
@@ -708,6 +730,10 @@ input[type="color"]::-webkit-color-swatch {
 
 #Secondary {
   border-color: var(--accent);
+}
+
+#Color-Container {
+  display: grid;
 }
 
 .AlertContent {
@@ -739,24 +765,24 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .AlertModal {
-  color:var(--text-secondary);
+  color: var(--text-secondary);
   position: absolute;
   border-radius: 0.4rem;
   background-color: var(--bg-100);
   inset: 7rem;
-  gap:1rem;
+  gap: 1rem;
   padding: 1rem;
 }
 
-.InputModal{
+.InputModal {
   position: absolute;
   border-radius: 0.4rem;
   background-color: var(--bg-100);
-  top:50vh;
+  top: 50vh;
   inset-inline: 15rem;
-  gap:1rem;
+  gap: 1rem;
   padding: 1rem;
-  transform: translate(0,-50%);
+  transform: translate(0, -50%);
 }
 
 
@@ -791,13 +817,15 @@ input[type="color"]::-webkit-color-swatch {
   background: var(--accent);
 }
 
-.Confirm-0{
-  --gap:0.2rem;
+.Confirm-0 {
+  --gap: 0.2rem;
   outline: var(--gap) dotted var(--accent-failure);
 }
-.Confirm-1{
+
+.Confirm-1 {
   outline: var(--gap) dashed var(--accent-failure);
 }
-.Confirm-2{
+
+.Confirm-2 {
   outline: var(--gap) solid var(--accent-failure);
 }

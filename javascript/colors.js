@@ -3,10 +3,10 @@ let x = Math.random
 function GetColor(Property) {
     if (/vec4/i.test(Property?.type)) return [new ColorHandler(Property.value)]
 
-    let DynID = Property?.findIndex(item => /dynamics/i.test(item.key))
-    let ConstID = Property?.findIndex(item => /constantValue/i.test(item.key))
+    let DynID = Property?.findIndex(item => item.key.toString().toLowerCase() == "dynamics")
+    let ConstID = Property?.findIndex(item => item.key.toString().toLowerCase() == "constantValue")
     if (DynID >= 0) {
-        let ProbTableID = Property[DynID].value.items.findIndex(item => /probabilitytables/i.test(item.key))
+        let ProbTableID = Property[DynID].value.items.findIndex(item => item.key.toString().toLowerCase() == "probabilitytables")
         if (ProbTableID >= 0) Property[DynID].value.items.shift()
     }
     let Palette = []
