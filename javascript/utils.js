@@ -5,7 +5,7 @@ const { ColorHandler, ToBG } = require('./colors.js');
 const { clipboard } = require('electron');
 const _ = require("lodash")
 
-function Tab(Location, FileSaved = true) {
+async function Tab(Location, FileSaved = true) {
 	if (FileSaved == true) {
 		window.location.href = Location;
 	} else {
@@ -14,8 +14,10 @@ function Tab(Location, FileSaved = true) {
 			buttons: ["Continue", "Cancel"],
 			title: "File not saved",
 			message: "You may have forgotten to save your bin.\nSave before proceeding please."
-		}, () => { window.location.href = Location })
-		return 0;
+		},()=>{
+			window.location.href = Location;
+		})
+		return FileSaved;
 	}
 }
 
@@ -331,14 +333,27 @@ function CreateMessage(
 	options = {
 		type: "error", title: "", message: "", defaultId: 0, cancelId: 0,
 		detail: "", checkboxLabel: "", checkboxChecked: false
-	}, action = ()=>{}) {
+	},action = undefined) {
 	let data = ipcRenderer.sendSync("Message", options)
-	if (data?.response == 0 || action != undefined) {
+	if (data?.response == 0 && action != undefined) {
 		action()
 	}
+}
 
+function getAllFiles(dir, files_) {
+	files_ = files_ || [];
+	var files = fs.readdirSync(dir);
+	for (var i in files) {
+		let name = dir + '/' + files[i];
+		if (fs.statSync(name).isDirectory()) {
+			getAllFiles(name, files_);
+		} else {
+			files_.push(name.toLowerCase());
+		}
+	}
+	return files_;
 }
 
 module.exports = {
-	Tab, Prefs, Samples, Sleep, CreateMessage
+	Tab, Prefs, Samples, Sleep, CreateMessage, getAllFiles
 }

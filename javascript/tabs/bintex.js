@@ -1,8 +1,6 @@
-
-
-const { execSync, exec } = require("child_process");
+const { execSync } = require("child_process");
 const sorter = require("path-sort").standalone('/');
-const { Tab, Prefs } = require('../javascript/utils.js');
+const { Tab, Prefs, CreateMessage, getAllFiles } = require('../javascript/utils.js');
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
@@ -22,89 +20,152 @@ let ParticleTargetPath = "";
 let AllFiles = []
 let BinFiles = []
 let BTXFiles = []
-
-async function SelectWadFolder(Path = undefined) {
-  WadPath = Path ?? ipcRenderer.sendSync("FileSelect", [
-    "Select wad folder",
-    "Folder",
-  ])[0];
-  if (!fs.existsSync(path.join(WadPath, "data")) &&
-    !fs.existsSync(path.join(WadPath, "assets"))) {
-    CreateMessage({
-      type: "info",
-      title: "Error",
-      message: "Invalid Path"
-    })
-    return 0;
-  }
-  UnusedButton.disabled = true
-  let Progress = document.getElementById('Progress-Range')
-  let BinCount = document.getElementById('Bin-Count')
-  Progress.classList.remove('Progress-Complete')
-  AllFiles = []
-
-  AllFiles = getAllFiles(WadPath, AllFiles)
-  BinFiles = getAllFiles(WadPath, BinFiles).filter(file => file.endsWith(".bin"))
-  Progress.max = BinFiles.length
-  for (let i = 0; i < BinFiles.length; i++) {
-    ToJson(BinFiles[i])
-    Progress.value = i + 1
-    BinCount.innerText = `Converting Bins - ${Progress.value}/${Progress.max}`
-    await sleep(20)
-  }
-  Progress.classList.add('Progress-Complete')
-  BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".btx"))
-  await ReadBTX()
-}
-
 let SeparateOutput = []
 let CombinedOutput = []
 let MissingOutput = []
 
-async function ReadBTX() {
+let pathRegExp = new RegExp(/ASSETS.+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
+
+function Undo() {
+	if (FileCache.length > 0) {
+		File = JSON.parse(JSON.stringify(FileCache[FileCache.length - 1]))
+		FileCache.pop();
+		LoadFile(true);
+	}
+	FilterParticles(document.getElementById("Filter").value);
+}
+
+async function SelectWadFolder(Path = undefined) {
+  UnlinkList.innerText = ""
+  WadPath = Path ?? ipcRenderer.sendSync("FileSelect", [
+    "Select wad folder",
+    "Folder",
+  ])[0];
+  if (!fs.existsSync(WadPath) || !WadPath.toLowerCase().endsWith(".wad.client")) {
+    CreateMessage({
+      type: "info",
+      title: "Error",
+      message: "Invalid Path.\nFolder name must end in \'.wad.client\' for the sake of safety."
+    })
+    return 0;
+  }
+
+  Progress.classList.remove('Progress-Complete')
+  AllFiles = [];
+  BinFiles = [];
   SeparateOutput = []
   CombinedOutput = []
   MissingOutput = []
+  AllFiles = getAllFiles(WadPath, AllFiles).filter(file => !file.endsWith(".bin"))
+  BinFiles = getAllFiles(WadPath, BinFiles).filter(file => file.endsWith(".bin"))
+
+  Progress.max = BinFiles.length
+  for (let i = 0; i < BinFiles.length; i++) {
+    ToJson(BinFiles[i])
+    BinCount.innerText = `Converting Bins - ${Progress.value}/${Progress.max}`
+    await sleep(10)
+    Progress.value = i + 1
+  }
+  BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".btx"))
+  Progress.classList.add('Progress-Complete')
+
+  Files2Delete = AllFiles.filter(item => !item.endsWith('.json'))
 
   for (let i = 0; i < BTXFiles.length; i++) {
-    let ParticleObject = JSON.parse(fs.readFileSync(BTXFiles[i])).entries.value.items
-    for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
-      if (ParticleObject[PO_ID].value.name == "VfxSystemDefinitionData") {
+    let currentFile = JSON.parse(fs.readFileSync(BTXFiles[i], "utf-8"))
+    let Matches = JSON.stringify(currentFile, null, 2).match(pathRegExp)
+    if (Matches?.length > 0) {
 
+      for (let j = 0; j < Matches.length; j++) {
+        fixedMatch = Matches[j].toLowerCase()
+        if (!CombinedOutput.includes(fixedMatch)) {
+          CombinedOutput.push(fixedMatch)
+        }
+        for (let k = 0; k < 3; k++) {
+          let index = Files2Delete.findIndex(item => (item.endsWith(fixedMatch) || item.replace("/2x_", "/").endsWith(fixedMatch) || item.replace("/4x_", "/").endsWith(fixedMatch)))
+
+          if (index >= 0) { Files2Delete.splice(index, 1) }
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < BTXFiles.length; i++) {
+    let currentFile = JSON.parse(fs.readFileSync(BTXFiles[i], "utf-8"))
+    let ParticleObject = currentFile.entries.value.items
+
+    for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
+      if (ParticleObject[PO_ID].value.name.toString().toLowerCase() == "vfxsystemdefinitiondata") {
         let tempname = ParticleObject[PO_ID].value.items.find((item) => {
-          if (item.key == "particleName") { return item }
-        }).value.toLowerCase()
+          if (item.key.toString().toLowerCase() == "particlename") { return item }
+        }).value.toString().toLowerCase()
         SeparateOutput.push({
           Particle: tempname,
-          Bin: BTXFiles[i].replace(/\.btx$/, ".bin"),
+          Bin: BTXFiles[i].replace(/\.btx$/, ".bin").replace(/\\/g, "/"),
           Files: []
         })
 
-        let DefData = ParticleObject[PO_ID].value.items.filter(item => item.key == "complexEmitterDefinitionData" || item.key == "simpleEmitterDefinitionData")
+        let DefData = ParticleObject[PO_ID].value.items.filter(item =>
+          item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
+          item.key.toString().toLowerCase() == "simpleemitterdefinitiondata")
         for (let B = 0; B < DefData.length; B++) {
           let Props = DefData[B].value.items
           for (let C = 0; C < Props.length; C++) {
-            if (DefData[B].key == "complexEmitterDefinitionData" || DefData[B].key == "simpleEmitterDefinitionData") {
-
+            if (DefData[B].key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
+              DefData[B].key.toString().toLowerCase() == "simpleemitterdefinitiondata") {
               let StringObj = JSON.stringify(DefData[B], null, 2)
-              let RegStr = new RegExp(/\"ASSETS.+\.(?:dds|skn|skl|sco|scb|anm)\"/gi)
-
-              let Matches = StringObj.match(RegStr)
-
+              let Matches = StringObj.match(pathRegExp)
               Matches?.forEach(Match => {
-                if (!CombinedOutput.includes(Match.replace(/"/g, '').toLowerCase())) {
-                  CombinedOutput.push(Match.replace(/"/g, '').toLowerCase())
-                }
-                if (!SeparateOutput[SeparateOutput.length - 1].Files.includes(Match.replace(/"/g, '').toLowerCase())) {
-                  SeparateOutput[SeparateOutput.length - 1].Files.push(Match.replace(/"/g, '').toLowerCase())
+                fixedMatch = Match.toLowerCase()
+                if (!SeparateOutput[SeparateOutput.length - 1].Files.includes(fixedMatch)) {
+                  SeparateOutput[SeparateOutput.length - 1].Files.push(fixedMatch)
                 }
               })
             }
           }
         }
       }
+      else {
+        let tempname = ParticleObject[PO_ID].value.name
+
+        let MiscIndex = SeparateOutput.findIndex(item => item.Particle == "!Misc" && item.Bin == BTXFiles[i].replace(/\.btx$/, ".bin"))
+
+        if (MiscIndex < 0) {
+          SeparateOutput.push({
+            Particle: "!Misc",
+            Bin: BTXFiles[i].replace(/\.btx$/, ".bin").replace(/\\/g, "/"),
+            Files: []
+          })
+          MiscIndex = SeparateOutput.length - 1
+        }
+        let MatData = ParticleObject[PO_ID].value.items
+        let StringObj = JSON.stringify(MatData, null, 2)
+        let Matches = StringObj.match(pathRegExp)
+        Matches?.forEach(Match => {
+          fixedMatch = Match.toLowerCase()
+          if (!SeparateOutput[MiscIndex].Files.includes(fixedMatch)) {
+            SeparateOutput[MiscIndex].Files.push(fixedMatch)
+          }
+        })
+      }
     }
   }
+
+  for (i = 0; i < BTXFiles.length; i++) {
+    if (!Files2Delete.includes(BTXFiles[i])) {
+      Files2Delete.push(BTXFiles[i])
+    }
+  }
+  Files2Delete.sort((a, b) => (a.Particle > b.Particle) ? 1 : ((b.Particle > a.Particle) ? -1 : 0))
+  Files2Delete.map(item => {
+    let FileName = document.createElement('div')
+    FileName.innerText = item.slice(WadPath.length + 1)
+    UnlinkList.appendChild(FileName)
+  })
+
+  BinCount.innerText = `Detected Unused - ${Files2Delete.length}`
+  UnusedButton.disabled = false
+
   SeparateOutput.sort((a, b) => (a.Particle > b.Particle) ? 1 : ((b.Particle > a.Particle) ? -1 : 0))
 
   for (let i = 0; i < SeparateOutput.length; i++) {
@@ -120,33 +181,6 @@ async function ReadBTX() {
   }
   fs.writeFileSync(`${WadPath}\\Missing.json`, JSON.stringify(MissingOutput, null, 2))
 
-  await GetUnused()
-}
-
-async function GetUnused() {
-  let Assets
-  Assets = getAllFiles(WadPath, Assets).filter(
-    file => file.endsWith(".dds") || file.endsWith(".skn") || file.endsWith(".skl") || file.endsWith(".sco") || file.endsWith(".scb") || file.endsWith(".anm") || file.endsWith(".btx")
-  )
-
-  for (let i = 0; i < CombinedOutput.length; i++) {
-    CombinedOutput[i] = path.join(WadPath, CombinedOutput[i])
-  }
-
-
-
-  Progress.value = Progress.max
-  for (let i = 0; i < Assets.length; i++) {
-    if (!CombinedOutput.includes(Assets[i]) && /(\\particles\\|\\mod\\|shared\\|\.btx)/gi.test(Assets[i])) {
-      Files2Delete.push(Assets[i])
-      let FileName = document.createElement('div')
-      FileName.innerText = Assets[i].slice(WadPath.length + 1)
-      UnlinkList.appendChild(FileName)
-    }
-  }
-
-  BinCount.innerText = `Detected Unused - ${Files2Delete.length}`
-  UnusedButton.disabled = false
 }
 
 let Confirm = 0
@@ -170,7 +204,7 @@ async function DeleteUnused() {
 
   if (Files2Delete.length > 0) {
     for (let i = 0; i < Files2Delete.length; i++) {
-      await sleep(20)
+      await sleep(10)
       Progress.value = i
       UnlinkList.removeChild(UnlinkList.firstChild)
       fs.unlinkSync(Files2Delete[i])
@@ -187,19 +221,6 @@ async function DeleteUnused() {
   Progress.classList.replace('Progress-Delete', 'Progress-Complete')
 }
 
-function getAllFiles(dir, files_) {
-  files_ = files_ || [];
-  var files = fs.readdirSync(dir);
-  for (var i in files) {
-    let name = dir + "\\" + files[i];
-    if (fs.statSync(name).isDirectory()) {
-      getAllFiles(name, files_);
-    } else {
-      files_.push(name);
-    }
-  }
-  return files_;
-}
 
 function ToJson(FilePath) {
   let TempFile = FilePath.replace(/\.bin$/, ".btx")

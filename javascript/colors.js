@@ -4,7 +4,7 @@ function GetColor(Property) {
     if (/vec4/i.test(Property?.type)) return [new ColorHandler(Property.value)]
 
     let DynID = Property?.findIndex(item => item.key.toString().toLowerCase() == "dynamics")
-    let ConstID = Property?.findIndex(item => item.key.toString().toLowerCase() == "constantValue")
+    let ConstID = Property?.findIndex(item => item.key.toString().toLowerCase() == "constantvalue")
     if (DynID >= 0) {
         let ProbTableID = Property[DynID].value.items.findIndex(item => item.key.toString().toLowerCase() == "probabilitytables")
         if (ProbTableID >= 0) Property[DynID].value.items.shift()
@@ -56,6 +56,10 @@ class ColorHandler {
         this.b = parseInt(Hex.slice(5, 7), 16)
 
         this.vec4 = this.ToVec4()
+    }
+    InputAlpha(alpha) {
+        this.a = alpha
+        this.vec4[3] = alpha
     }
     InputVec4(vec4) {
         this.r = Math.round(vec4[0] * 255);

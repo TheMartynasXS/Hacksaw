@@ -16,13 +16,9 @@
             <img class="Icon" src="../css/svg/paintroller.svg"></img>
             <div class="TabTitle">Splash</div>
         </button>
-        <!-- <button onclick="Tab('./stitch.html')" class="NavButton">
+        <button onclick="Tab('./stitch.html',FileSaved)" class="NavButton">
             <img class="Icon" src="../css/svg/hashtag.svg"></img>
             <div class="TabTitle">Stitch</div>
-        </button> -->
-        <button onclick="Tab('./skinideas.html',FileSaved)" class="NavButton">
-            <img class="Icon" src="../css/svg/bulb.svg"></img>
-            <div class="TabTitle">Skin Ideas</div>
         </button>
         <button onclick="Tab('./bintex.html',FileSaved)" class="NavButton">
             <img class="Icon" src="../css/svg/list.svg"></img>
@@ -31,6 +27,10 @@
         <button onclick="Tab('./xrgba.html',FileSaved)" class="NavButton">
             <img class="Icon" src="../css/svg/drop.svg"></img>
             <div class="TabTitle">xrgba</div>
+        </button>
+        <button onclick="Tab('./skinideas.html',FileSaved)" class="NavButton">
+            <img class="Icon" src="../css/svg/bulb.svg"></img>
+            <div class="TabTitle">Skin Ideas</div>
         </button>
         <button onclick="Tab('./settings.html',FileSaved)" class="NavButton">
             <img class="Icon" src="../css/svg/cog.svg"></img>
@@ -62,10 +62,10 @@
                 <button onclick="SaveSample()">Save Sample</button>
                 <button onclick="OpenSampleWindow()">Color Samples</button>
             </div>
-            <div class="Flex Input-Group Margin-Top">
+            <div class="Flex Input-Group Margin-Top Margin-Bottom">
                 <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox"
                     onchange="CheckToggle(this)">
-                <input class="Ellipsis Flex-3" type="text" id="Filter" placeholder="Filter by Particle Name"
+                <input class="Ellipsis Flex-3 Filter" type="text" id="Filter" placeholder="Filter by Particle Name"
                     oninput="FilterParticles(this.value)">
                 <label class="Label" style="padding:0.4rem">
                     <input type="checkbox" class="Type" id="T1"></input>

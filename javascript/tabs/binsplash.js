@@ -1,5 +1,5 @@
 const { Tab } = require('../javascript/utils.js');
-const { Prefs, Samples, CreateAlert, CreateMessage, Sleep } = require('../javascript/utils.js');
+const { Prefs, Samples, CreateMessage, Sleep } = require('../javascript/utils.js');
 
 const { execSync } = require("child_process");
 const { getColorHexRGB } = require("electron-color-picker");
@@ -10,12 +10,12 @@ const _ = require("lodash")
 const { ColorHandler, GetColor, ToBG } = require('../javascript/colors.js');
 
 let FileCache = [];
-let FileHistory = [];
 let FileSaved = true;
 
 let RecolorMode = document.getElementById("Mode");
 let RecolorTarget = document.getElementById("Target");
 RecolorMode.value = Prefs.obj.PreferredMode
+
 let T1 = document.getElementById('T1')
 let T2 = document.getElementById('T2')
 let T3 = document.getElementById('T3')
@@ -60,11 +60,26 @@ window.onerror = function (msg, file, lineNo, columnNo) {
 	ipcRenderer.send("Message", {
 		type: "error",
 		title: file + " @ line: " + lineNo + " col: " + columnNo,
-		Message: msg
+		message: msg
 	})
 };
-
-
+ipcRenderer.send("app-version")
+ipcRenderer.once("app-version", (event, arg) => {
+	//ąconsole.log(arg.version)
+});
+ipcRenderer.on('update_available', () => {
+	CreateMessage({
+		type: "message",
+		buttons: ["Download and Iz", "Cancel"],
+		title: "File not saved",
+		message: "You may have forgotten to save your bin.\nSave before proceeding please."
+	}, () => {
+		window.location.href = Location;
+	})
+});
+ipcRenderer.on('update_downloaded', () => {
+	ipcRenderer.removeAllListeners('update_downloaded');
+});
 
 const PickScreen = async () => {
 	const color = await getColorHexRGB().catch((error) => {
@@ -140,12 +155,11 @@ function CreatePicker(Target, PaletteIndex) {
 		Alpha.maxLength = 7;
 
 		Alpha.oninput = (E) => {
-			Palette[PaletteIndex].InputHex(E.target.value)
+			Palette[PaletteIndex].InputAlpha(E.target.value)
 			MapPalette();
 		};
 
 		ColorPickerInputs.appendChild(Alpha);
-		console.dir(Palette)
 		let Exit = document.createElement('button')
 		Exit.innerText = 'X'
 		Exit.onclick = () => {
@@ -199,6 +213,7 @@ function MapPalette() {
 			GradientIndicator.style.background = PaletteItem.ToHEX();
 		}
 	})
+	document.getElementById("Color-Container").style.gridTemplateColumns = `repeat(${Palette.length}, minmax(0px, 1fr))`
 }
 MapPalette()
 
@@ -217,11 +232,11 @@ function ChangeColorCount(Count) {
 		PaletteItem.time = (1 / (Palette.length - 1) * index);
 	});
 	MapPalette();
-	document.getElementById("Color-Container").style.gridTemplateColumns = `repeat(${Count}, minmax(0px, 1fr))`
 	document.getElementById("Slider-Input").value = Palette.length;
 }
 
-async function OpenBin() {
+async function OpenBin(skip = false) {
+
 	document.getElementById('CheckToggle').checked = false
 	if (FileSaved != true) {
 		CreateMessage({
@@ -233,10 +248,12 @@ async function OpenBin() {
 		FileSaved = true;
 		return 0;
 	}
-	FilePath = ipcRenderer.sendSync("FileSelect", [
-		"Select Bin to edit",
-		"Bin",
-	]);
+	if (!skip) {
+		FilePath = ipcRenderer.sendSync("FileSelect", [
+			"Select Bin to edit",
+			"Bin",
+		]);
+	}
 
 	if (FilePath == undefined) {
 		return 0;
@@ -250,9 +267,6 @@ async function OpenBin() {
 
 	LoadFile();
 	FileCache = [];
-	if (!FileHistory.includes(FilePath.slice(0, -4) + ".json")) {
-		FileHistory.push(FilePath.slice(0, -4) + ".json");
-	}
 }
 
 function LoadFile(SkipAlert = true) {
@@ -261,17 +275,12 @@ function LoadFile(SkipAlert = true) {
 	for (let i = 0; i < File.linked.value.items.length; i++) {
 		Relative += `${File.linked.value.items[i]}\n`
 	}
-	fs.readFileSync
-
 	let Container = File.entries.value.items;
-	if (!/ValueColor/i.test(JSON.stringify(Container))) {
+	if (!/(ValueColor|Materials)/i.test(JSON.stringify(Container))) {
 		CreateMessage({
 			type: "warning",
-			title: "No color values found",
-			message: `
-					Check other bins.\n 
-					${Relative}
-				`
+			title: "warning",
+			message: `No color values found\nCheck other bins.\n${Relative}`
 		})
 		return 0;
 	}
@@ -286,8 +295,8 @@ function LoadFile(SkipAlert = true) {
 			let ParticleDiv = document.createElement("div");
 			ParticleDiv.id = Container[PO_ID].key;
 			ParticleDiv.className = "Particle-Div";
-			ParticleDiv.innerHTML = `<div class="Particle-Title-Div Flex">
-            <input type="checkbox" class="CheckBox" onclick="CheckChildren(this.parentNode.parentNode.children[1],this.checked)"/>
+			ParticleDiv.innerHTML = `<div class="Particle-Title-Div Flex Hidden">
+            <input type="checkbox" class="CheckBox" onclick="CheckChildren(this.parentNode.parentNode.children,this.checked)"/>
             <div class="Label Ellipsis Flex-1">${ParticleName}</div>
             </div>`;
 			let DefData = Container[PO_ID].value.items.filter(
@@ -314,7 +323,6 @@ function LoadFile(SkipAlert = true) {
 
 						let OFCID = RDProp?.findIndex(item => item.key.toString().toLowerCase() == "fresnelcolor")           // Outline Fresnel Color
 						let RFCID = RDProp?.findIndex(item => item.key.toString().toLowerCase() == "reflectionfresnelcolor") // Reflective Fresnel Color
-
 						let LCID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "lingercolor")			// Linger Color
 						let BCID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "birthcolor")			// Birth Color
 						let MCID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "color")				// Main Color
@@ -466,6 +474,72 @@ function LoadFile(SkipAlert = true) {
 			}
 			ParticleList.appendChild(ParticleDiv);
 		}
+		else if (Container[PO_ID].value.name.toLowerCase() == "staticmaterialdef") {
+			MaterialName = Container[PO_ID].value.items.find((item) => {
+				if (item.key.toLowerCase() == "name") {
+					return item;
+				}
+			}).value ?? `unknown ${PO_ID}`;
+
+			let MaterialDiv = document.createElement("div");
+			MaterialDiv.id = Container[PO_ID].key;
+			MaterialDiv.className = "Material-Div";
+			MaterialDiv.innerHTML = `<div class="Particle-Title-Div Input-Group Flex">
+            <input type="checkbox" class="CheckBox" onclick="CheckChildren(this.parentNode.parentNode.children,this.checked)"/>
+            <div class="Label Ellipsis Flex-1">${MaterialName}</div>
+            </div>`;
+			let ParamValues = Container[PO_ID].value.items.filter(
+				(item) =>
+					item.key.toString().toLowerCase() == "paramvalues"
+			);
+
+			let Props = ParamValues[0].value.items;
+			for (let B = 0; B < Props.length; B++) {
+
+				let DefDataDiv = document.createElement("div");
+				DefDataDiv.className = "DefDataDiv";
+
+				let Emitter = document.createElement("div");
+
+				Emitter.className = "Flex Emitter-Div";
+				let Input = document.createElement("input");
+				Input.type = "checkbox";
+				Input.className = `CheckBox`;
+
+				Emitter.appendChild(Input);
+				let Title = document.createElement("div");
+				Title.className = "Label Flex-1 Ellipsis";
+				Title.innerText =
+					Props[B].items[
+						Props[B].items.findIndex(
+							(item) => item.key.toString().toLowerCase() == "name")
+					]?.value;
+				let MCID = Props[B].items.findIndex(
+					(item) => item.key.toString().toLowerCase() == "value")
+				Emitter.appendChild(Title);
+				if (/color/ig.test(Title.innerText)) {
+					let MainColorDiv = document.createElement("div")
+					const MCColor = () => { return GetColor(Props[B].items[MCID]) }
+					MCBG = ToBG(MCColor())
+					MainColorDiv.onclick = () => {
+						Palette = MCColor()
+						MapPalette();
+						document.getElementById("Slider-Input").value = Palette.length;
+					};
+					MainColorDiv.className = `Prop-Block Pointer ${MCBG ? "" : "Blank-Obj"}`
+					MainColorDiv.style = `background: ${MCBG ? MCBG : ""}`
+					Emitter.appendChild(MainColorDiv);
+				}
+				else {
+					continue
+				}
+				MaterialDiv.appendChild(DefDataDiv);
+
+				DefDataDiv.appendChild(Emitter)
+
+			}
+			ParticleList.appendChild(MaterialDiv);
+		}
 	}
 	MapPalette()
 }
@@ -522,25 +596,28 @@ function CheckToggle(checkbox) {
 		if (ParticleListChildren[I].style.display != "none") {
 			ParticleListChildren[I].children[0].children[0].checked = checkbox.checked;
 			CheckChildren(
-				ParticleListChildren[I].children[1],
+				ParticleListChildren[I].children,
 				ParticleListChildren[I].children[0].children[0].checked
 			);
 		}
 	}
 }
 
-function CheckChildren(Particle, State) {
-	if (Particle == undefined) {
-		return 0;
-	}
-	for (let J = 0; J < Particle.children.length; J++) {
-		if (
-			Particle.children[J].style.visibility != "hidden" &&
-			Particle.children[J].children[0].disabled != true
-		) {
-			Particle.children[J].children[0].checked = State;
+function CheckChildren(Particles, State) {
+	for (let i = 1; i < Particles.length; i++) {
+		if (Particles[i] == undefined) {
+			return 0;
+		}
+		for (let j = 0; j < Particles[i].children.length; j++) {
+			if (
+				Particles[i].children[j].style.visibility != "hidden" &&
+				Particles[i].children[j].children[0].disabled != true
+			) {
+				Particles[i].children[j].children[0].checked = State;
+			}
 		}
 	}
+
 }
 
 function IsBW(A, B, C) { return A == B && B == C ? A == 0 || A == 1 : false }
@@ -605,7 +682,7 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 				PropType[DynID] = JSON.parse(BlankConstant)
 			}
 
-			ConstID = PropType.findIndex(item => item.key.toString().toLowerCase() == "constantValue")
+			ConstID = PropType.findIndex(item => item.key.toString().toLowerCase() == "constantvalue")
 			DynID = PropType.findIndex(item => item.key.toString().toLowerCase() == "dynamics")
 
 			if (DynID >= 0) {
@@ -687,39 +764,39 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 function RecolorSelected() {
 	FileSaved = false;
 	FileCache.push(JSON.parse(JSON.stringify(File)));
+	if (FileCache.length > 10) { FileCache.shift() }
 	let Container = File.entries.value.items;
 
 	for (let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++) {
-		let Adjusted_ID = Container.findIndex(
-			(item) => item.key == ParticleList.childNodes[PO_ID].id
-		);
-		let DefData = Container[Adjusted_ID].value.items;
+		let Index = Container.findIndex(item => item.key == ParticleList.children[PO_ID].id)
 
+		let DefData = Container[Index].value.items
 		let DomDefData = ParticleList.children[PO_ID].children;
-		for (let B = 1; B < ParticleList.children[PO_ID].children.length; B++) {
-			for (let C = 0; C < DomDefData[B].children.length; C++) {
-				let DomEmitter = DomDefData[B].children[C].children;
-				let Offset = DefData.findIndex(item => (item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-					item.key.toString().toLowerCase() == "simpleemitterdefinitiondata"))
-				if (DomEmitter[0].checked) {
-					let PropItems = DefData[B - 1 + Offset].value.items[C].items;
-					let RDID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "reflectionDefinition")
-					let RDProp = PropItems[RDID]?.value.items
+		if (ParticleList.children[PO_ID].className == "Particle-Div") {
+			for (let defID = 0; defID < DomDefData.length - 1; defID++) {
+				for (let emitID = 0; emitID < DomDefData[defID + 1].children.length; emitID++) {
+					domEmitDef = DomDefData[defID + 1].children[emitID].children
+					emitDef = DefData[defID].value.items[emitID].items
+					if (!domEmitDef[0].checked) continue;
+
+					let RDID = emitDef.findIndex(item => item.key.toString().toLowerCase() == "reflectiondefinition")
+					let RDProp = emitDef[RDID]?.value.items
 
 					let OFCID = RDProp?.findIndex(item => item.key.toString().toLowerCase() == "fresnelcolor")// Outline Fresnel Color
 					let RFCID = RDProp?.findIndex(item => item.key.toString().toLowerCase() == "reflectionfresnelcolor")// Reflective Fresnel Color
 
-					let LCID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "lingercolor")
-					let BCID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "birthcolor")
+					let LCID = emitDef?.findIndex(item => item.key.toString().toLowerCase() == "lingercolor")
+					let BCID = emitDef?.findIndex(item => item.key.toString().toLowerCase() == "birthcolor")
 
-					let MCID = PropItems?.findIndex(item => item.key.toString().toLowerCase() == "color")
+					let MCID = emitDef?.findIndex(item => item.key.toString().toLowerCase() == "color")
+
 					if (OFCID >= 0 && T1.checked) {
 						RDProp[OFCID] = RecolorProp(RDProp[OFCID], true)
 						const OFColor = () => { return GetColor(RDProp[OFCID]) }
 
-						DomEmitter[2].style.background = ToBG(OFColor)
+						domEmitDef[2].style.background = ToBG(OFColor())
 
-						DomEmitter[2].onclick = () => {
+						domEmitDef[2].onclick = () => {
 							Palette = OFColor();
 							MapPalette();
 							document.getElementById("Slider-Input").value =
@@ -729,9 +806,8 @@ function RecolorSelected() {
 					if (RFCID >= 0 && T2.checked) {
 						RDProp[RFCID] = RecolorProp(RDProp[RFCID], true)
 						const RFColor = () => { return GetColor(RDProp[RFCID]) }
-						DomEmitter[3].style.background = ToBG(RFColor())
-
-						DomEmitter[3].onclick = () => {
+						domEmitDef[3].style.background = ToBG(RFColor())
+						domEmitDef[3].onclick = () => {
 							Palette = RFColor();
 							MapPalette();
 							document.getElementById("Slider-Input").value =
@@ -739,11 +815,11 @@ function RecolorSelected() {
 						};
 					}
 					if (LCID >= 0 && T3.checked) {
-						PropItems[LCID] = RecolorProp(PropItems[LCID])
-						const LCColor = () => { return GetColor(PropItems[LCID].value.items) }
-						DomEmitter[4].style.background = ToBG(LCColor())
+						emitDef[LCID] = RecolorProp(emitDef[LCID])
+						const LCColor = () => { return GetColor(emitDef[LCID].value.items) }
+						domEmitDef[4].style.background = ToBG(LCColor())
 
-						DomEmitter[4].onclick = () => {
+						domEmitDef[4].onclick = () => {
 							Palette = LCColor();
 							MapPalette();
 							document.getElementById("Slider-Input").value =
@@ -751,22 +827,22 @@ function RecolorSelected() {
 						};
 					}
 					if (BCID >= 0 && T4.checked) {
-						PropItems[BCID] = RecolorProp(PropItems[BCID])
-						const BCColor = () => { return GetColor(PropItems[BCID].value.items) }
-						DomEmitter[5].style.background = ToBG(BCColor())
+						emitDef[BCID] = RecolorProp(emitDef[BCID])
+						const BCColor = () => { return GetColor(emitDef[BCID].value.items) }
+						domEmitDef[5].style.background = ToBG(BCColor())
 
-						DomEmitter[5].onclick = () => {
+						domEmitDef[5].onclick = () => {
 							Palette = BCColor()
 							MapPalette();
 							document.getElementById("Slider-Input").value = Palette.length;
 						};
 					}
 					if (MCID >= 0 && T5.checked) {
-						PropItems[MCID] = RecolorProp(PropItems[MCID])
-						const MCColor = () => { return GetColor(PropItems[MCID].value.items) }
-						DomEmitter[6].style.background = ToBG(MCColor())
+						emitDef[MCID] = RecolorProp(emitDef[MCID])
+						const MCColor = () => { return GetColor(emitDef[MCID].value.items) }
+						domEmitDef[6].style.background = ToBG(MCColor())
 
-						DomEmitter[6].onclick = () => {
+						domEmitDef[6].onclick = () => {
 							Palette = MCColor()
 							MapPalette();
 							document.getElementById("Slider-Input").value = Palette.length;
@@ -775,13 +851,31 @@ function RecolorSelected() {
 				}
 			}
 		}
+		else if (ParticleList.children[PO_ID].className == "Material-Div") {
+			let paramIndex = DefData.findIndex(item => item.key.toString().toLowerCase() == "paramvalues")
+			for (let paramID = 1; paramID < DomDefData.length; paramID++) {
+				domEmitDef = DomDefData[paramID].firstElementChild.children
+				if (!domEmitDef[0].checked) continue;
+				let colorIndex = DefData[paramIndex].value.items.findIndex(item =>
+					item.items[0].value == domEmitDef[1].innerText)
+				ColorProp = DefData[paramIndex].value.items[colorIndex].items[1]
+				ColorProp = RecolorProp(ColorProp, true)
+				const MCColor = () => { return GetColor(ColorProp) }
+				domEmitDef[2].style.background = ToBG(MCColor())
+
+				domEmitDef[2].onclick = () => {
+					Palette = MCColor()
+					MapPalette();
+					document.getElementById("Slider-Input").value = Palette.length;
+				};
+			}
+		}
 	}
 }
 
 function Undo() {
 	if (FileCache.length > 0) {
-		File = JSON.parse(JSON.stringify(FileCache[FileCache.length - 1]))
-		FileCache.pop();
+		File = JSON.parse(JSON.stringify(FileCache.pop()))
 		LoadFile(true);
 	}
 	document.getElementById('CheckToggle').checked = false
@@ -797,7 +891,6 @@ async function SaveBin() {
 	);
 	await ToBin();
 	FileSaved = true;
-	FileHistory = []
 }
 
 

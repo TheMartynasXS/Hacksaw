@@ -16,13 +16,9 @@
             <img class="Icon" src="../css/svg/paintroller.svg"></img>
             <div class="TabTitle">Splash</div>
         </button>
-        <!-- <button onclick="Tab('./stitch.html')" class="NavButton">
+        <button onclick="Tab('./stitch.html')" class="NavButton">
             <img class="Icon" src="../css/svg/hashtag.svg"></img>
             <div class="TabTitle">Stitch</div>
-        </button> -->
-        <button onclick="Tab('./skinideas.html')" class="NavButton">
-            <img class="Icon" src="../css/svg/bulb.svg"></img>
-            <div class="TabTitle">Skin Ideas</div>
         </button>
         <button onclick="Tab('./bintex.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/list.svg"></img>
@@ -31,6 +27,10 @@
         <button onclick="Tab('./xrgba.html')" class="NavButton">
             <img class="Icon" src="../css/svg/drop.svg"></img>
             <div class="TabTitle">xrgba</div>
+        </button>
+        <button onclick="Tab('./skinideas.html')" class="NavButton">
+            <img class="Icon" src="../css/svg/bulb.svg"></img>
+            <div class="TabTitle">Skin Ideas</div>
         </button>
         <button onclick="Tab('./settings.html')" class="NavButton">
             <img class="Icon" src="../css/svg/cog.svg"></img>
@@ -44,7 +44,8 @@
             </div>
             <div class="Input-Group">
                 <div class="Label Flex-1" id="Bin-Count">...</div>
-                <progress id="Progress-Range" class="Flex-2" type="range" value="0" style="padding-inline: 0;"></progress>
+                <progress id="Progress-Range" class="Flex-2" type="range" value="0"
+                    style="padding-inline: 0;"></progress>
             </div>
             <div class="Margin-Block Usage-Information" style="padding-block:0.5rem">
                 Usage Information:
@@ -62,7 +63,8 @@
                                 <strong>Combined.json</strong> - Ordered list of files by path.
                             </li>
                             <li>
-                                <strong>Separate.json</strong> - Ordered list of files by bin which file is mentioned in.
+                                <strong>Separate.json</strong> - Ordered list of files by bin which file is mentioned
+                                in.
                             </li>
                             <li>
                                 <strong>Missing.json</strong> - Files that are missing from your folder.
@@ -79,7 +81,7 @@
                 <mark>More Features will be added eventually</mark>
             </div>
             <div id="Unlink-List" class="Margin-Bottom">
-                
+
             </div>
             <div class="Input-Group">
                 <button onclick="DeleteUnused()" id="Delete-Unused" class="Flex-1">
@@ -90,4 +92,5 @@
         </div>
     </div>
 </body>
+
 </html>

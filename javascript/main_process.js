@@ -4,12 +4,13 @@ const { ipcMain } = require("electron");
 const { dialog } = require("electron");
 const isDev = require("electron-is-dev");
 const fs = require("fs");
-const _ = require("lodash")
+const { autoUpdater } = require("electron-updater");
 
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json")
 
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json")
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json")
+
 
 let Prefs = fs.existsSync(PrefsPath)
     ? JSON.parse(fs.readFileSync(PrefsPath))
@@ -43,16 +44,13 @@ const createWindow = (htmlDir) => {
     });
 
     mainWindow.loadFile(path.join(__dirname, htmlDir));
-    isDev ? mainWindow.webContents.openDevTools({ mode: "detach" }) : mainWindow.removeMenu();
-    if (Prefs.RitoBinPath?.length == 0) {
-        dialog.showMessageBox(null, {
-            type: "warning",
-            title: "Ritobin Missing",
-            buttons: ["Continue"],
-            message: "Select Ritobin_cli.exe before continuing."
-        })
-    }
+    !isDev ? mainWindow.webContents.openDevTools({ mode: "detach" }) : mainWindow.removeMenu();
+
+    mainWindow.once('ready-to-show', () => {
+        autoUpdater.checkForUpdatesAndNotify();
+    })
 };
+
 
 app.whenReady().then(() => {
     if (!fs.existsSync(SamplesPath)) {
@@ -61,13 +59,42 @@ app.whenReady().then(() => {
     if (!fs.existsSync(xRGBAPath)) {
         fs.writeFileSync(xRGBAPath, "[]", "utf8")
     }
-    if (!fs.existsSync(PrefsPath) || Prefs?.RitoBinPath.length == 0) {
+    if (!fs.existsSync(PrefsPath) || Prefs?.RitoBinPath == undefined || Prefs?.RitoBinPath?.length == 0) {
         fs.writeFileSync(PrefsPath, DefaultPreferences, "utf8")
-        createWindow("../html/settings.html");
+        let button = dialog.showMessageBoxSync(null, {
+            type: "warning",
+            title: "Ritobin Missing",
+            defaultId: 2,
+            buttons: ["Continue", "cancel"],
+            message: "Select Ritobin_cli.exe before continuing."
+        })
+        if (button == 0) {
+            Prefs.RitoBinPath = dialog.showOpenDialogSync({
+                title: "Select ritobin_cli.exe!",
+                filters: [{ name: "ritobin_cli", extensions: ["exe"] }],
+                properties: ["openFile"],
+            })[0]
+
+        }
+        else {
+            fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
+            fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
+            fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
+            app.quit();
+            return 0;
+        }
     }
-    else {
-        createWindow("../html/binsplash.html");
-    }
+    createWindow("../html/binsplash.html");
+});
+
+ipcMain.on('app-version', (event) => {
+    event.sender.send('app-version', { version: app.getVersion() });
+});
+autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update_available');
+});
+autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update_downloaded');
 });
 
 ipcMain.on('get-ssx', (event) => {
@@ -78,7 +105,6 @@ ipcMain.on("update-settings", (event, arg) => {
     Prefs = JSON.parse(arg);
 });
 ipcMain.on("update-samples", (event, arg) => {
-
     Samples = JSON.parse(arg);
 });
 ipcMain.on("update-xrgba", (event, arg) => {
@@ -150,7 +176,7 @@ ipcMain.on("FileSelect", (event, arg) => {
 ipcMain.on("UserPath", (event) => {
     event.returnValue = app.getPath("userData");
 });
-ipcMain.on("Message", (event, props) => {
+ipcMain.on("Message", (event, props = { title: "untitled", message: "unknownerror" }) => {
     switch (props.type) {
         case "error":
             dialog.showErrorBox(props.title, props.message)
