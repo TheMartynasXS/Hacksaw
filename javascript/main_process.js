@@ -4,13 +4,11 @@ const { ipcMain } = require("electron");
 const { dialog } = require("electron");
 const isDev = require("electron-is-dev");
 const fs = require("fs");
-const { autoUpdater } = require("electron-updater");
 
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json")
 
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json")
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json")
-
 
 let Prefs = fs.existsSync(PrefsPath)
     ? JSON.parse(fs.readFileSync(PrefsPath))
@@ -44,11 +42,7 @@ const createWindow = (htmlDir) => {
     });
 
     mainWindow.loadFile(path.join(__dirname, htmlDir));
-    !isDev ? mainWindow.webContents.openDevTools({ mode: "detach" }) : mainWindow.removeMenu();
-
-    mainWindow.once('ready-to-show', () => {
-        autoUpdater.checkForUpdatesAndNotify();
-    })
+    isDev || process.argv.includes("--dev") ? mainWindow.webContents.openDevTools({ mode: "detach" }) : mainWindow.removeMenu();
 };
 
 
@@ -87,20 +81,9 @@ app.whenReady().then(() => {
     createWindow("../html/binsplash.html");
 });
 
-ipcMain.on('app-version', (event) => {
-    event.sender.send('app-version', { version: app.getVersion() });
-});
-autoUpdater.on('update-available', () => {
-    mainWindow.webContents.send('update_available');
-});
-autoUpdater.on('update-downloaded', () => {
-    mainWindow.webContents.send('update_downloaded');
-});
-
 ipcMain.on('get-ssx', (event) => {
     event.returnValue = [Prefs, Samples, xRGBA]
 })
-
 ipcMain.on("update-settings", (event, arg) => {
     Prefs = JSON.parse(arg);
 });
@@ -118,7 +101,7 @@ app.on("window-all-closed", () => {
     fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
     app.quit();
 });
-//create preference file if it doesn't exist
+
 const DefaultPreferences = JSON.stringify(
     {
         PreferredMode: 'random',
@@ -198,4 +181,3 @@ ipcMain.on("Message", (event, props = { title: "untitled", message: "unknownerro
             break;
     }
 });
-

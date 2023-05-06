@@ -1,9 +1,13 @@
 {
   "name": "hacksaw",
   "productName": "hacksaw",
-  "version": "3.6.4",
+  "version": "3.6.6",
   "description": "my league modding suite",
   "main": "javascript/main_process.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheMartynasXS/Hacksaw"
+  },
   "build": {
     "appId": "com.github.devmarcius.hacksaw",
     "win": {
@@ -44,12 +48,9 @@
   "dependencies": {
     "electron-color-picker": "^0.2.0",
     "electron-is-dev": "^2.0.0",
-    "electron-updater": "^5.3.0",
-    "get-github-tag": "^1.1.0",
     "lodash": "^4.17.21",
     "open": "^8.4.0",
-    "path-sort": "^0.1.0",
-    "update-electron-app": "^2.0.1"
+    "path-sort": "^0.1.0"
   },
   "devDependencies": {
     "electron": "15.2.0",

@@ -25,14 +25,15 @@ let CombinedOutput = []
 let MissingOutput = []
 
 let pathRegExp = new RegExp(/ASSETS.+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
+//let pathRegExp = new RegExp(/ASSETS.+(?:particles|mod|shared).+(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
 
 function Undo() {
-	if (FileCache.length > 0) {
-		File = JSON.parse(JSON.stringify(FileCache[FileCache.length - 1]))
-		FileCache.pop();
-		LoadFile(true);
-	}
-	FilterParticles(document.getElementById("Filter").value);
+  if (FileCache.length > 0) {
+    File = JSON.parse(JSON.stringify(FileCache[FileCache.length - 1]))
+    FileCache.pop();
+    LoadFile(true);
+  }
+  FilterParticles(document.getElementById("Filter").value);
 }
 
 async function SelectWadFolder(Path = undefined) {
@@ -207,7 +208,7 @@ async function DeleteUnused() {
       await sleep(10)
       Progress.value = i
       UnlinkList.removeChild(UnlinkList.firstChild)
-      fs.unlinkSync(Files2Delete[i])
+      //fs.unlinkSync(Files2Delete[i])
       BinCount.innerText = `Deleting Unused - ${i + 1}/${Progress.max}`
     }
   } else {

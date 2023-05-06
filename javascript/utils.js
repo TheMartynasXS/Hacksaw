@@ -14,7 +14,7 @@ async function Tab(Location, FileSaved = true) {
 			buttons: ["Continue", "Cancel"],
 			title: "File not saved",
 			message: "You may have forgotten to save your bin.\nSave before proceeding please."
-		},()=>{
+		}, () => {
 			window.location.href = Location;
 		})
 		return FileSaved;
@@ -333,7 +333,7 @@ function CreateMessage(
 	options = {
 		type: "error", title: "", message: "", defaultId: 0, cancelId: 0,
 		detail: "", checkboxLabel: "", checkboxChecked: false
-	},action = undefined) {
+	}, action = undefined) {
 	let data = ipcRenderer.sendSync("Message", options)
 	if (data?.response == 0 && action != undefined) {
 		action()

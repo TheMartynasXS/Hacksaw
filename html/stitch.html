@@ -17,23 +17,23 @@
             <div class="TabTitle">Splash</div>
         </button>
         <button onclick="Tab('./stitch.html',FileSaved)" disabled class="NavButton">
-            <img class="Icon" src="../css/svg/hashtag.svg"></img>
+            <img class="Icon" src="../css/svg/Stitch.svg"></img>
             <div class="TabTitle">Stitch</div>
         </button>
         <button onclick="Tab('./bintex.html',FileSaved)" class="NavButton">
-            <img class="Icon" src="../css/svg/list.svg"></img>
+            <img class="Icon" src="../css/svg/ListBox.svg"></img>
             <div class="TabTitle">BinTex</div>
         </button>
         <button onclick="Tab('./xrgba.html',FileSaved)" class="NavButton">
-            <img class="Icon" src="../css/svg/drop.svg"></img>
+            <img class="Icon" src="../css/svg/Swatch.svg"></img>
             <div class="TabTitle">xrgba</div>
         </button>
         <button onclick="Tab('./skinideas.html',FileSaved)" class="NavButton">
-            <img class="Icon" src="../css/svg/bulb.svg"></img>
+            <img class="Icon" src="../css/svg/LightBulb.svg"></img>
             <div class="TabTitle">Skin Ideas</div>
         </button>
         <button onclick="Tab('./settings.html',FileSaved)" class="NavButton">
-            <img class="Icon" src="../css/svg/cog.svg"></img>
+            <img class="Icon" src="../css/svg/Cog.svg"></img>
             <div class="TabTitle">Settings</div>
         </button>
     </div>
@@ -42,12 +42,15 @@
             <div style="grid-area: a">
                 <div class="Input-Group">
                     <button class="Flex-1" onclick="OpenTargetBin()">Open Target Bin</button>
-                    <button class="Flex-1" onclick="OpenFolder()">Move Particles To...</button>
                     <button class="Flex-1" onclick="OpenDonorBin()">Open Donor Bin</button>
                 </div>
-                <div class="Input-Group">
-                    <div class="Label Flex-1"><strong class="Wrap" id="ReroutePath">This will show new particle
-                            path</strong></div>
+                <div class="Input-Group ScrollX">
+                    <div class="Label Flex-1">
+                        <strong id="TargetPath">This will show target bin</strong>
+                    </div>
+                    <div class="Label Flex-1">
+                        <mark id="DonorPath">This will show donor bin</mark>
+                    </div>
                 </div>
                 <div class="Input-Group">
                     <input class="Ellipsis Flex-3 Filter" type="text" id="FilterTarget"
@@ -62,6 +65,8 @@
             </div>
             <div style="grid-area: b" class="Input-Group">
                 <button onclick="Undo()" class="Flex-1">Undo</button>
+                <button onclick="ClearSelection()" class="Flex-1"><mark>Clear Selected</mark></button>
+                <button class="Flex-1" onclick="MoveParticles()">Move Particles To...</button>
                 <button class="Flex-1 Special-Input" onclick="Save()">Save</button>
             </div>
             <script src="../javascript/tabs/stitch.js"></script>

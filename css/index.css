@@ -103,6 +103,10 @@ mark {
   color: var(--text-primary);
 }
 
+.Input-Group .Reduced-Padding {
+  padding-inline: 0rem;
+}
+
 .Input-Group input[type="color"] {
   margin: 0.1rem;
 }
@@ -184,8 +188,9 @@ mark {
   padding-inline: 0.75rem;
   align-items: center;
   padding-block: auto;
-  overflow: hidden;
+  overflow-y: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 input.Filter {
@@ -462,7 +467,14 @@ input[type="color"]::-webkit-color-swatch {
   display: block;
 }
 
-.NavButton .Icon {
+.Icon {
+  height: 1.5rem;
+  width: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.NavBar .Icon {
   height: 2rem;
   width: 2rem;
   aspect-ratio: 1;
@@ -586,11 +598,15 @@ input[type="color"]::-webkit-color-swatch {
   overflow-x: auto;
 }
 
-#Title::-webkit-scrollbar {
+#Title::-webkit-scrollbar,
+.Label::-webkit-scrollbar {
   cursor: pointer;
   position: absolute;
   height: 0.4rem;
   bottom: 10px;
+}
+.ScrollX{
+  overflow-x: auto;
 }
 
 .Particle-Title-Div {
@@ -814,7 +830,6 @@ input[type="color"]::-webkit-color-swatch {
   padding: 1rem;
   transform: translate(0, -50%);
 }
-
 
 .IconButton {
   height: 3rem;

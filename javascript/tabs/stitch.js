@@ -37,7 +37,8 @@ function Undo() {
 	FilterParticles(document.getElementById("FilterDonor").value, "FilterDonor");
 }
 
-function OpenFolder() {
+function MoveParticles() {
+
 	WadPath = ipcRenderer.sendSync("FileSelect", [
 		"Select wad folder",
 		"Folder",
@@ -51,8 +52,15 @@ function OpenFolder() {
 		return 0;
 	}
 	WadPath = ("assets\\" + WadPath.split("\\assets\\").pop()).replace(/\\/g, "/")
-	ReroutePathDisplay.innerText = WadPath
 
+	let Container = DonorFile.entries.value.items;
+	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
+		Container[PO_ID]
+		let StringProp = JSON.stringify(Container[PO_ID], null, 2)
+		StringProp = StringProp.replace(pathRegExp,
+			(match) => { return WadPath + match.split("/").pop() })
+		Container[PO_ID] = JSON.parse(StringProp)
+	}
 }
 function OpenTargetBin() {
 	TargetPath = ipcRenderer.sendSync("FileSelect", [
@@ -67,6 +75,7 @@ function OpenTargetBin() {
 	}
 	TargetFile = JSON.parse(fs.readFileSync(TargetPath.slice(0, -4) + ".json", "utf-8"))
 
+	document.getElementById("TargetPath").innerText = TargetPath.split(".wad.client\\").pop()
 	RenderTarget();
 }
 
@@ -91,10 +100,51 @@ function RenderTarget(i = -1) {
 			let ParticleDiv = document.createElement("div");
 			ParticleDiv.id = Container[PO_ID].key;
 			ParticleDiv.className = "Particle-Div";
-			ParticleDiv.innerHTML = `<div class="Particle-Title-Div Flex Hidden ${/_tar_/gi.test(ParticleName) ? "TargetSymbol" : ""}">
-            <input type="radio" class="CheckBox" name="Target"/>
-            <div class="Label Ellipsis Flex-1">${ParticleName}</div>
-            </div>`;
+
+			let ParticleTitleDiv = document.createElement("div");
+			ParticleTitleDiv.className = "Particle-Title-Div Input-Group Flex Hidden";
+			ParticleDiv.appendChild(ParticleTitleDiv);
+
+			let TargetCheckbox = document.createElement("input");
+			TargetCheckbox.type = "radio";
+			TargetCheckbox.className = "CheckBox";
+			TargetCheckbox.name = "Target";
+			ParticleTitleDiv.appendChild(TargetCheckbox);
+
+			let ParticleTitle = document.createElement("div");
+			ParticleTitle.className = "Label Ellipsis Flex-1";
+			ParticleTitle.innerText = ParticleName;
+			ParticleTitleDiv.appendChild(ParticleTitle);
+
+			let ParticleScale = document.createElement("input");
+			ParticleScale.type = "number";
+			ParticleScale.className = "Input Reduced-Padding";
+			ParticleScale.placeholder = "1.0";
+			ParticleScale.value = Container[PO_ID].value.items.find((item) => {
+				if (item.key.toLowerCase() == "transform") {
+					return item;
+				}
+			})?.value[0] ?? 1.0;
+			ParticleScale.oninput = (e) => {
+				let index = Container[PO_ID].value.items.findIndex((item) => {
+					if (item.key.toLowerCase() == "transform") {
+						return item;
+					}
+				})
+				if (index != -1) {
+					Container[PO_ID].value.items[index].value[0] = parseFloat(e.target.value);
+					Container[PO_ID].value.items[index].value[5] = parseFloat(e.target.value);
+					Container[PO_ID].value.items[index].value[10] = parseFloat(e.target.value);
+				} else {
+					Container[PO_ID].value.items.push({
+						key: "Transform",
+						type: "mtx44",
+						value: [parseFloat(e.target.value), 0, 0, 0, 0, parseFloat(e.target.value), 0, 0, 0, 0, parseFloat(e.target.value), 0, 0, 0, 0, 1]
+					});
+				}
+			};
+			ParticleTitleDiv.appendChild(ParticleScale);
+
 			let DefData = Container[PO_ID].value.items.filter(
 				(item) =>
 					item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
@@ -115,7 +165,7 @@ function RenderTarget(i = -1) {
 						Emitter.className = "Flex Input-Group";
 
 						let Delete = document.createElement("button");
-						Delete.innerHTML = "<Mark>X</Mark>"
+						Delete.innerHTML = "<img class=\"Icon\" src=\"../css/svg/Delete.svg\"></img>"
 						Delete.onclick = () => {
 							FileSaved = false
 							FileCache.push(JSON.parse(JSON.stringify(TargetFile)))
@@ -141,7 +191,7 @@ function RenderTarget(i = -1) {
 			TargetList.appendChild(ParticleDiv);
 		}
 		else if (Container[PO_ID].value.name.toLowerCase() == "resourceresolver") {
-			console.log(Container[PO_ID].value.items[0].value.items)
+
 		}
 		else {
 			let MaterialDiv = document.createElement("div");
@@ -160,6 +210,7 @@ function RenderTarget(i = -1) {
 	else {
 		TargetList.children[i].children[0].children[0].checked = true
 	}
+	FilterParticles(document.getElementById("FilterTarget")?.value, "Target-Container")
 }
 function OpenDonorBin() {
 	DonorPath = ipcRenderer.sendSync("FileSelect", [
@@ -174,6 +225,7 @@ function OpenDonorBin() {
 	}
 	DonorFile = JSON.parse(fs.readFileSync(DonorPath.slice(0, -4) + ".json", "utf-8"))
 
+	document.getElementById("DonorPath").innerText = DonorPath.split(".wad.client\\").pop()
 	RenderDonor();
 }
 function FilterParticles(FilterString, List) {
@@ -197,8 +249,6 @@ function FilterParticles(FilterString, List) {
 		}
 	}
 }
-
-
 
 function RenderDonor() {
 	DonorList.innerText = "";
@@ -240,12 +290,9 @@ function RenderDonor() {
 						let TCindex = TC.findIndex((item) => item.key == TargetList.children[i].id)
 						let TCComplex = TC[TCindex].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
 
-						let StringProp = JSON.stringify(Container[index].value.items[Complex].value.items, null, 2)
-						StringProp = StringProp.replace(pathRegExp,
-							(match) => { return WadPath + match.split("/").pop() })
 						TC[TCindex].value.items[TCComplex].value.items = [
 							...TC[TCindex].value.items[TCComplex].value.items,
-							...JSON.parse(StringProp)
+							...Container[index].value.items[Complex].value.items
 						]
 						RenderTarget(i)
 						break
@@ -290,12 +337,8 @@ function RenderDonor() {
 								if (TargetList.children[i].children[0].children[0].checked) {
 									let index = TC.findIndex((item) => item.key == TargetList.children[i].id)
 									let Complex = TC[index].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
-									let StringProp = JSON.stringify(Props[C], null, 2)
-									StringProp = StringProp.replace(pathRegExp,
-										(match) => { return WadPath + match.split("/").pop() })
-									TC[index].value.items[Complex].value.items.push(
-										JSON.parse(StringProp)
-									)
+
+									TC[index].value.items[Complex].value.items.push(Props[C])
 									RenderTarget(i)
 									break
 								}
@@ -319,9 +362,11 @@ function RenderDonor() {
 			DonorList.appendChild(ParticleDiv);
 		}
 		else if (Container[PO_ID].value.name.toLowerCase() == "resourceresolver") {
-			console.log(Container[PO_ID].value.items)
+
 		}
 	}
+
+	FilterParticles(document.getElementById("FilterDonor")?.value, "Donor-Container")
 }
 
 function ToJson(FilePath) {
@@ -351,6 +396,20 @@ function Save() {
 			title: "Error Converting to bin",
 			message: "err.stderr.toString()"
 		})
+	}
+}
+function ClearSelection() {
+	let TC = TargetFile.entries.value.items;
+	for (let i = 0; i < TargetList.childNodes.length; i++) {
+		if (TargetList.children[i].children[0].children[0].checked) {
+
+			let TCindex = TC.findIndex((item) => item.key == TargetList.children[i].id)
+			let TCComplex = TC[TCindex].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
+
+			TC[TCindex].value.items[TCComplex].value.items = []
+			RenderTarget(i)
+			break
+		}
 	}
 }
 

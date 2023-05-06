@@ -63,23 +63,6 @@ window.onerror = function (msg, file, lineNo, columnNo) {
 		message: msg
 	})
 };
-ipcRenderer.send("app-version")
-ipcRenderer.once("app-version", (event, arg) => {
-	//ąconsole.log(arg.version)
-});
-ipcRenderer.on('update_available', () => {
-	CreateMessage({
-		type: "message",
-		buttons: ["Download and Iz", "Cancel"],
-		title: "File not saved",
-		message: "You may have forgotten to save your bin.\nSave before proceeding please."
-	}, () => {
-		window.location.href = Location;
-	})
-});
-ipcRenderer.on('update_downloaded', () => {
-	ipcRenderer.removeAllListeners('update_downloaded');
-});
 
 const PickScreen = async () => {
 	const color = await getColorHexRGB().catch((error) => {
@@ -258,7 +241,7 @@ async function OpenBin(skip = false) {
 	if (FilePath == undefined) {
 		return 0;
 	}
-	document.getElementById("Title").innerText = FilePath.split("\\").pop();
+	document.getElementById("Title").innerText = FilePath.split(".wad.client\\").pop();
 	if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
 		await ToJson();
 	}
@@ -773,10 +756,13 @@ function RecolorSelected() {
 		let DefData = Container[Index].value.items
 		let DomDefData = ParticleList.children[PO_ID].children;
 		if (ParticleList.children[PO_ID].className == "Particle-Div") {
+			let start = DefData.findIndex(item => item.key.toLowerCase() == "complexemitterdefinitiondata" ||
+				item.key.toLowerCase() == "simpleemitterdefinitiondata")
+			start = start > 0 ? start : 0
 			for (let defID = 0; defID < DomDefData.length - 1; defID++) {
 				for (let emitID = 0; emitID < DomDefData[defID + 1].children.length; emitID++) {
 					domEmitDef = DomDefData[defID + 1].children[emitID].children
-					emitDef = DefData[defID].value.items[emitID].items
+					emitDef = DefData[defID + start].value.items[emitID].items
 					if (!domEmitDef[0].checked) continue;
 
 					let RDID = emitDef.findIndex(item => item.key.toString().toLowerCase() == "reflectiondefinition")
