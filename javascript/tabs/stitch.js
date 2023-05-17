@@ -53,7 +53,7 @@ function MoveParticles() {
 	}
 	WadPath = ("assets\\" + WadPath.split("\\assets\\").pop()).replace(/\\/g, "/")
 
-	let Container = DonorFile.entries.value.items;
+	let Container = TargetFile.entries.value.items;
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		Container[PO_ID]
 		let StringProp = JSON.stringify(Container[PO_ID], null, 2)
