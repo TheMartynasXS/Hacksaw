@@ -242,7 +242,7 @@ async function OpenBin(skip = false) {
 		return 0;
 	}
 	document.getElementById("Title").innerText = FilePath.split(".wad.client\\").pop();
-	if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false) {
+	if (fs.existsSync(FilePath.slice(0, -4) + ".json") == false || Prefs.Regenerate) {
 		await ToJson();
 	}
 

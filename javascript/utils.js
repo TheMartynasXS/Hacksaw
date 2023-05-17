@@ -50,6 +50,10 @@ class Preferences {
 		this.obj.IgnoreBW = Ignore
 		this.save();
 	}
+	Regenerate(Regen = false) {
+		this.obj.Regenerate = Regen
+		this.save();
+	}
 
 	RitoBinPath() {
 		this.obj.RitoBinPath = ipcRenderer.sendSync('FileSelect', ['Select RitoBin_cli.exe', 'RitoBin'])

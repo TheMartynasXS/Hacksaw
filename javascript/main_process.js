@@ -18,6 +18,7 @@ let Prefs = fs.existsSync(PrefsPath)
         RitoBinPath: "",
         RememberTargets: false,
         Targets: [false, false, false, false, true],
+        Regenerate: false,
     };
 let Samples = fs.existsSync(SamplesPath)
     ? JSON.parse(fs.readFileSync(SamplesPath))
@@ -78,6 +79,9 @@ app.whenReady().then(() => {
             return 0;
         }
     }
+    if (!Prefs.hasOwnProperty("Regenerate")) {
+        Prefs.Regenerate = false;
+    }
     createWindow("../html/binsplash.html");
 });
 
@@ -109,6 +113,7 @@ const DefaultPreferences = JSON.stringify(
         RitoBinPath: "",
         RememberTargets: false,
         Targets: [false, false, false, false, true],
+        Regenerate: false,
     }
     , null, 4)
 

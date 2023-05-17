@@ -12,7 +12,7 @@
 
 <body class="Flex">
     <div class="NavBar Flex-Col">
-        <button onclick="Tab('./binsplash.html')" disabled class="NavButton">
+        <button onclick="Tab('./binsplash.html')" class="NavButton">
             <img class="Icon" src="../css/svg/Paintroller.svg"></img>
             <div class="TabTitle">Splash</div>
         </button>
@@ -32,7 +32,7 @@
             <img class="Icon" src="../css/svg/LightBulb.svg"></img>
             <div class="TabTitle">Skin Ideas</div>
         </button>
-        <button onclick="Tab('./settings.html')" class="NavButton">
+        <button onclick="Tab('./settings.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/Cog.svg"></img>
             <div class="TabTitle">Settings</div>
         </button>
@@ -58,6 +58,10 @@
             <div class="Input-Group">
                 <input type="checkbox" class="CheckBox SettingOptionCheckbox" id="RememberTargets">
                 <div class="Label Flex-1">Remember Recolor Targets</div>
+            </div>
+            <div class="Input-Group">
+                <input type="checkbox" class="CheckBox SettingOptionCheckbox" id="Regenerate">
+                <div class="Label Flex-1">Regenerate JSON on open</div>
             </div>
 
             <script src="../javascript/tabs/settings.js"></script>
