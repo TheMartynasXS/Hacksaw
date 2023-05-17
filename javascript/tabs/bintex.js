@@ -24,8 +24,7 @@ let SeparateOutput = []
 let CombinedOutput = []
 let MissingOutput = []
 
-let pathRegExp = new RegExp(/ASSETS.+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
-//let pathRegExp = new RegExp(/ASSETS.+(?:particles|mod|shared).+(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
+let pathRegExp = new RegExp(/ASSETS.+(?:dds|skn|skl|sco|scb|anm|tex)/gi)
 
 function Undo() {
   if (FileCache.length > 0) {
@@ -70,8 +69,6 @@ async function SelectWadFolder(Path = undefined) {
   BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".btx"))
   Progress.classList.add('Progress-Complete')
 
-  Files2Delete = AllFiles.filter(item => !item.endsWith('.json'))
-
   for (let i = 0; i < BTXFiles.length; i++) {
     let currentFile = JSON.parse(fs.readFileSync(BTXFiles[i], "utf-8"))
     let Matches = JSON.stringify(currentFile, null, 2).match(pathRegExp)
@@ -81,11 +78,6 @@ async function SelectWadFolder(Path = undefined) {
         fixedMatch = Matches[j].toLowerCase()
         if (!CombinedOutput.includes(fixedMatch)) {
           CombinedOutput.push(fixedMatch)
-        }
-        for (let k = 0; k < 3; k++) {
-          let index = Files2Delete.findIndex(item => (item.endsWith(fixedMatch) || item.replace("/2x_", "/").endsWith(fixedMatch) || item.replace("/4x_", "/").endsWith(fixedMatch)))
-
-          if (index >= 0) { Files2Delete.splice(index, 1) }
         }
       }
     }
@@ -152,11 +144,13 @@ async function SelectWadFolder(Path = undefined) {
     }
   }
 
-  for (i = 0; i < BTXFiles.length; i++) {
-    if (!Files2Delete.includes(BTXFiles[i])) {
-      Files2Delete.push(BTXFiles[i])
-    }
-  }
+  Files2Delete = AllFiles.filter(item => {
+    slice = item.slice(WadPath.length + 1).toLowerCase()
+    return !CombinedOutput.includes(slice) && !slice.split("/").slice(-1)[0].startsWith("2x_") && !slice.split("/").slice(-1)[0].startsWith("4x_")
+  })
+
+  Files2Delete = Files2Delete.filter(item => !(item.endsWith(".json") || item.endsWith(".bnk") || item.endsWith(".wpk")))
+
   Files2Delete.sort((a, b) => (a.Particle > b.Particle) ? 1 : ((b.Particle > a.Particle) ? -1 : 0))
   Files2Delete.map(item => {
     let FileName = document.createElement('div')
@@ -206,9 +200,9 @@ async function DeleteUnused() {
   if (Files2Delete.length > 0) {
     for (let i = 0; i < Files2Delete.length; i++) {
       await sleep(10)
-      Progress.value = i
+      Progress.value = i + 1
       UnlinkList.removeChild(UnlinkList.firstChild)
-      //fs.unlinkSync(Files2Delete[i])
+      fs.unlinkSync(Files2Delete[i])
       BinCount.innerText = `Deleting Unused - ${i + 1}/${Progress.max}`
     }
   } else {
@@ -221,7 +215,6 @@ async function DeleteUnused() {
   UnlinkList.innerText = ""
   Progress.classList.replace('Progress-Delete', 'Progress-Complete')
 }
-
 
 function ToJson(FilePath) {
   let TempFile = FilePath.replace(/\.bin$/, ".btx")
