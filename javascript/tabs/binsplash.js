@@ -270,7 +270,7 @@ function LoadFile(SkipAlert = true) {
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		if (Container[PO_ID].value.name.toLowerCase() == "vfxsystemdefinitiondata") {
 			ParticleName = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toLowerCase() == "particlename") {
+				if (item.key.toString().toLowerCase() == "particlename") {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
@@ -459,7 +459,7 @@ function LoadFile(SkipAlert = true) {
 		}
 		else if (Container[PO_ID].value.name.toLowerCase() == "staticmaterialdef") {
 			MaterialName = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toLowerCase() == "name") {
+				if (item.key.toString().toLowerCase() == "name") {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
@@ -756,8 +756,8 @@ function RecolorSelected() {
 		let DefData = Container[Index].value.items
 		let DomDefData = ParticleList.children[PO_ID].children;
 		if (ParticleList.children[PO_ID].className == "Particle-Div") {
-			let start = DefData.findIndex(item => item.key.toLowerCase() == "complexemitterdefinitiondata" ||
-				item.key.toLowerCase() == "simpleemitterdefinitiondata")
+			let start = DefData.findIndex(item => item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
+				item.key.toString().toLowerCase() == "simpleemitterdefinitiondata")
 			start = start > 0 ? start : 0
 			for (let defID = 0; defID < DomDefData.length - 1; defID++) {
 				for (let emitID = 0; emitID < DomDefData[defID + 1].children.length; emitID++) {

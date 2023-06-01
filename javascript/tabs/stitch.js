@@ -24,7 +24,6 @@ let FileCache = [];
 
 let TargetList = document.getElementById("Target-Container")
 let DonorList = document.getElementById("Donor-Container")
-let ReroutePathDisplay = document.getElementById("ReroutePath")
 
 let pathRegExp = new RegExp(/ASSETS.+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
 
@@ -51,7 +50,7 @@ function MoveParticles() {
 		})
 		return 0;
 	}
-	WadPath = ("assets\\" + WadPath.split("\\assets\\").pop()).replace(/\\/g, "/")
+	WadPath = (WadPath.split(".wad.client\\").pop()).replace(/\\/g, "/") + "/"
 
 	let Container = TargetFile.entries.value.items;
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
@@ -92,7 +91,7 @@ function RenderTarget(i = -1) {
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		if (Container[PO_ID].value.name.toLowerCase() == "vfxsystemdefinitiondata") {
 			ParticleName = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toLowerCase() == "particlename") {
+				if (item.key.toString().toLowerCase() == "particlename") {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
@@ -121,13 +120,13 @@ function RenderTarget(i = -1) {
 			ParticleScale.className = "Input Reduced-Padding";
 			ParticleScale.placeholder = "1.0";
 			ParticleScale.value = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toLowerCase() == "transform") {
+				if (item.key.toString().toLowerCase() == "transform") {
 					return item;
 				}
 			})?.value[0] ?? 1.0;
 			ParticleScale.oninput = (e) => {
 				let index = Container[PO_ID].value.items.findIndex((item) => {
-					if (item.key.toLowerCase() == "transform") {
+					if (item.key.toString().toLowerCase() == "transform") {
 						return item;
 					}
 				})
@@ -265,7 +264,7 @@ function RenderDonor() {
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		if (Container[PO_ID].value.name.toLowerCase() == "vfxsystemdefinitiondata") {
 			ParticleName = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toLowerCase() == "particlename") {
+				if (item.key.toString().toLowerCase() == "particlename") {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;

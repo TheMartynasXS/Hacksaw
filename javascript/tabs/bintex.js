@@ -24,7 +24,7 @@ let SeparateOutput = []
 let CombinedOutput = []
 let MissingOutput = []
 
-let pathRegExp = new RegExp(/ASSETS.+(?:dds|skn|skl|sco|scb|anm|tex)/gi)
+let pathRegExp = new RegExp(/ASSETS.+(?:dds|skn|skl|sco|scb|tex)/gi)
 
 function Undo() {
   if (FileCache.length > 0) {
