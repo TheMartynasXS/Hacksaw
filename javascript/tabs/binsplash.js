@@ -8,6 +8,7 @@ const fs = require('fs')
 const _ = require("lodash")
 
 const { ColorHandler, GetColor, ToBG } = require('../javascript/colors.js');
+const { relative } = require('path');
 
 let FileCache = [];
 let FileSaved = true;
@@ -166,6 +167,12 @@ function ReverseSample() {
 	Palette.reverse();
 	for (let i = 0; i < timeArray.length; i++) {
 		Palette[i].SetTime(timeArray[i]);
+	}
+	MapPalette();
+}
+function HueShift() {
+	for (let i = 0; i < Palette.length; i++) {
+		Palette[i].HueShift(document.getElementById("Hue").value)
 	}
 	MapPalette();
 }
@@ -458,11 +465,11 @@ function LoadFile(SkipAlert = true) {
 			ParticleList.appendChild(ParticleDiv);
 		}
 		else if (Container[PO_ID].value.name.toLowerCase() == "staticmaterialdef") {
-			MaterialName = Container[PO_ID].value.items.find((item) => {
+			MaterialName = "[static]Materials/" + Container[PO_ID].value.items.find((item) => {
 				if (item.key.toString().toLowerCase() == "name") {
 					return item;
 				}
-			}).value ?? `unknown ${PO_ID}`;
+			}).value.split("/").pop() ?? `unknown ${PO_ID}`;
 
 			let MaterialDiv = document.createElement("div");
 			MaterialDiv.id = Container[PO_ID].key;

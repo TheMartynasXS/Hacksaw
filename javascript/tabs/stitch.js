@@ -170,7 +170,9 @@ function RenderTarget(i = -1) {
 							FileCache.push(JSON.parse(JSON.stringify(TargetFile)))
 							if (FileCache.length > 10) { FileCache.shift() }
 							Props.splice(C, 1)
+
 							RenderTarget()
+							FilterParticles(document.getElementById("FilterTarget")?.value, "Target-Container")
 						}
 						Emitter.appendChild(Delete);
 

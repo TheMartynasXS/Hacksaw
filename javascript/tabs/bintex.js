@@ -17,7 +17,7 @@ let Files2Delete = [];
 
 let WadPath = "";
 let ParticleTargetPath = "";
-let AllFiles = []
+let AssetFiles = []
 let BinFiles = []
 let BTXFiles = []
 let SeparateOutput = []
@@ -51,12 +51,13 @@ async function SelectWadFolder(Path = undefined) {
   }
 
   Progress.classList.remove('Progress-Complete')
-  AllFiles = [];
+  AssetFiles = [];
   BinFiles = [];
+  BTXFiles = [];
   SeparateOutput = []
   CombinedOutput = []
   MissingOutput = []
-  AllFiles = getAllFiles(WadPath, AllFiles).filter(file => !file.endsWith(".bin"))
+  AssetFiles = getAllFiles(WadPath, AssetFiles).filter(file => /\.(?:dds|skn|skl|sco|scb|tex)/gi.test(file))
   BinFiles = getAllFiles(WadPath, BinFiles).filter(file => file.endsWith(".bin"))
 
   Progress.max = BinFiles.length
@@ -66,6 +67,7 @@ async function SelectWadFolder(Path = undefined) {
     await sleep(10)
     Progress.value = i + 1
   }
+
   BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".btx"))
   Progress.classList.add('Progress-Complete')
 
@@ -144,12 +146,13 @@ async function SelectWadFolder(Path = undefined) {
     }
   }
 
-  Files2Delete = AllFiles.filter(item => {
+  Files2Delete = AssetFiles.filter(item => {
     slice = item.slice(WadPath.length + 1).toLowerCase()
     return !CombinedOutput.includes(slice) && !slice.split("/").slice(-1)[0].startsWith("2x_") && !slice.split("/").slice(-1)[0].startsWith("4x_")
   })
 
-  Files2Delete = Files2Delete.filter(item => !(item.endsWith(".json") || item.endsWith(".bnk") || item.endsWith(".wpk")))
+  //Files2Delete = Files2Delete.filter(item => !item.endsWith(".anm"))
+  Files2Delete = [...Files2Delete, ...BTXFiles]
 
   Files2Delete.sort((a, b) => (a.Particle > b.Particle) ? 1 : ((b.Particle > a.Particle) ? -1 : 0))
   Files2Delete.map(item => {

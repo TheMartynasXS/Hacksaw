@@ -57,7 +57,12 @@
                 <div id="Color-Container"></div>
             </div>
             <div class="Input-Group">
-                <label class="Label Flex-1"></label>
+                <label class="Label">Hue Shift:</label>
+                <input class="Ellipsis Filter Flex-1" type="number" id="Hue" placeholder="-360 to 360 degrees"
+                    min="-360" max="360">
+                <button onclick="HueShift()">
+                    Apply
+                </button>
                 <button onclick="ReverseSample()">
                     <img class="Icon" src="../css/svg/Reverse.svg"></img>
                 </button>

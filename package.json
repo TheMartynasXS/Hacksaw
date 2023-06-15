@@ -1,7 +1,7 @@
 {
   "name": "hacksaw",
   "productName": "hacksaw",
-  "version": "3.6.7",
+  "version": "3.6.9",
   "description": "my league modding suite",
   "main": "javascript/main_process.js",
   "repository": {
@@ -54,6 +54,6 @@
   },
   "devDependencies": {
     "electron": "15.2.0",
-    "electron-builder": "^22.11.7"
+    "electron-builder": "^22.14.13"
   }
 }
