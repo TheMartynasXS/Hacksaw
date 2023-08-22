@@ -1,9 +1,9 @@
 const { Prefs, Samples, Tab, getAllFiles, CreateMessage } = require('../javascript/utils.js');
 const fs = require('fs')
-const path = require('path')
 const { ipcRenderer } = require('electron');
 const { execSync } = require("child_process");
-const { findIndex } = require('lodash');
+const Keys = require('../javascript/keys.json');
+const { property } = require('lodash');
 
 window.onerror = function (msg, file, lineNo, columnNo) {
 	ipcRenderer.send("Message", {
@@ -81,7 +81,7 @@ function OpenTargetBin() {
 function RenderTarget(i = -1) {
 	TargetList.innerText = "";
 	let Container = TargetFile.entries.value.items;
-	if (Container.find((item) => item.value.name.toLowerCase() == "vfxsystemdefinitiondata") == undefined) {
+	if (Container.find((item) => item.value.name == Keys.definitions.vfx) == undefined) {
 		CreateMessage({
 			type: "info",
 			title: "No Particles",
@@ -89,9 +89,9 @@ function RenderTarget(i = -1) {
 		})
 	}
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
-		if (Container[PO_ID].value.name.toLowerCase() == "vfxsystemdefinitiondata") {
+		if (Container[PO_ID].value.name == Keys.definitions.vfx) {
 			ParticleName = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toString().toLowerCase() == "particlename") {
+				if (item.key.toString() == Keys.property.particleName) {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
@@ -120,13 +120,13 @@ function RenderTarget(i = -1) {
 			ParticleScale.className = "Input Reduced-Padding";
 			ParticleScale.placeholder = "1.0";
 			ParticleScale.value = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toString().toLowerCase() == "transform") {
+				if (item.key == Keys.property.transform) {
 					return item;
 				}
 			})?.value[0] ?? 1.0;
 			ParticleScale.oninput = (e) => {
 				let index = Container[PO_ID].value.items.findIndex((item) => {
-					if (item.key.toString().toLowerCase() == "transform") {
+					if (item.key == Keys.property.transform) {
 						return item;
 					}
 				})
@@ -136,7 +136,7 @@ function RenderTarget(i = -1) {
 					Container[PO_ID].value.items[index].value[10] = parseFloat(e.target.value);
 				} else {
 					Container[PO_ID].value.items.push({
-						key: "Transform",
+						key: Keys.property.transform,
 						type: "mtx44",
 						value: [parseFloat(e.target.value), 0, 0, 0, 0, parseFloat(e.target.value), 0, 0, 0, 0, parseFloat(e.target.value), 0, 0, 0, 0, 1]
 					});
@@ -146,8 +146,8 @@ function RenderTarget(i = -1) {
 
 			let DefData = Container[PO_ID].value.items.filter(
 				(item) =>
-					item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-					item.key.toString().toLowerCase() == "simpleemitterdefinitiondata"
+					item.key == Keys.definitions.complex ||
+					item.key == Keys.definitions.simple
 			);
 			for (let B = 0; B < DefData.length; B++) {
 				let DefDataDiv = document.createElement("div");
@@ -155,8 +155,8 @@ function RenderTarget(i = -1) {
 				ParticleDiv.appendChild(DefDataDiv);
 
 				if (
-					DefData[B].key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-					DefData[B].key.toString().toLowerCase() == "simpleemitterdefinitiondata"
+					DefData[B].key == Keys.definitions.complex ||
+					DefData[B].key == Keys.definitions.simple
 				) {
 					let Props = DefData[B].value.items;
 					for (let C = 0; C < Props.length; C++) {
@@ -181,7 +181,7 @@ function RenderTarget(i = -1) {
 						Title.innerText =
 							Props[C].items[
 								Props[C].items.findIndex(
-									(item) => item.key.toString().toLowerCase() == "emittername")
+									(item) => item.key == Keys.property.emitterName)
 							]?.value;
 						Emitter.appendChild(Title);
 
@@ -191,7 +191,7 @@ function RenderTarget(i = -1) {
 			}
 			TargetList.appendChild(ParticleDiv);
 		}
-		else if (Container[PO_ID].value.name.toLowerCase() == "resourceresolver") {
+		else if (Container[PO_ID].value.name == Keys.property.resourceResolver) {
 
 		}
 		else {
@@ -255,7 +255,7 @@ function RenderDonor() {
 	DonorList.innerText = "";
 	let Container = DonorFile.entries.value.items;
 
-	if (Container.find((item) => item.value.name.toLowerCase() == "vfxsystemdefinitiondata") == undefined) {
+	if (Container.find((item) => item.value.name == Keys.definitions.vfx) == undefined) {
 		CreateMessage({
 			type: "info",
 			title: "No Particles",
@@ -264,9 +264,9 @@ function RenderDonor() {
 		return 0;
 	}
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
-		if (Container[PO_ID].value.name.toLowerCase() == "vfxsystemdefinitiondata") {
+		if (Container[PO_ID].value.name == Keys.definitions.vfx) {
 			ParticleName = Container[PO_ID].value.items.find((item) => {
-				if (item.key.toString().toLowerCase() == "particlename") {
+				if (item.key == Keys.property.particleName) {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
@@ -284,12 +284,12 @@ function RenderDonor() {
 				FileSaved = false
 				let TC = TargetFile.entries.value.items;
 				let index = Container.findIndex((item) => item.key == Move.parentNode.parentNode.id)
-				let Complex = Container[index].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
+				let Complex = Container[index].value.items.findIndex((item) => item.key == Keys.definitions.complex || item.key == Keys.definitions.simple)
 				for (let i = 0; i < TargetList.childNodes.length; i++) {
 					if (TargetList.children[i].children[0].children[0].checked) {
 
 						let TCindex = TC.findIndex((item) => item.key == TargetList.children[i].id)
-						let TCComplex = TC[TCindex].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
+						let TCComplex = TC[TCindex].value.items.findIndex((item) => item.key == Keys.definitions.complex || item.key == Keys.definitions.simple)
 
 						TC[TCindex].value.items[TCComplex].value.items = [
 							...TC[TCindex].value.items[TCComplex].value.items,
@@ -309,8 +309,8 @@ function RenderDonor() {
 			ParticleDiv.children[0].appendChild(ParticleLabel);
 			let DefData = Container[PO_ID].value.items.filter(
 				(item) =>
-					item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-					item.key.toString().toLowerCase() == "simpleemitterdefinitiondata"
+					item.key == Keys.definitions.complex ||
+					item.key == Keys.definitions.simple
 			);
 			for (let B = 0; B < DefData.length; B++) {
 				let DefDataDiv = document.createElement("div");
@@ -318,8 +318,8 @@ function RenderDonor() {
 				ParticleDiv.appendChild(DefDataDiv);
 
 				if (
-					DefData[B].key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-					DefData[B].key.toString().toLowerCase() == "simpleemitterdefinitiondata"
+					DefData[B].key == Keys.definitions.complex ||
+					DefData[B].key == Keys.definitions.simple
 				) {
 					let Props = DefData[B].value.items;
 					for (let C = 0; C < Props.length; C++) {
@@ -337,7 +337,9 @@ function RenderDonor() {
 							for (let i = 0; i < TargetList.childNodes.length; i++) {
 								if (TargetList.children[i].children[0].children[0].checked) {
 									let index = TC.findIndex((item) => item.key == TargetList.children[i].id)
-									let Complex = TC[index].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
+									let Complex = TC[index].value.items.findIndex((item) => {
+										item.key == Keys.definitions.complex || item.key == Keys.definitions.simple
+									})
 
 									TC[index].value.items[Complex].value.items.push(Props[C])
 									RenderTarget(i)
@@ -352,7 +354,7 @@ function RenderDonor() {
 						Title.innerText =
 							Props[C].items[
 								Props[C].items.findIndex(
-									(item) => item.key.toString().toLowerCase() == "emittername")
+									(item) => item.key == Keys.property.emitterName)
 							]?.value;
 						Emitter.appendChild(Title);
 
@@ -362,7 +364,7 @@ function RenderDonor() {
 			}
 			DonorList.appendChild(ParticleDiv);
 		}
-		else if (Container[PO_ID].value.name.toLowerCase() == "resourceresolver") {
+		else if (Container[PO_ID].value.name == Keys.property.resourceResolver) {
 
 		}
 	}
@@ -371,7 +373,7 @@ function RenderDonor() {
 }
 
 function ToJson(FilePath) {
-	execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}"`);
+	execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" -k`);
 }
 function Save() {
 	FileSaved = true;
@@ -395,7 +397,7 @@ function Save() {
 		CreateMessage({
 			type: "error",
 			title: "Error Converting to bin",
-			message: "err.stderr.toString()"
+			message: err.stderr.toString()
 		})
 	}
 }
@@ -405,7 +407,7 @@ function ClearSelection() {
 		if (TargetList.children[i].children[0].children[0].checked) {
 
 			let TCindex = TC.findIndex((item) => item.key == TargetList.children[i].id)
-			let TCComplex = TC[TCindex].value.items.findIndex((item) => item.key == "ComplexEmitterDefinitionData" || item.key == "SimpleEmitterDefinitionData")
+			let TCComplex = TC[TCindex].value.items.findIndex((item) => item.key == Keys.definitions.complex || item.key == Keys.definitions.simple)
 
 			TC[TCindex].value.items[TCComplex].value.items = []
 			RenderTarget(i)

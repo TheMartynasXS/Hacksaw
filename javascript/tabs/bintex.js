@@ -93,7 +93,7 @@ async function SelectWadFolder(Path = undefined) {
       if (ParticleObject[PO_ID].value.name.toString().toLowerCase() == "vfxsystemdefinitiondata") {
         let tempname = ParticleObject[PO_ID].value.items.find((item) => {
           if (item.key.toString().toLowerCase() == "particlename") { return item }
-        }).value.toString().toLowerCase()
+        })?.value.toString().toLowerCase()
         SeparateOutput.push({
           Particle: tempname,
           Bin: BTXFiles[i].replace(/\.btx$/, ".bin").replace(/\\/g, "/"),

@@ -1,0 +1,25 @@
+{
+    "definitions": {
+        "complex": 2257500010,
+        "simple": 1736566626,
+        "vfx": 1171098015,
+        "reflection": 1064658893,
+        "dynamics": 3154345447,
+        "constant": 3031705514,
+        "probability": 2802337561
+    },
+    "property": {
+        "emitterName": 1025882318,
+        "particleName": 3975268028,
+        "transform": 3786248987,
+        "resourceResolver": 4013559603,
+        "valueColor": 122655197,
+        "materials" : 0,
+        "lingerColor": 0,
+        "fresnelColor": 954992847,
+        "reflectionColor" : 1444892650,
+        "birthColor": 2211310241,
+        "color":1031692888,
+        "blendMode": 4202188459
+    }
+}

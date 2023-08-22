@@ -3,6 +3,7 @@ const path = require("path");
 const { ipcMain } = require("electron");
 const { dialog } = require("electron");
 const isDev = require("electron-is-dev");
+const Open = require("open");
 const fs = require("fs");
 
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json")
@@ -167,7 +168,18 @@ ipcMain.on("UserPath", (event) => {
 ipcMain.on("Message", (event, props = { title: "untitled", message: "unknownerror" }) => {
     switch (props.type) {
         case "error":
-            dialog.showErrorBox(props.title, props.message)
+            // dialog.showErrorBox(props.title, props.message)
+            dialog.showMessageBox(null, {
+                type: props.type,
+                title: props.title,
+                message: props.message,
+                detail: "Please check for an update on Github.",
+                buttons: ["Open Github", "OK"]
+            }).then(result =>{
+                if(result.response == 0){
+                    Open("https://github.com/TheMartynasXS/Hacksaw/releases")
+                }
+            })
             break;
         default:
             dialog.showMessageBox(null, {
