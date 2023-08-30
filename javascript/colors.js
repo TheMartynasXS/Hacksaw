@@ -1,6 +1,7 @@
 function Clamp(num, min = 0, max = 1) { return Math.min(Math.max(num, min), max); }
 let x = Math.random
 function GetColor(Property) {
+    // console.log(Property)
     if (/vec4/i.test(Property?.type)) return [new ColorHandler(Property.value)]
 
     let DynID = Property?.findIndex(item => item.key == 3154345447)
