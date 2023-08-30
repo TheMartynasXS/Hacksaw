@@ -278,6 +278,7 @@ input[type="range"].Range {
   -webkit-appearance: none;
   flex: 1;
   height: 24px;
+  padding-inline: 0rem;
   background: linear-gradient(to right, var(--bg-200) 0%, var(--bg-200) 100%);
   background-size: 100% 10px;
   background-repeat: no-repeat;
@@ -295,6 +296,21 @@ input[type="range"].Range::-webkit-slider-thumb {
   background: var(--text-secondary);
   position: relative;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"].Range.Hue {
+  background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+  background-size: 100% 100%;
+}
+
+input[type="range"].Range.Sat {
+  background: linear-gradient(to right, #808080 0%,  #f00);
+  background-size: 100% 100%;
+}
+
+input[type="range"].Range.Light {
+  background: linear-gradient(to right, #000 0%, #fff 100%);
+  background-size: 100% 100%;
 }
 
 input[type="range"].Range::-webkit-slider-thumb:hover {
@@ -605,7 +621,8 @@ input[type="color"]::-webkit-color-swatch {
   height: 0.4rem;
   bottom: 10px;
 }
-.ScrollX{
+
+.ScrollX {
   overflow-x: auto;
 }
 
