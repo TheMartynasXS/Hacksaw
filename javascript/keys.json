@@ -7,16 +7,22 @@
         "dynamics": 3154345447,
         "constant": 3031705514,
         "probability": 2802337561,
-        "staticMat": 4288492553
+        "staticMat": 4288492553,
+        "dynMat": 2257018867,
+        "paramValues": 3500885688,
+        "dynMatDef": 121596497
     },
     "Props": {
         "emitterName": 1025882318,
+        "times": 1567157941,
+        "values": 877087803,
         "particleName": 3975268028,
         "transform": 3786248987,
         "resourceResolver": 4013559603,
         "valueColor": 122655197,
         "materials": 0,
         "lingerColor": 3106518078,
+        "lingerDriver": 1803004106,
         "fresnelColor": 954992847,
         "reflectionColor": 1444892650,
         "birthColor": 2211310241,
@@ -24,8 +30,10 @@
         "blendMode": 4202188459
     },
     "MatProps": {
-        "params": 3500885688,
         "name": 2369371622,
-        "staticValue": 1113510858
+        "staticValue": 1113510858,
+        "driver": 3847494111,
+        "params": 1218784985,
+        "tintColor": 2369371622
     }
 }

@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>HackSaw</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
 
     <link rel="stylesheet" href="../css/index.css">
@@ -23,6 +22,10 @@
         <button onclick="Tab('./bintex.html')" class="NavButton">
             <img class="Icon" src="../css/svg/ListBox.svg"></img>
             <div class="TabTitle">BinTex</div>
+        </button>
+        <button onclick="Tab('./colorswap.html')" class="NavButton">
+            <img class="Icon" src="../css/svg/ColorWand.svg"></img>
+            <div class="TabTitle">Color Swap</div>
         </button>
         <button onclick="Tab('./xrgba.html')" class="NavButton">
             <img class="Icon" src="../css/svg/Swatch.svg"></img>
@@ -46,15 +49,12 @@
                     <option value="linear">Linear</option>
                     <option value="wrap">Wrap</option>
                     <option value="semi-override">Semi-Override</option>
+                    <option value="shift">Shift</option>
                 </select>
             </div>
             <div class="Input-Group">
                 <input type="checkbox" class="CheckBox SettingOptionCheckbox" id="IgnoreBW">
                 <div class="Label Flex-1">Ignore Black/White values</div>
-            </div>
-            <div class="Input-Group">
-                <input type="checkbox" class="CheckBox SettingOptionCheckbox" id="RememberTargets">
-                <div class="Label Flex-1">Remember Recolor Targets</div>
             </div>
             <div class="Input-Group">
                 <input type="checkbox" class="CheckBox SettingOptionCheckbox" id="Regenerate">

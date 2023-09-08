@@ -20,8 +20,8 @@ let XA = document.getElementById('XA')
 SetFields()
 function SetFields() {
   let temp = Round()
-  ColorInput.value = Color.hex
-  Hex.value = Color.hex
+  ColorInput.value = Color.ToHEX()
+  Hex.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XR.value = temp[0]
   XG.value = temp[1]
@@ -30,9 +30,9 @@ function SetFields() {
 }
 
 ColorInput.addEventListener('input', (e) => {
-  Color.input(e.target.value);
+  Color.InputHex(e.target.value)
   let temp = Round()
-  Hex.value = Color.hex
+  Hex.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XR.value = temp[0]
   XG.value = temp[1]
@@ -48,7 +48,7 @@ Hex.addEventListener('input', (e) => {
 
   Color.input(fixed)
   let temp = Round()
-  ColorInput.value = Color.hex
+  ColorInput.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XR.value = temp[0]
   XG.value = temp[1]
@@ -60,8 +60,8 @@ XRGBA.addEventListener('input', (e) => {
   let list = e.target.value.slice(1, e.target.value.length - 2).split(',')
   Color = new ColorHandler([list[0], list[1], list[2], list[3]])
   let temp = Round()
-  ColorInput.value = Color.hex
-  Hex.value = Color.hex
+  ColorInput.value = Color.ToHEX()
+  Hex.value = Color.ToHEX()
   XR.value = temp[0]
   XG.value = temp[1]
   XB.value = temp[2]
@@ -70,8 +70,8 @@ XRGBA.addEventListener('input', (e) => {
 XR.addEventListener('input', (e) => {
   Color = new ColorHandler([e.target.value, Color.vec4[1], Color.vec4[2], Color.vec4[3]])
   let temp = Round()
-  ColorInput.value = Color.hex
-  Hex.value = Color.hex
+  ColorInput.value = Color.ToHEX()
+  Hex.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XG.value = temp[1]
   XB.value = temp[2]
@@ -80,8 +80,8 @@ XR.addEventListener('input', (e) => {
 XG.addEventListener('input', (e) => {
   Color = new ColorHandler([Color.vec4[0], XG.value, Color.vec4[2], Color.vec4[3]])
   let temp = Round()
-  ColorInput.value = Color.hex
-  Hex.value = Color.hex
+  ColorInput.value = Color.ToHEX()
+  Hex.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XR.value = temp[0]
   XB.value = temp[2]
@@ -90,8 +90,8 @@ XG.addEventListener('input', (e) => {
 XB.addEventListener('input', (e) => {
   Color = new ColorHandler([Color.vec4[0], Color.vec4[1], XB.value, Color.vec4[3]])
   let temp = Round()
-  ColorInput.value = Color.hex
-  Hex.value = Color.hex
+  ColorInput.value = Color.ToHEX()
+  Hex.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XR.value = temp[0]
   XG.value = temp[1]
@@ -101,8 +101,8 @@ XA.addEventListener('input', (e) => {
   if(Hex.length != 1) Hex.value = '#000000'
   Color.input(Hex.value, e.target.value);
   let temp = Round()
-  ColorInput.value = Color.hex
-  Hex.value = Color.hex
+  ColorInput.value = Color.ToHEX()
+  Hex.value = Color.ToHEX()
   XRGBA.value = `{ ${temp[0]}, ${temp[1]}, ${temp[2]}, ${temp[3]} }`
   XR.value = temp[0]
   XG.value = temp[1]

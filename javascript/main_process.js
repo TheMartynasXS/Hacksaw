@@ -17,8 +17,7 @@ let Prefs = fs.existsSync(PrefsPath)
         PreferredMode: "random",
         IgnoreBW: true,
         RitoBinPath: "",
-        RememberTargets: false,
-        Targets: [false, false, false, false, true],
+        Targets: [true, true, true, true, true],
         Regenerate: false,
     };
 let Samples = fs.existsSync(SamplesPath)
@@ -34,6 +33,7 @@ const createWindow = (htmlDir) => {
         minWidth: 800,
         minHeight: 500,
         height: 600,
+        title: "Hacksaw " + app.getVersion(),
         backgroundColor: "#3a3b41",
         icon: "buildhacksaw.ico",
         webPreferences: {
@@ -99,7 +99,7 @@ ipcMain.on("update-xrgba", (event, arg) => {
     xRGBA = JSON.parse(arg);
 });
 
-app.setAppUserModelId("Hacksaw");
+app.setAppUserModelId("Hacksaw " + app.getVersion());
 app.on("window-all-closed", () => {
     fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
     fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
@@ -112,8 +112,7 @@ const DefaultPreferences = JSON.stringify(
         PreferredMode: 'random',
         IgnoreBW: true,
         RitoBinPath: "",
-        RememberTargets: false,
-        Targets: [false, false, false, false, true],
+        Targets: [true, true, true, true, true],
         Regenerate: false,
     }
     , null, 4)
@@ -171,12 +170,12 @@ ipcMain.on("Message", (event, props = { title: "untitled", message: "unknownerro
             // dialog.showErrorBox(props.title, props.message)
             dialog.showMessageBox(null, {
                 type: props.type,
-                title: props.title,
-                message: props.message,
-                detail: "Please check for an update on Github.",
+                title: "error",
+                message: "Please check for an update on Github.",
+                detail: `${props.message}\n${props.title}`,
                 buttons: ["Open Github", "OK"]
-            }).then(result =>{
-                if(result.response == 0){
+            }).then(result => {
+                if (result.response == 0) {
                     Open("https://github.com/TheMartynasXS/Hacksaw/releases")
                 }
             })

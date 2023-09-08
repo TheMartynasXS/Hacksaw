@@ -84,16 +84,20 @@ mark {
   background-color: transparent;
   color: var(--accent-failure)
 }
+b {
+  color: var(--accent-success);
+}
 
 .Input-Group {
   display: flex;
   height: 2rem;
 }
 
-.Input-Group input,
-.Input-Group button,
-.Input-Group select,
-.Input-Group .Label {
+.Input-Group>input[type="number"],
+.Input-Group>input[type="text"],
+.Input-Group>button,
+.Input-Group>select,
+.Input-Group>.Label{
   margin: 0.1rem;
   padding-inline: 1rem;
   background-color: var(--bg-200);
@@ -103,32 +107,32 @@ mark {
   color: var(--text-primary);
 }
 
-.Input-Group .Reduced-Padding {
+.Input-Group>.Reduced-Padding {
   padding-inline: 0rem;
 }
 
-.Input-Group input[type="color"] {
+.Input-Group>input[type="color"] {
   margin: 0.1rem;
 }
 
-.Input-Group input {
+.Input-Group>input {
   width: 10px;
 }
 
-.Input-Group button:disabled {
+.Input-Group>button:disabled {
   color: var(--bg-300);
 }
 
-.Input-Group button:disabled:hover {
+.Input-Group>button:disabled:hover {
   background: var(--bg-200);
   cursor: default;
 }
 
-.Input-Group button:hover {
+.Input-Group>button:hover {
   background: var(--bg-300)
 }
 
-.Input-Group button {
+.Input-Group>button {
   min-width: fit-content;
   background-color: var(--bg-200);
 }
@@ -216,8 +220,8 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: auto;
 }
 
-.Input-Group .CheckBox,
-.Input-Group .CheckBox {
+.Input-Group>.CheckBox,
+.Input-Group>.CheckBox {
   background-color: var(--bg-200);
 }
 
@@ -277,7 +281,7 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="range"].Range {
   -webkit-appearance: none;
   flex: 1;
-  height: 24px;
+  height: 1.75rem;
   background: linear-gradient(to right, var(--bg-200) 0%, var(--bg-200) 100%);
   background-size: 100% 10px;
   background-repeat: no-repeat;
@@ -289,9 +293,9 @@ input[type="range"].Range {
 input[type="range"].Range::-webkit-slider-thumb {
   cursor: pointer;
   -webkit-appearance: none;
-  width: 24px;
+  width: 1.75rem;
   border-radius: 0.4rem;
-  height: 24px;
+  height: 1.75rem;
   background: var(--text-secondary);
   position: relative;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
@@ -300,7 +304,21 @@ input[type="range"].Range::-webkit-slider-thumb {
 input[type="range"].Range::-webkit-slider-thumb:hover {
   background: var(--accent);
 }
-
+.HUE{
+ background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%) !important;  
+}
+.SAT{
+ background: linear-gradient(to right, #808080, #ff0000) !important;
+}
+.LIGHT{
+ background: linear-gradient(to right, #000000, #ff8080, #fff) !important;
+}
+.HUE,
+.SAT,
+.LIGHT{
+ border-radius: 0.4rem;
+ height: 1.8rem;
+}
 progress {
   border-radius: 0.4rem;
   height: auto;
@@ -514,7 +532,8 @@ input[type="color"]::-webkit-color-swatch {
 
 #Skin-Ideas.Tab,
 #Stitch.Tab,
-#Splash.Tab {
+#Splash.Tab
+#ColorSwap.Tab {
   overflow: hidden;
 }
 
@@ -528,6 +547,9 @@ input[type="color"]::-webkit-color-swatch {
     "a a"
     ". ."
     "b b";
+}
+#ColorSwap{
+  display: flex;
 }
 
 #Skin-Ideas,
@@ -605,7 +627,8 @@ input[type="color"]::-webkit-color-swatch {
   height: 0.4rem;
   bottom: 10px;
 }
-.ScrollX{
+
+.ScrollX {
   overflow-x: auto;
 }
 
@@ -657,6 +680,64 @@ input[type="color"]::-webkit-color-swatch {
   margin-right: 0px !important;
   margin-left: 0.8rem !important;
   width: 1.5rem;
+}
+
+
+.dropbtn {
+  color: white;
+  border: none;
+  height: 100%;
+  background-color: transparent;
+}
+
+div.dropdown {
+  position: relative;
+  padding:0;
+  margin: 0.1rem;
+  padding-inline: 1rem;
+  background-color: var(--bg-200);
+  border-radius: 0.4rem;
+  border: none;
+  text-align: center;
+  color: var(--text-primary);
+}
+div.dropdown:hover{
+  background-color: var(--bg-300);
+}
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--bg-200);
+  border-radius: 0.4rem;
+  width: 100%;
+  transform: translate(-1rem);
+  overflow: hidden;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content button {
+  display:grid !important;
+  place-items: center;
+  background-color: transparent;
+  width: 100%;
+  border: none;
+  color: var(--text-primary);
+  height: 2rem;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content button:hover {
+  background-color: var(--bg-300);
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
 }
 
 

@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>HackSaw</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
 
     <link rel="stylesheet" href="../css/index.css">
@@ -24,6 +23,10 @@
             <img class="Icon" src="../css/svg/ListBox.svg"></img>
             <div class="TabTitle">BinTex</div>
         </button>
+        <button onclick="Tab('./colorswap.html')" class="NavButton">
+            <img class="Icon" src="../css/svg/ColorWand.svg"></img>
+            <div class="TabTitle">Color Swap</div>
+        </button>
         <button onclick="Tab('./xrgba.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/Swatch.svg"></img>
             <div class="TabTitle">xrgba</div>
@@ -36,12 +39,13 @@
     <div id="Main" class="Main Flex-1">
         <div id="Splash" class="Tab Flex Flex-Col">
             <div class="Input-Group"><button id="Eye-Dropper">EyeDropper</button><input id="RGB" type="color">
-                <div class="Label">Hex:</div><input id="Hex" class="Flex-Auto" maxlength="7">
+                <div class="Label">Hex:</div>
+                <input id="Hex" class="Flex-Auto Filter Label" style="background-color: var(--bg-300);" maxlength="7">
                 <button class="Flex-1" onclick="SaveColor()">Save Color</button>
             </div>
             <div class="Flex-Col Margin-Bottom">
                 <div class="Input-Group">
-                    <div class="Label">XRGBA:</div><input id="XRGB" class="Flex-1">
+                    <div class="Label">XRGBA:</div><input id="XRGB" class="Flex-1 Label Filter" style="background-color: var(--bg-300);">
                 </div>
                 <div class="Input-Group">
                     <div class="Label">XR:</div><input id="XR" type="number" class="Flex-1">

@@ -92,7 +92,6 @@ class SampleDB {
 		let Folder = ipcRenderer.sendSync('FileSelect', ['Select sample export location', 'Folder'])
 		if (ID != undefined) {
 			let temp = JSON.parse(JSON.stringify(this.obj[ID]))
-			console.log(temp)
 			for (let i = 0; i < temp.Palette.length; i++) {
 				temp.Palette[i].obj = undefined
 			}
@@ -187,13 +186,10 @@ class SampleDB {
 		Modal.appendChild(AlertContent)
 
 		for (let ID = 0; ID < this.obj.length; ID++) {
-			console.log(this.obj[ID])
 			let SampleDom = document.createElement("div")
 			SampleDom.className = "Input-Group Sample"
 			SampleDom.style.background = ToBG(this.obj[ID].Palette)
 
-			let SwapDiv = document.createElement('div')
-			SwapDiv.className = "Flex"
 			let UpButton = document.createElement('button')
 			UpButton.innerText = "▲"
 			UpButton.onclick = (Event) => {
@@ -214,9 +210,8 @@ class SampleDB {
 					this.show()
 				}
 			}
-			SwapDiv.appendChild(UpButton)
-			SwapDiv.appendChild(DownButton)
-			SampleDom.appendChild(SwapDiv)
+			SampleDom.appendChild(UpButton)
+			SampleDom.appendChild(DownButton)
 
 			let UseThis = document.createElement('button')
 			UseThis.onclick = () => {
@@ -246,7 +241,7 @@ class SampleDB {
 
 			let Title = document.createElement('input')
 			Title.value = this.obj[ID].Name
-			Title.className = "Flex-1"
+			Title.className = "Flex-1 Label"
 			Title.onchange = (Event) => {
 				this.obj[ID].Name = Event.target.value
 				this.save()

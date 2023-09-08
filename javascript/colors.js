@@ -1,7 +1,6 @@
 function Clamp(num, min = 0, max = 1) { return Math.min(Math.max(num, min), max); }
 let x = Math.random
 function GetColor(Property) {
-    // console.log(Property)
     if (/vec4/i.test(Property?.type)) return [new ColorHandler(Property.value)]
 
     let DynID = Property?.findIndex(item => item.key == 3154345447)
@@ -70,12 +69,10 @@ class ColorHandler {
         this.vec4 = this.ToVec4()
     }
     ToHSL() {
-        let r = this.vec4[0]
-        let g = this.vec4[1]
-        let b = this.vec4[2]
+        let [r, g, b] = [this.vec4[0], this.vec4[1], this.vec4[2]]
         let max = Math.max(r, g, b)
         let min = Math.min(r, g, b)
-        let h, s, l = (max + min) / 2
+        let h = 0, s, l = (max + min) / 2
         if (max == min) {
             h = s = 0
         } else {
@@ -90,11 +87,14 @@ class ColorHandler {
         }
         return [h, s, l]
     }
-    HueShift(hue) {
-        let hsl = this.ToHSL()
-        hue = Math.abs(hue) >= 360 ? hue % 360 : hue
-        hsl[0] += hue / 360
-        this.InputHSL(hsl)
+    HSLShift(hue = 0, sat = 0, lig = 0) {
+        let hsl = (this.ToHSL());
+        hue = Math.abs(hue) >= 360 ? hue % 360 : hue;
+        hsl[0] += hue / 360;
+        let [h, s, l] = hsl;
+        s = Math.min(Math.max(s + (sat / 100), 0.01), 1);
+        l = Math.min(Math.max(l + (lig / 100), 0.01), 1);
+        this.InputHSL([h, s, l])
     }
     InputHSL(hsl) {
         let h = hsl[0]

@@ -23,30 +23,35 @@ let T3 = document.getElementById('T3')
 let T4 = document.getElementById('T4')
 let T5 = document.getElementById('T5')
 
-if (Prefs.obj.RememberTargets == true) {
-	T1.checked = Prefs.obj.Targets[0];
-	T2.checked = Prefs.obj.Targets[1];
-	T3.checked = Prefs.obj.Targets[2];
-	T4.checked = Prefs.obj.Targets[3];
-	T5.checked = Prefs.obj.Targets[4];
-	T1.addEventListener("change", (Event) => {
-		Prefs.Targets([Event.target.checked, T2.checked, T3.checked, T4.checked, T5.checked])
-	});
-	T2.addEventListener("change", (Event) => {
-		Prefs.Targets([T1.checked, Event.target.checked, T3.checked, T4.checked, T5.checked])
-	});
-	T3.addEventListener("change", (Event) => {
-		Prefs.Targets([T1.checked, T2.checked, Event.target.checked, T4.checked, T5.checked])
-	});
-	T4.addEventListener("change", (Event) => {
-		Prefs.Targets([T1.checked, T2.checked, T3.checked, Event.target.checked, T5.checked])
-	});
-	T5.addEventListener("change", (Event) => {
-		Prefs.Targets([T1.checked, T2.checked, T3.checked, T4.checked, Event.target.checked])
-	});
-}
+let HUE = document.getElementById("Hue");
+let SAT = document.getElementById("Sat");
+let LIGHT = document.getElementById("Light");
 
-let BlankDynamic = `{"key":"3154345447","type":"pointer","value":{"items":[{"key":"times","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"values","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"1128908277"}}`;
+
+T1.checked = Prefs.obj.Targets[0];
+T2.checked = Prefs.obj.Targets[1];
+T3.checked = Prefs.obj.Targets[2];
+T4.checked = Prefs.obj.Targets[3];
+T5.checked = Prefs.obj.Targets[4];
+
+T1.addEventListener("change", (Event) => {
+	Prefs.Targets([Event.target.checked, T2.checked, T3.checked, T4.checked, T5.checked])
+});
+T2.addEventListener("change", (Event) => {
+	Prefs.Targets([T1.checked, Event.target.checked, T3.checked, T4.checked, T5.checked])
+});
+T3.addEventListener("change", (Event) => {
+	Prefs.Targets([T1.checked, T2.checked, Event.target.checked, T4.checked, T5.checked])
+});
+T4.addEventListener("change", (Event) => {
+	Prefs.Targets([T1.checked, T2.checked, T3.checked, Event.target.checked, T5.checked])
+});
+T5.addEventListener("change", (Event) => {
+	Prefs.Targets([T1.checked, T2.checked, T3.checked, T4.checked, Event.target.checked])
+});
+
+
+let BlankDynamic = `{"key":"3154345447","type":"pointer","value":{"items":[{"key":"1567157941","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"877087803","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"1128908277"}}`;
 let BlankConstant = `{"key":"3031705514","type":"vec4","value":[0.5,0.5,0.5,1]}`;
 
 let Palette = [new ColorHandler];
@@ -64,6 +69,28 @@ window.onerror = function (msg, file, lineNo, columnNo) {
 		message: msg
 	})
 };
+ChangeMode(RecolorMode.value)
+function ChangeMode(mode) {
+	switch (mode) {
+		case 'random':
+			GradientIndicator.style.display = 'none'
+			ColorContainer.style.display = 'grid'
+			document.getElementById("Slider-Input").style.display = 'block'
+			break
+		case 'linear':
+		case 'wrap':
+		case 'semi-override':
+			GradientIndicator.style.display = 'flex'
+			ColorContainer.style.display = 'grid'
+			document.getElementById("Slider-Input").style.display = 'block'
+			break;
+		case 'shift':
+			ColorContainer.style.display = 'none'
+			GradientIndicator.style.display = 'none'
+			document.getElementById("Slider-Input").style.display = 'none'
+			break;
+	}
+}
 
 const PickScreen = async () => {
 	const color = await getColorHexRGB().catch((error) => {
@@ -114,7 +141,7 @@ function CreatePicker(Target, PaletteIndex) {
 
 		let Hex = document.createElement("input");
 		Hex.id = "Hex";
-		Hex.className = 'Flex-1'
+		Hex.className = 'Flex-1 Label'
 		Hex.value = new ColorHandler([temp[0] / 255, temp[1] / 255, temp[2] / 255, 1]).ToHEX();
 		Hex.maxLength = 7;
 		Hex.oninput = (Event) => {
@@ -134,7 +161,7 @@ function CreatePicker(Target, PaletteIndex) {
 
 		let Alpha = document.createElement("input");
 		Alpha.id = "Alpha";
-		Alpha.className = 'Flex-1'
+		Alpha.className = 'Flex-1 Label'
 		Alpha.value = Palette[PaletteIndex].vec4[3]
 		Alpha.maxLength = 7;
 
@@ -170,12 +197,7 @@ function ReverseSample() {
 	}
 	MapPalette();
 }
-function HueShift() {
-	for (let i = 0; i < Palette.length; i++) {
-		Palette[i].HueShift(document.getElementById("Hue").value)
-	}
-	MapPalette();
-}
+
 
 function MapPalette() {
 	ColorContainer.innerText = null;
@@ -206,7 +228,17 @@ function MapPalette() {
 	document.getElementById("Color-Container").style.gridTemplateColumns = `repeat(${Palette.length}, minmax(0px, 1fr))`
 }
 MapPalette()
-
+function ColorShift() {
+	for (let i = 0; i < Palette.length; i++) {
+		Palette[i].HSLShift(
+			HUE.value == '' ? 0 : HUE.value,
+			SAT.value == '' ? 0 : SAT.value,
+			LIGHT.value == '' ? 0 : LIGHT.value
+		)
+	}
+	HUE.value
+	MapPalette();
+}
 function ChangeColorCount(Count) {
 	let TempLenght = parseInt(Palette.length);
 	if (TempLenght < Count) {
@@ -275,6 +307,7 @@ function LoadFile(SkipAlert = true) {
 	}
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		if (Container[PO_ID].value.name == KEYS.Definitions.vfx) {
+			console.log(Container[PO_ID].value.items)
 			ParticleName = Container[PO_ID].value.items.find((item) => {
 				if (item.key == KEYS.Props.particleName) {
 					return item;
@@ -367,14 +400,17 @@ function LoadFile(SkipAlert = true) {
 						Emitter.appendChild(ReflectiveDiv);
 
 						let LingerDiv = document.createElement("div")
-						if (LCID >= 0) {
-							let PropType = PropItems[LCID].value.items
-							let DynID = PropType.findIndex(item => item.key == KEYS.Definitions.dynamics)
+
+						breakpoint: if (LCID >= 0) {
+							LDID = PropItems[LCID].value.items.findIndex(item => item.key == KEYS.Props.lingerDriver)
+							if (LDID < 0) break breakpoint;
+							let PropType = PropItems[LCID].value.items[LDID]
+							let DynID = PropType.value.items.findIndex(item => item.key == KEYS.Definitions.dynamics)
 							if (DynID >= 0) {
-								let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
-								if (ProbTableID >= 0) PropType[DynID].value.items.shift()
+								let ProbTableID = PropType.value.items[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+								if (ProbTableID >= 0) PropType.value.items[DynID].value.items.shift()
 							}
-							const LCColor = GetColor(PropItems[LCID].value.items)
+							const LCColor = GetColor(PropItems[LCID].value.items[LDID].value.items)
 							LCBG = ToBG(LCColor)
 
 							LingerDiv.onclick = () => {
@@ -463,7 +499,10 @@ function LoadFile(SkipAlert = true) {
 			ParticleList.appendChild(ParticleDiv);
 		}
 		else if (Container[PO_ID].value.name == KEYS.Definitions.staticMat) {
-			MaterialName = "[static]Materials/" + Container[PO_ID].value.items.find((item) => {
+			//! temporarily disabling until fixed
+			continue;
+			//!
+			MaterialName = "Materials/" + Container[PO_ID].value.items.find((item) => {
 				if (item.key == KEYS.MatProps.name) {
 					return item;
 				}
@@ -478,8 +517,9 @@ function LoadFile(SkipAlert = true) {
             </div>`;
 			let ParamValues = Container[PO_ID].value.items.filter(
 				(item) =>
-					item.key == KEYS.MatProps.params
+					item.key == KEYS.Definitions.paramValues
 			);
+			let DynMaterials = Container[PO_ID].value.items.filter(item => item.key == KEYS.Definitions.dynMat)
 
 			let Props = ParamValues[0].value.items;
 			for (let B = 0; B < Props.length; B++) {
@@ -497,7 +537,7 @@ function LoadFile(SkipAlert = true) {
 				Emitter.appendChild(Input);
 				let Title = document.createElement("div");
 				Title.className = "Label Flex-1 Ellipsis";
-				Title.innerText =
+				Title.innerText = "[static]" +
 					Props[B].items[
 						Props[B].items.findIndex(
 							(item) => item.key == KEYS.MatProps.name)
@@ -526,6 +566,55 @@ function LoadFile(SkipAlert = true) {
 				DefDataDiv.appendChild(Emitter)
 
 			}
+			let DynProps = DynMaterials[0].value.items;
+			for (let B = 0; B < DynProps.length; B++) {
+				let DefDataDiv = document.createElement("div");
+				DefDataDiv.className = "DefDataDiv";
+
+				let Emitter = document.createElement("div");
+
+				Emitter.className = "Flex Emitter-Div";
+				let Input = document.createElement("input");
+				Input.type = "checkbox";
+				Input.className = `CheckBox`;
+
+				Emitter.appendChild(Input);
+				let Title = document.createElement("div");
+				Title.className = "Label Flex-1 Ellipsis";
+				Title.innerText = "[dynamic]"
+
+				// let MCID = DynProps.findIndex(
+				// 	item => item.key == KEYS.MatProps.params)
+				// console.log(DynProps[B])
+				Emitter.appendChild(Title);
+				if (DynProps[B].key == KEYS.MatProps.params) {
+					console.log(DynProps[B].value.items[0].items)
+
+					Title.innerText += DynProps[B].value.items[0].items[DynProps[B].value.items[0].items.findIndex(
+						item => item.key == KEYS.MatProps.tintColor)].value
+					let TCID
+					// let MainColorDiv = document.createElement("div")
+					// const MCColor = GetColor(DynProps[MCID])
+					// MCBG = ToBG(MCColor)
+					// MainColorDiv.onclick = () => {
+					// 	Palette = _.cloneDeep(MCColor)
+					// 	MapPalette();
+					// 	document.getElementById("Slider-Input").value = Palette.length;
+					// };
+					// MainColorDiv.className = `Prop-Block Pointer ${MCBG ? "" : "Blank-Obj"}`
+					// MainColorDiv.style = `background: ${MCBG ? MCBG : ""}`
+					// Emitter.appendChild(MainColorDiv);
+				}
+				else {
+					continue
+				}
+				MaterialDiv.appendChild(DefDataDiv);
+
+				DefDataDiv.appendChild(Emitter)
+
+			}
+
+
 			ParticleList.appendChild(MaterialDiv);
 		}
 	}
@@ -621,6 +710,15 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 			case "wrap":
 			case "semi-override":
 				NewColor = Palette[0].vec4
+				break;
+			case "shift":
+				NewColor = new ColorHandler(ColorProp.value)
+				NewColor.HSLShift(
+					HUE.value == '' ? 0 : HUE.value,
+					SAT.value == '' ? 0 : SAT.value,
+					LIGHT.value == '' ? 0 : LIGHT.value
+				)
+				NewColor = NewColor.vec4
 				break;
 		}
 		if (RecolorMode != "semi-override" && !(Prefs.obj.IgnoreBW && IsBW(
@@ -816,6 +914,59 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 				}
 			}
 			break
+		case "shift":
+			ConstID = PropType.findIndex(item => item.key == KEYS.Definitions.constant)
+			DynID = PropType.findIndex(item => item.key == KEYS.Definitions.dynamics)
+
+			if (DynID >= 0) {
+				let DynValue = PropType[DynID].value.items
+				let DynTimes = DynValue[0].value.items
+				let DynColors = DynValue[1].value.items
+
+				for (let i = 0; i < DynTimes.length; i++) {
+
+					let NewColor = new ColorHandler(DynColors[i])
+					NewColor.HSLShift(
+						HUE.value == '' ? 0 : HUE.value,
+						SAT.value == '' ? 0 : SAT.value,
+						LIGHT.value == '' ? 0 : LIGHT.value
+					)
+					NewColor = NewColor.vec4
+					if (!(Prefs.IgnoreBW &&
+						IsBW(
+							DynColors[i][0],
+							DynColors[i][1],
+							DynColors[i][2],
+						))) {
+						DynColors[i][0] = NewColor[0]
+						DynColors[i][1] = NewColor[1]
+						DynColors[i][2] = NewColor[2]
+					}
+				}
+			} else {
+				let NewColor = new ColorHandler(PropType[ConstID].value)
+				NewColor.HSLShift(
+					HUE.value == '' ? 0 : HUE.value,
+					SAT.value == '' ? 0 : SAT.value,
+					LIGHT.value == '' ? 0 : LIGHT.value
+				)
+				NewColor = NewColor.vec4
+
+				if (!(Prefs.IgnoreBW &&
+					IsBW(
+						PropType[ConstID].value[0],
+						PropType[ConstID].value[1],
+						PropType[ConstID].value[2]
+					))) {
+					PropType[ConstID].value[0] = NewColor[0]
+					PropType[ConstID].value[1] = NewColor[1]
+					PropType[ConstID].value[2] = NewColor[2]
+					PropType[ConstID].value[3] = NewColor[3]
+
+					ColorProp.value.items = PropType
+				}
+			}
+			break
 	}
 	return ColorProp
 }
@@ -851,7 +1002,6 @@ function RecolorSelected() {
 					let BCID = emitDef?.findIndex(item => item.key == KEYS.Props.birthColor)// Birth Color
 
 					let MCID = emitDef?.findIndex(item => item.key == KEYS.Props.color)
-
 					if (OFCID >= 0 && T1.checked) {
 						RDProp[OFCID] = RecolorProp(RDProp[OFCID], true)
 						const OFColor = GetColor(RDProp[OFCID])
@@ -876,9 +1026,11 @@ function RecolorSelected() {
 								Palette.length;
 						};
 					}
-					if (LCID >= 0 && T3.checked) {
-						emitDef[LCID] = RecolorProp(emitDef[LCID])
-						const LCColor = GetColor(emitDef[LCID].value.items)
+					breakpoint: if (LCID >= 0 && T3.checked) {
+						LDID = emitDef[LCID].value.items.findIndex(item => item.key == KEYS.Props.lingerDriver)
+						if (LDID < 0) break breakpoint;
+						emitDef[LCID].value.items[LDID] = RecolorProp(emitDef[LCID].value.items[LDID])
+						const LCColor = GetColor(emitDef[LCID].value.items[LDID].value.items)
 						domEmitDef[4].style.background = ToBG(LCColor)
 
 						domEmitDef[4].onclick = () => {
@@ -915,30 +1067,120 @@ function RecolorSelected() {
 			}
 		}
 		else if (ParticleList.children[PO_ID].className == "Material-Div") {
-			let paramIndex = DefData.findIndex(item => item.key == KEYS.MatProps.staticValue)
+			//! temporarily disabling until fixed
+			continue;
+			//!
+			let paramIndex = DefData.findIndex(item => item.key == KEYS.Definitions.paramValues)
 			for (let paramID = 1; paramID < DomDefData.length; paramID++) {
 				domEmitDef = DomDefData[paramID].firstElementChild.children
 				if (!domEmitDef[0].checked) continue;
-				let colorIndex = DefData[paramIndex].value.items.findIndex(item =>
+				let colorIndex = DefData[paramIndex]?.value.items.findIndex(item =>
 					item.items[0].value == domEmitDef[1].innerText)
-				ColorProp = DefData[paramIndex].value.items[colorIndex].items[1]
-				ColorProp = RecolorProp(ColorProp, true)
-				const MCColor = () => { return GetColor(ColorProp) }
-				domEmitDef[2].style.background = ToBG(MCColor)
+				ColorProp = DefData[paramIndex].value.items[colorIndex].items[
+					DefData[paramIndex].value.items[colorIndex].items.findIndex(item => item.type == "vec4")
+				]
+				if (ColorProp != undefined) {
+					ColorProp = RecolorProp(ColorProp, true)
+					const MCColor = () => { return GetColor(ColorProp) }
+					domEmitDef[2].style.background = ToBG(MCColor)
 
-				domEmitDef[2].onclick = () => {
-					Palette = _.cloneDeep(MCColor)
-					MapPalette();
-					document.getElementById("Slider-Input").value = Palette.length;
-				};
+					domEmitDef[2].onclick = () => {
+						Palette = _.cloneDeep(MCColor)
+						MapPalette();
+						document.getElementById("Slider-Input").value = Palette.length;
+					};
+				}
 			}
+			// let dynIndex = DefData.findIndex(index => item.key == KEYS.Definitions.dynMat)
+
 		}
 	}
 }
+async function FromBin() {
+	if (File == undefined) {
+		return;
+	}
+	let OldFilePath = ipcRenderer.sendSync("FileSelect", [
+		"Select Bin to take colors from",
+		"Bin",
+	])
+	FileCache.push(_.cloneDeep(File));
+
+	if (fs.existsSync(OldFilePath.slice(0, -4) + ".json") == false || Prefs.Regenerate) {
+		await ToJson();
+	}
+	let OldFile = JSON.parse(fs.readFileSync(OldFilePath.slice(0, -4) + ".json", "utf-8"))
+	let OldContainer = OldFile.entries.value.items;
+	let Container = File.entries.value.items;
+	for (let PO_ID = 0; PO_ID < OldContainer.length; PO_ID++) {
+		if (OldContainer[PO_ID].value.name == KEYS.Definitions.vfx) {
+			let NewId = Container.findIndex(item => item.key == OldContainer[PO_ID].key)
+
+			let OldDefData = OldContainer[PO_ID].value.items[0].value.items
+			let DefData = Container[NewId].value.items[0].value.items
+
+			for (let B = 0; B < OldDefData?.length; B++) {
+				let OldEmitterName = OldDefData[B].items.find(item => item.key == KEYS.Props.emitterName).value.toLowerCase()
+
+				let EmitterIndex = DefData.findIndex(item => {
+					let index = item.items.find(item => item.key == KEYS.Props.emitterName).value.toLowerCase() == OldEmitterName
+					return index == true
+				})
+				let PropItems = DefData[EmitterIndex].items
+				let OldPropItems = OldDefData[B].items
+
+				let OldRDID = OldPropItems?.findIndex(item => item.key == KEYS.Definitions.reflection)
+				let OldRDProp = OldPropItems[OldRDID]?.value.items
+
+				let OldOFCID = OldRDProp?.findIndex(item => item.key == KEYS.Props.fresnelColor)           	// Outline Fresnel Color
+				let OldRFCID = OldRDProp?.findIndex(item => item.key == KEYS.Props.reflectionColor) 			// Reflective Fresnel Color
+				let OldLCID = OldPropItems?.findIndex(item => item.key == KEYS.Props.lingerColor)			// Linger Color
+				let OldBCID = OldPropItems?.findIndex(item => item.key == KEYS.Props.birthColor)			// Birth Color
+				let OldMCID = OldPropItems?.findIndex(item => item.key == KEYS.Props.color)				// Main Color
+				let OldBMID = OldPropItems?.findIndex(item => item.key == KEYS.Props.blendMode)
+
+				let OldLDID = OldPropItems[OldLCID]?.value.items.findIndex(item => item.key == KEYS.Props.lingerDriver)
+
+				let RDID = PropItems?.findIndex(item => item.key == KEYS.Definitions.reflection)
+				let RDProp = PropItems[RDID]?.value.items
+
+				let OFCID = RDProp?.findIndex(item => item.key == KEYS.Props.fresnelColor)           	// Outline Fresnel Color
+				let RFCID = RDProp?.findIndex(item => item.key == KEYS.Props.reflectionColor) 			// Reflective Fresnel Color
+				let LCID = PropItems?.findIndex(item => item.key == KEYS.Props.lingerColor)			// Linger Color
+				let BCID = PropItems?.findIndex(item => item.key == KEYS.Props.birthColor)			// Birth Color
+				let MCID = PropItems?.findIndex(item => item.key == KEYS.Props.color)				// Main Color
+				let BMID = PropItems?.findIndex(item => item.key == KEYS.Props.blendMode)
+
+				let LDID = PropItems[LCID]?.value.items.findIndex(item => item.key == KEYS.Props.lingerDriver)
+				if (OldOFCID >= 0 && OFCID >= 0) {
+					RDProp[OFCID] = _.cloneDeep(OldRDProp[OldOFCID])
+				}
+				if (OldRFCID >= 0 && RFCID >= 0) {
+					RDProp[RFCID] = _.cloneDeep(OldRDProp[OldRFCID])
+				}
+				if (OldLCID >= 0 && LCID >= 0) {
+					PropItems[LCID].value.items[LDID] = _.cloneDeep(OldPropItems[OldLCID].value.items[OldLDID])
+				}
+				if (OldBCID >= 0 && BCID >= 0) {
+					PropItems[BCID] = _.cloneDeep(OldPropItems[OldBCID])
+				}
+				if (OldMCID >= 0 && MCID >= 0) {
+					PropItems[MCID] = _.cloneDeep(OldPropItems[OldMCID])
+				}
+				if (OldBMID >= 0 && BMID >= 0) {
+					PropItems[BMID] = _.cloneDeep(OldPropItems[OldBMID])
+				}
+
+			}
+		}
+	}
+	LoadFile(true);
+}
+
 
 function Undo() {
 	if (FileCache.length > 0) {
-		File = JSON.parse(JSON.stringify(FileCache.pop()))
+		File = _.cloneDeep(FileCache.pop())
 		LoadFile(true);
 	}
 	document.getElementById('CheckToggle').checked = false
@@ -959,12 +1201,12 @@ async function SaveBin() {
 
 
 async function ToJson() {
-	await Sleep(200)
+	await Sleep(100)
 	execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" -k`);
 }
 
 async function ToBin() {
-	await Sleep(200)
+	await Sleep(100)
 	try {
 		let res = execSync(
 			`"${Prefs.obj.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}"`
