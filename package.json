@@ -3,7 +3,7 @@
   "productName": "hacksaw",
   "version": "3.8.1",
   "description": "my league modding suite",
-  "main": "javascript/main_process.js",
+  "main": "src/main_process.cjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/TheMartynasXS/Hacksaw"
@@ -35,10 +35,14 @@
     ]
   },
   "scripts": {
-    "start": "electron .",
-    "package": "electron-forge package",
-    "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish always"
+    "vite-dev": "vite dev",
+    "vite-build": "vite build",
+    "electron": "electron .",
+    "electron-build": "electron-builder build --win --publish never",
+    "electron-publish": "electron-builder build --win --publish always",
+    "dev": "concurrently -k \"vite dev\" \"npm run electron\"",
+    "build": "vite build && npm run electron-build",
+    "publish": "vite build && npm run electron-publish"
   },
   "keywords": [],
   "author": {
@@ -53,7 +57,13 @@
     "path-sort": "^0.1.0"
   },
   "devDependencies": {
-    "electron": "15.2.0",
-    "electron-builder": "^22.14.13"
-  }
+    "@sveltejs/adapter-static": "^2.0.0",
+    "@sveltejs/kit": "^1.20.4",
+    "concurrently": "^8.2.1",
+    "electron": "^26.2.0",
+    "electron-builder": "^24.6.4",
+    "svelte": "^4.0.5",
+    "vite": "^4.4.2"
+  },
+  "type": "module"
 }
