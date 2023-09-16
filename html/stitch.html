@@ -23,6 +23,10 @@
             <img class="Icon" src="../css/svg/ListBox.svg"></img>
             <div class="TabTitle">BinTex</div>
         </button>
+        <button onclick="Tab('./mover.html')" class="NavButton">
+            <img class="Icon" src="../css/svg/Transfer.svg"></img>
+            <div class="TabTitle">Particle Mover</div>
+        </button>
         <button onclick="Tab('./colorswap.html',FileSaved)" class="NavButton">
             <img class="Icon" src="../css/svg/ColorWand.svg"></img>
             <div class="TabTitle">Color Swap</div>
@@ -65,7 +69,6 @@
             <div style="grid-area: b" class="Input-Group">
                 <button onclick="Undo()" class="Flex-1">Undo</button>
                 <button onclick="ClearSelection()" class="Flex-1"><mark>Clear Selected</mark></button>
-                <button class="Flex-1" onclick="MoveParticles()">Move Particles To...</button>
                 <button class="Flex-1 Special-Input" onclick="Save()">Save</button>
             </div>
             <script src="../javascript/tabs/stitch.js"></script>

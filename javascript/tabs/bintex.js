@@ -11,12 +11,9 @@ let BinCount = document.getElementById('Bin-Count')
 
 let UnusedButton = document.getElementById('Delete-Unused')
 
-let ParticleArray = [];
-
 let Files2Delete = [];
 
 let WadPath = "";
-let ParticleTargetPath = "";
 let AssetFiles = []
 let BinFiles = []
 let BTXFiles = []

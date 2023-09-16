@@ -3,6 +3,9 @@ const { Tab, Prefs, CreateAlert } = require('../javascript/utils.js');
 function SelectRitoBin() {
     Prefs.RitoBinPath();
 }
+function SelectFFMPEG() {
+    Prefs.FFMPEGPath();
+}
 
 document.getElementById("Mode").value = Prefs.obj.PreferredMode;
 document.getElementById("IgnoreBW").checked = Prefs.obj.IgnoreBW;

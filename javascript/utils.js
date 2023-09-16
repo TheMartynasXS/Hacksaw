@@ -59,6 +59,10 @@ class Preferences {
 		this.obj.RitoBinPath = ipcRenderer.sendSync('FileSelect', ['Select RitoBin_cli.exe', 'RitoBin'])
 		this.save();
 	}
+	FFMPEGPath() {
+		this.obj.FFMPEGPath = ipcRenderer.sendSync('FileSelect', ['Select ffmpeg.exe', 'ffmpeg'])
+		this.save();
+	}
 
 	save() {
 		ipcRenderer.send("update-settings", JSON.stringify(this.obj, null, 2))

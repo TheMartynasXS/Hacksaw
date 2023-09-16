@@ -559,6 +559,8 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #Unlink-List,
+#Origin-List,
+#Redirect-List,
 #Idea-List,
 .Usage-Information {
   color: var(--text-primary);

@@ -156,8 +156,18 @@ ipcMain.on("FileSelect", (event, arg) => {
             })
             .then(
                 (val) => (event.returnValue = val.filePaths[0]),
-                (val) => console.log("error")
             );
+    }
+    else if (arg[1] == "ffmpeg") {
+        dialog
+            .showOpenDialog({
+                title: arg[0],
+                filters: [{ name: "ffmpeg", extensions: ["exe"] }],
+                properties: ["openFile"],
+            })
+            .then(
+                (val) => (event.returnValue = val.filePaths[0]),
+            )
     }
 });
 

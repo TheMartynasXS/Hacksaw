@@ -19,11 +19,11 @@
             <img class="Icon" src="../css/svg/Stitch.svg"></img>
             <div class="TabTitle">Stitch</div>
         </button>
-        <button onclick="Tab('./bintex.html')" disabled class="NavButton">
+        <button onclick="Tab('./bintex.html')" class="NavButton">
             <img class="Icon" src="../css/svg/ListBox.svg"></img>
             <div class="TabTitle">BinTex</div>
         </button>
-        <button onclick="Tab('./mover.html')" class="NavButton">
+        <button onclick="Tab('./mover.html')" disabled class="NavButton">
             <img class="Icon" src="../css/svg/Transfer.svg"></img>
             <div class="TabTitle">Particle Mover</div>
         </button>
@@ -45,52 +45,49 @@
             <div class="Input-Group Margin-Bottom">
                 <button class="Flex-1" onclick="SelectWadFolder()" id="Select-Files">Select Wad Folder</button>
             </div>
-            <div class="Input-Group">
-                <div class="Label Flex-1" id="Bin-Count">...</div>
-                <progress id="Progress-Range" class="Flex-2" type="range" value="0"
-                    style="padding-inline: 0;"></progress>
+            <div class="Input-Group Margin-Bottom">
+                <button onclick="OpenLocation()">Select New Location</button> <label class="Label Flex-1"
+                    id="Title"><strong><- Select a file</strong></label>
             </div>
             <div class="Margin-Block Usage-Information" style="padding-block:0.5rem">
                 Usage Information:
                 <ol>
                     <li>
-                        Select a folder which contains <strong>Assets</strong> and <strong>Data</strong> folders.
+                        Select a WadFolder (a folder that ends with "<strong>.wad.client</strong>")
                     </li>
                     <li>
-                        Upon completion it will generate:
-                        <ul>
-                            <li>
-                                <strong>.BTX</strong> - temporary bin files used to read for the unused files.
-                            </li>
-                            <li>
-                                <strong>Combined.json</strong> - Ordered list of files by path.
-                            </li>
-                            <li>
-                                <strong>Separate.json</strong> - Ordered list of files by bin which file is mentioned
-                                in.
-                            </li>
-                            <li>
-                                <strong>Missing.json</strong> - Files that are missing from your folder.
-                            </li>
-                            <li>
-                                List of files that are going to be <mark>deleted</mark> from the directory down below.
-                            </li>
-                        </ul>
+                        Select a folder to which you want to redirect particle paths to.
+                    </li>
+                    <ul>
+
+                        <li>
+                            Path must include the word "<strong>particles</strong>" if you want the ability to move
+                            particles later.
+                        </li>
+                    </ul>
+                    <li>
+                        Confirm that the paths are as you want them to be.
                     </li>
                     <li>
-                        <strong>Delete</strong> button will delete listed files from the directory.
+                        Press <strong>Move particles</strong> button
                     </li>
                 </ol>
             </div>
-            <div id="Unlink-List" class="Margin-Bottom">
+            <div style="overflow:hidden !important;display:grid;grid-template-columns: 1fr 1fr; gap: 1rem;overflow: scroll;"
+                class="Flex-1">
+                <div id="Origin-List" class="Margin-Bottom">
 
+                </div>
+                <div id="Redirect-List" class="Margin-Bottom">
+
+                </div>
             </div>
             <div class="Input-Group">
-                <button onclick="DeleteUnused()" id="Delete-Unused" class="Flex-1">
-                    <strong><mark>Delete</mark></strong>
+                <button onclick="MoveParticles()" class="Flex-1">
+                    <strong>Move particles</strong>
                 </button>
             </div>
-            <script src="../javascript/tabs/bintex.js" defer></script>
+            <script src="../javascript/tabs/mover.js" defer></script>
         </div>
     </div>
 </body>

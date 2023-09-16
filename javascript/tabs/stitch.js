@@ -24,7 +24,7 @@ let FileCache = [];
 let TargetList = document.getElementById("Target-Container")
 let DonorList = document.getElementById("Donor-Container")
 
-let pathRegExp = new RegExp(/ASSETS.+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
+let pathRegExp = new RegExp(/ASSETS.+?(\/particles\/|shared\/).+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
 
 function Undo() {
 	if (FileCache.length > 0) {
@@ -35,31 +35,7 @@ function Undo() {
 	FilterParticles(document.getElementById("FilterDonor").value, "FilterDonor");
 }
 
-function MoveParticles() {
 
-	WadPath = ipcRenderer.sendSync("FileSelect", [
-		"Select wad folder",
-		"Folder",
-	])[0];
-	if (!fs.existsSync(WadPath) || !WadPath.toLowerCase().includes(".wad.client")) {
-		CreateMessage({
-			type: "info",
-			title: "Error",
-			message: "Invalid Path.\nPath must contain \'.wad.client\' for the sake of safety."
-		})
-		return 0;
-	}
-	WadPath = (WadPath.split(".wad.client\\").pop()).replace(/\\/g, "/") + "/"
-
-	let Container = TargetFile.entries.value.items;
-	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
-		Container[PO_ID]
-		let StringProp = JSON.stringify(Container[PO_ID], null, 2)
-		StringProp = StringProp.replace(pathRegExp,
-			(match) => { return WadPath + match.split("/").pop() })
-		Container[PO_ID] = JSON.parse(StringProp)
-	}
-}
 function OpenTargetBin() {
 	TargetPath = ipcRenderer.sendSync("FileSelect", [
 		"Select Bin to edit",
