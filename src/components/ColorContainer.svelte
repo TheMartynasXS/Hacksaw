@@ -5,7 +5,7 @@
 	import { ColorHandler } from '../Utilities';
 	import { clickOutside } from '../events/clickOutside';
 
-	let Count = 1;
+	let Count = $paletteStore.length;
 
 	let indicatorColor = '';
 	let Open = false;

@@ -1,22 +1,41 @@
 <script>
-	import NavBar from 'components/NavBar.svelte';
+	const sendHelloMessageToElectron = () => {
+		const someData = {
+			name: "Svelte",
+		};
 
-	import BinSplash from 'src/routes/BinSplash.svelte';
-	import Stitch from 'src/routes/Stitch.svelte';
-	
-	let Location = 'binsplash';
+		window.api.send("hello", someData);
+	};
+
+	window.api.on("world", (e, data) => {
+		// Handle "world" message from Electron
+	});
 </script>
 
-<NavBar bind:Location={Location}/>
+<!-- <script>
+	import NavBar from "components/NavBar.svelte";
+
+	import BinSplash from "src/routes/BinSplash.svelte";
+	import Stitch from "src/routes/Stitch.svelte";
+
+	let Location = "binsplash";
+</script>
+
+<NavBar bind:Location />
+
 <div class="content">
-	{#if Location == 'binsplash'}
+	{#if Location == "binsplash"}
 		<BinSplash />
-	{:else if Location == 'stitch'}
+	{:else if Location == "stitch"}
 		<Stitch />
 	{/if}
 </div>
+
 <style>
-	.content{
-		margin-left: 4rem;
+	.content {
+		margin-left: 3.75rem;
+		display: flex;
+		flex-direction: column;
+		padding: 0.5rem;
 	}
-</style>
+</style> -->

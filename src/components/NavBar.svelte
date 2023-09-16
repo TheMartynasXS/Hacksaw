@@ -57,7 +57,6 @@
 		position: fixed;
 		display: flex;
 		flex-direction: column;
-		animation: forwards slide-in 0.5s ease-out;
 		height: 100%;
 		background-color: var(--bg-200);
 		width: 3.75rem;
@@ -66,14 +65,6 @@
 	}
 	.NavBar:hover {
 		width: 14rem;
-	}
-	@keyframes slide-in {
-		0% {
-			transform: translateX(-3rem);
-		}
-		100% {
-			transform: translateX(0rem);
-		}
 	}
 	.NavButton {
 		border: none;
