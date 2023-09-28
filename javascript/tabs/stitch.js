@@ -17,14 +17,11 @@ let TargetFile
 let DonorFile
 
 let FileSaved = true;
-let WadPath = "";
 
 let FileCache = [];
 
 let TargetList = document.getElementById("Target-Container")
 let DonorList = document.getElementById("Donor-Container")
-
-let pathRegExp = new RegExp(/ASSETS.+?(\/particles\/|shared\/).+?\.(?:bnk|wpk|dds|skn|skl|sco|scb|anm|tex)/gi)
 
 function Undo() {
 	if (FileCache.length > 0) {
@@ -312,10 +309,9 @@ function RenderDonor() {
 								if (TargetList.children[i].children[0].children[0].checked) {
 									let index = TC.findIndex((item) => item.key == TargetList.children[i].id)
 									let Complex = TC[index].value.items.findIndex((item) => {
-										item.key == KEYS.Definitions.complex || item.key == KEYS.Definitions.simple
+										return (item.key == KEYS.Definitions.complex || item.key == KEYS.Definitions.simple)
 									})
-
-									TC[index].value.items[Complex].value.items.push(Props[C])
+									TC[index].value.items[Complex]?.value.items.push(Props[C])
 									RenderTarget(i)
 									break
 								}

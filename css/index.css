@@ -525,7 +525,7 @@ input[type="color"]::-webkit-color-swatch {
   background-color: var(--bg-300)
 }
 
-.NavButton:hover:enabled .Icon {
+.NavButton:hover:enabled .Icon{
   transform: rotate(7deg) scale(1.1);
   filter: grayscale(0);
 }
@@ -556,6 +556,13 @@ input[type="color"]::-webkit-color-swatch {
 #Unlink-List,
 #Idea-List {
   flex: 1;
+}
+
+#Origin-List,
+#Redirect-List{
+  scrollbar-gutter: stable;
+  word-wrap: break-word;
+  hyphens: none;
 }
 
 #Unlink-List,

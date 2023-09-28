@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, clipboard } = require("electron");
 const path = require("path");
 const { ipcMain } = require("electron");
 const { dialog } = require("electron");
@@ -177,16 +177,18 @@ ipcMain.on("UserPath", (event) => {
 ipcMain.on("Message", (event, props = { title: "untitled", message: "unknownerror" }) => {
     switch (props.type) {
         case "error":
-            // dialog.showErrorBox(props.title, props.message)
             dialog.showMessageBox(null, {
                 type: props.type,
                 title: "error",
                 message: "Please check for an update on Github.",
                 detail: `${props.message}\n${props.title}`,
-                buttons: ["Open Github", "OK"]
+                buttons: ["Copy Error", "Open Github", "OK"]
             }).then(result => {
-                if (result.response == 0) {
+                if (result.response == 1) {
                     Open("https://github.com/TheMartynasXS/Hacksaw/releases")
+                }
+                else if (result.response == 0) {
+                    clipboard.writeText(`${props.message}\n${props.title}`)
                 }
             })
             break;

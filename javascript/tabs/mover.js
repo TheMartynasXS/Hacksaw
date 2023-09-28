@@ -14,7 +14,7 @@ let UnusedButton = document.getElementById('Delete-Unused')
 
 
 
-let Files2Delete = [];
+let AllFiles;
 let JsonFiles = [];
 let WadPath = "";
 let NewPath = "";
@@ -50,12 +50,6 @@ function OpenLocation() {
     RedirectList.innerText = Origin.replace(pathRegExp, (match) => { return NewPath.split(".wad.client/").pop() + match.split("/").pop() })
 }
 
-OriginList.addEventListener('scroll', (e) => {
-    RedirectList.scrollTop = OriginList.scrollTop
-})
-RedirectList.addEventListener('scroll', (e) => {
-    OriginList.scrollTop = RedirectList.scrollTop
-})
 
 async function SelectWadFolder(Path = undefined) {
     RedirectList.innerText = ""
@@ -63,6 +57,7 @@ async function SelectWadFolder(Path = undefined) {
         "Select wad folder",
         "Folder",
     ])[0];
+    AllFiles = new Set();
     if (!fs.existsSync(WadPath) || !WadPath.toLowerCase().endsWith(".wad.client")) {
         CreateMessage({
             type: "info",
@@ -84,12 +79,10 @@ async function SelectWadFolder(Path = undefined) {
         let Container = TargetFile.entries.value.items;
         for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
             let StringProp = JSON.stringify(Container[PO_ID], null, 2)
-            // write all matches to OriginList.innerText
-            StringProp.match(pathRegExp)?.forEach(match => {
-                OriginList.innerText += match + "\n"
-            })
+            AllFiles.add(...(StringProp.match(pathRegExp) || []))
         }
     }
+    OriginList.innerHTML = [...AllFiles].sort(sorter).join("<br>")
 }
 
 let Confirm = 0

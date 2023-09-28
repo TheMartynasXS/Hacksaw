@@ -1235,4 +1235,3 @@ function OpenSampleWindow() {
 }
 
 ChangeColorCount(2);
-
