@@ -9,12 +9,15 @@
 	<link rel="stylesheet" href="%sveltekit.assets%/style.css">
 </head>
 <style>
-	
+
 </style>
 
 <body data-sveltekit-preload-data="hover">
 	<div display="content">
 		%sveltekit.body%
 </body>
+<script>
+	window.api.send("to-main", "a message");
+</script>
 
 </html>

@@ -1,7 +1,7 @@
 <script>
-	import ColorContainer from 'components/ColorContainer.svelte';
+	// import ColorContainer from 'components/ColorContainer.svelte';
 	import ToggleButton from 'components/ToggleButton.svelte';
-	import { settings, paletteStore } from 'src/Stores';
+	// import { settings, paletteStore } from 'src/Stores';
 	import _ from 'lodash';
 
 	
@@ -29,7 +29,7 @@
 		<option value="wrap">Wrap</option>
 	</select>
 </div>
-<ColorContainer />
+<!-- <ColorContainer /> -->
 <div class="Input-Group">
 	<input
 		class="Ellipsis Filter Flex-1"

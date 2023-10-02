@@ -1,11 +1,15 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("api", {
-    send: (message, data) => {
-        ipcRenderer.send(message, data);
+console.log('preload.js loaded');
+contextBridge.exposeInMainWorld(
+    'api', {
+    send: (channel, data) => {
+        ipcRenderer.send(channel, data)
     },
-
-    on: (message, listener) => {
-        ipcRenderer.on(message, listener);
+    sendSync: (channel, data) => {
+        ipcRenderer.sendSync(channel, data)
     },
+    receive: (channel, func) => {
+        ipcRenderer.on(channel, (event, ...args) => func(...args))
+    }
 });

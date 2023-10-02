@@ -1,25 +1,18 @@
 <script>
-	const sendHelloMessageToElectron = () => {
-		const someData = {
-			name: "Svelte",
-		};
-
-		window.api.send("hello", someData);
-	};
-
-	window.api.on("world", (e, data) => {
-		// Handle "world" message from Electron
-	});
-</script>
-
-<!-- <script>
 	import NavBar from "components/NavBar.svelte";
 
 	import BinSplash from "src/routes/BinSplash.svelte";
 	import Stitch from "src/routes/Stitch.svelte";
 
 	let Location = "binsplash";
+	// const handleClick = () => {
+	// 	console.log(window)
+	// 	window.api.send("to-main", "a message");
+	// };
 </script>
+
+<button on:click={handleClick}>koamgosmgoamsm</button>
+
 
 <NavBar bind:Location />
 
@@ -38,4 +31,4 @@
 		flex-direction: column;
 		padding: 0.5rem;
 	}
-</style> -->
+</style>

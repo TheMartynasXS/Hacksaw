@@ -37,23 +37,19 @@ const createWindow = (htmlDir) => {
         backgroundColor: "#3a3b41",
         icon: "buildhacksaw.ico",
         webPreferences: {
-            nodeIntegration: false,
+            preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
         },
-        preload: './preload.js',
     });
     isDev ? mainWindow.loadURL("http://localhost:5173") : mainWindow.loadFile(path.join(__dirname, htmlDir));
     isDev || process.argv.includes("--dev") ? mainWindow.webContents.openDevTools({ mode: "detach" }) : mainWindow.removeMenu();
+    mainWindow.webContents.on('did-finish-load', () => {
+        mainWindow.webContents.send('preload');
+    });
 };
 
-ipcMain.on('hello', (e, data) => {
-    // Handle the "hello" message being received from the Svelte app
-    const someData = {
-        name: 'Electron',
-    };
 
-    mainWindow.webContents.send('world', someData);
-});
+
 
 app.whenReady().then(() => {
     // if (!fs.existsSync(SamplesPath)) {
@@ -204,3 +200,7 @@ app.whenReady().then(() => {
 //             break;
 //     }
 // });
+
+ipcMain.on('to-main', (event, args) => {
+    console.log("bruh")
+})
