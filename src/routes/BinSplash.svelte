@@ -1,36 +1,46 @@
 <script>
-	// import ColorContainer from 'components/ColorContainer.svelte';
-	import ToggleButton from 'components/ToggleButton.svelte';
-	// import { settings, paletteStore } from 'src/Stores';
-	import _ from 'lodash';
-
+	import ColorContainer from 'components/ColorContainer.svelte';
+	import ToggleButton from "components/ToggleButton.svelte";
+	import DropDownButton from 'components/DropDownButton.svelte';
 	
-	let Hue = '';
-	let Sat = '';
-	let Lig = '';
+	import { settings, paletteStore } from "src/Stores";
+	import _ from "lodash";
+
+	let Hue = "";
+	let Sat = "";
+	let Lig = "";
+
+	const handleClick = () => {
+		window.api.selectFolder();
+		window.api.receive((data) => {
+			window.api.readDir(data).then(
+				data =>{
+					console.log(data)
+				}
+			)
+		});
+	};
 </script>
 
 <div class="Input-Group Margin-Bottom">
 	<button
 		class="Special-Input"
-		on:click={_.debounce(
-			() => {
-				
-			},
-			1000,
-			{ leading: true, trailing: false }
-		)}>Open Bin</button
+		on:click={() => {
+			handleClick();
+		}}>Open Bin</button
 	>
 	<span class="Label Flex-1" id="Title"><strong>Select a file</strong></span>
-	<label class="Label" id="Title" for="Mode"><strong>Recoloring Mode:</strong></label>
+	<label class="Label" id="Title" for="Mode"
+		><strong>Recoloring Mode:</strong></label
+	>
 	<select name="Mode" id="Mode" bind:value={$settings.PreferredMode}>
 		<option value="random">Random</option>
 		<option value="linear">Linear</option>
 		<option value="wrap">Wrap</option>
 	</select>
 </div>
-<!-- <ColorContainer /> -->
-<div class="Input-Group">
+<ColorContainer />
+<!-- <div class="Input-Group">
 	<input
 		class="Ellipsis Filter Flex-1"
 		type="number"
@@ -58,28 +68,15 @@
 		max="100"
 		bind:value={Lig}
 	/>
-	<button
-		on:click={() => {
-			for (let i = 0; i < $paletteStore.length; i++) {
-				$paletteStore[i].Shift(Hue, Sat, Lig);
-			}
-			$paletteStore = $paletteStore;
-		}}
-	>
-		Apply
-	</button>
-	<button
-		on:click={() => {
-			$paletteStore = $paletteStore.reverse();
-		}}
-	>
-		<img class="Icon" src="../svg/Reverse.svg" alt="switch direction svg" />
-	</button>
-	<button>Save Sample</button>
-	<button>Color Samples</button>
-</div>
+	 <DropDownButton/> 
+	
+</div> -->
 <div class="Flex Input-Group Margin-Top Margin-Bottom">
-	<input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox" />
+	<input
+		type="checkbox"
+		id="CheckToggle"
+		class="CheckBox SettingOptionCheckbox"
+	/>
 	<input
 		class="Ellipsis Flex-3 Filter"
 		type="text"
@@ -100,7 +97,8 @@
 
 <div class="Input-Group">
 	<button class="Flex-1">Undo</button>
-	<button class="Flex-3" id="Recolor_Selected_Button">Recolor Selected</button>
+	<button class="Flex-3" id="Recolor_Selected_Button">Recolor Selected</button
+	>
 </div>
 
 <div class="Input-Group Margin-Top">

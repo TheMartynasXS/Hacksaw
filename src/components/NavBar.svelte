@@ -9,6 +9,7 @@
 			Location = "binsplash";
 		}}
 		class="NavButton"
+		disabled={Location === "binsplash"}
 	>
 		<img class="Icon" src="./svg/Paintroller.svg" alt="monkey" />
 		<div class="TabTitle">Splash</div>
@@ -18,6 +19,7 @@
 			Location = "stitch";
 		}}
 		class="NavButton"
+		disabled={Location === "stitch"}
 	>
 		<img class="Icon" src="./svg/Stitch.svg" alt="monkey" />
 		<div class="TabTitle">Stitch</div>
@@ -27,6 +29,7 @@
 			Location = "bintex";
 		}}
 		class="NavButton"
+		disabled={Location === "bintex"}
 	>
 		<img class="Icon" src="./svg/ListBox.svg" alt="monkey" />
 		<div class="TabTitle">BinTex</div>
@@ -36,6 +39,7 @@
 			Location = "xrgba";
 		}}
 		class="NavButton"
+		disabled={Location === "xrgba"}
 	>
 		<img class="Icon" src="./svg/Swatch.svg" alt="monkey" />
 		<div class="TabTitle">xrgba</div>
@@ -45,6 +49,7 @@
 			Location = "settings";
 		}}
 		class="NavButton"
+		disabled={Location === "settings"}
 	>
 		<img class="Icon" src="./svg/Cog.svg" alt="monkey" />
 		<div class="TabTitle">Settings</div>

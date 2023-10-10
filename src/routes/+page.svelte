@@ -5,13 +5,8 @@
 	import Stitch from "src/routes/Stitch.svelte";
 
 	let Location = "binsplash";
-	// const handleClick = () => {
-	// 	console.log(window)
-	// 	window.api.send("to-main", "a message");
-	// };
-</script>
 
-<button on:click={handleClick}>koamgosmgoamsm</button>
+</script>
 
 
 <NavBar bind:Location />

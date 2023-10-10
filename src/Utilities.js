@@ -15,6 +15,7 @@ class ColorHandler {
             parseInt(Hex.slice(5, 7), 16) / 255,
             Hex.length > 7 ? parseInt(Hex.slice(7, 9), 16) / 255 : 1
         ]
+        return this;
     }
     InputAlpha(alpha = 0) {
         this.vec4[3] = alpha
@@ -65,6 +66,7 @@ class ColorHandler {
             b = hue2rgb(p, q, h - 1 / 3);
         }
         this.vec4 = [r, g, b, this.vec4[3]];
+        return this;
     }
     ToHEX() {
         let rr =
@@ -84,6 +86,7 @@ class ColorHandler {
     SetTime(time) {
         this.time = time;
         this.vec4 = this.vec4;
+        return this;
     }
 }
 
