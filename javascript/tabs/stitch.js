@@ -28,8 +28,6 @@ function Undo() {
 		TargetFile = JSON.parse(JSON.stringify(FileCache.pop()))
 		RenderTarget();
 	}
-	FilterParticles(document.getElementById("FilterTarget").value, "FilterTarget");
-	FilterParticles(document.getElementById("FilterDonor").value, "FilterDonor");
 }
 
 
@@ -51,6 +49,9 @@ function OpenTargetBin() {
 }
 
 function RenderTarget(i = -1) {
+	let Select = document.getElementById("Target-Select")
+	Select.innerText = ''
+	let Options = []
 	TargetList.innerText = "";
 	let Container = TargetFile.entries.value.items;
 	if (Container.find((item) => item.value.name == KEYS.Definitions.vfx) == undefined) {
@@ -67,6 +68,12 @@ function RenderTarget(i = -1) {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
+			let Option = document.createElement("option");
+			Option.value = Container[PO_ID].key;
+			Option.innerText = ParticleName;
+			Options.push(Option)
+			
+			
 
 			let ParticleDiv = document.createElement("div");
 			ParticleDiv.id = Container[PO_ID].key;
@@ -144,7 +151,6 @@ function RenderTarget(i = -1) {
 							Props.splice(C, 1)
 
 							RenderTarget()
-							FilterParticles(document.getElementById("FilterTarget")?.value, "Target-Container")
 						}
 						Emitter.appendChild(Delete);
 
@@ -177,13 +183,20 @@ function RenderTarget(i = -1) {
 			TargetList.appendChild(MaterialDiv);
 		}
 	}
+	Options.sort((a, b) => a.innerText.localeCompare(b.innerText))
+	for(let i = 0; i < Options.length; i++){
+		Select.appendChild(Options[i])
+	}
+	Select.onchange = (Event) => {
+		document.querySelector(`[id="Target-Container"]>[id="${Event.target.value}"]`).scrollIntoView()
+	}
 	if (i == -1) {
 		return 0;
 	}
 	else {
 		TargetList.children[i].children[0].children[0].checked = true
 	}
-	FilterParticles(document.getElementById("FilterTarget")?.value, "Target-Container")
+	
 }
 function OpenDonorBin() {
 	DonorPath = ipcRenderer.sendSync("FileSelect", [
@@ -201,29 +214,11 @@ function OpenDonorBin() {
 	document.getElementById("DonorPath").innerText = DonorPath.split(".wad.client\\").pop()
 	RenderDonor();
 }
-function FilterParticles(FilterString, List) {
-	let ParticleListChildren = document.getElementById(List).children;
-
-	let search
-	try {
-		search = new RegExp(FilterString, "i");
-	} catch (error) { }
-
-	if (search != undefined) {
-		for (let I = 0; I < ParticleListChildren.length; I++) {
-			let match = ParticleListChildren[I].children[0]?.children[1]?.textContent.match(
-				search
-			)
-			if (match == null) {
-				ParticleListChildren[I].style.display = "none";
-			} else {
-				ParticleListChildren[I].style.display = null;
-			}
-		}
-	}
-}
 
 function RenderDonor() {
+	let Select = document.getElementById("Donor-Select")
+	Select.innerText = ''
+	let Options = []
 	DonorList.innerText = "";
 	let Container = DonorFile.entries.value.items;
 	if (Container.find((item) => item.value.name == KEYS.Definitions.vfx) == undefined) {
@@ -241,7 +236,11 @@ function RenderDonor() {
 					return item;
 				}
 			}).value ?? `unknown ${PO_ID}`;
-
+			let Option = document.createElement("option");
+			Option.value = Container[PO_ID].key;
+			Option.innerText = ParticleName;
+			Options.push(Option)
+			
 			let ParticleDiv = document.createElement("div");
 			ParticleDiv.id = Container[PO_ID].key;
 			ParticleDiv.className = "Particle-Div";
@@ -339,7 +338,13 @@ function RenderDonor() {
 		}
 	}
 
-	FilterParticles(document.getElementById("FilterDonor")?.value, "Donor-Container")
+	Options.sort((a, b) => a.innerText.localeCompare(b.innerText))
+	for(let i = 0; i < Options.length; i++){
+		Select.appendChild(Options[i])
+	}
+	Select.onchange = (Event) => {
+		document.querySelector(`[id="Donor-Container"]>[id="${Event.target.value}"]`).scrollIntoView()
+	}
 }
 
 function ToJson(FilePath) {
