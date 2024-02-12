@@ -225,6 +225,7 @@ input[type="number"]::-webkit-outer-spin-button {
   background-color: var(--bg-200);
 }
 
+
 .Type {
   /* filter: grayscale(1) brightness(1); */
   cursor: pointer;
@@ -276,6 +277,21 @@ input[type="number"]::-webkit-outer-spin-button {
   transition: 0.25s;
   background-color: var(--accent);
   left: 14px;
+}
+
+
+.CheckBox.Disable:checked {
+  background-color: red;
+}
+.CheckBox.Disable:checked:before {
+  left: 0px;
+}
+.CheckBox.Disable {
+  background-color: green;
+}
+.CheckBox.Disable:before{
+  left: 14px;
+  background-color: var(--bg-300);
 }
 
 input[type="range"].Range {
@@ -681,13 +697,11 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .Prop-Block-Secondary {
-  width: 2.9rem;
+  width: 3.4rem;
 }
 
 .ColorHelp {
   padding: 0px !important;
-  margin-right: 0px !important;
-  margin-left: 0.8rem !important;
   width: 1.5rem;
 }
 

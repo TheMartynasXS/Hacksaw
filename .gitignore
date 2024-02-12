@@ -9,3 +9,4 @@ dist/
 /public/style.css
 ./yarn-error.log
 skin0.json
+package-lock.json

@@ -415,6 +415,9 @@ function LoadFile(SkipAlert = true) {
 						let BMID = PropItems?.findIndex(
 							(item) => item.key == KEYS.Props.blendMode
 						); // Blend Mode
+						let DID = PropItems?.findIndex(
+							(item) => item.key == KEYS.Props.disabled
+						)  // Disabled
 
 						let OFBG, RFBG, LCBG, BCBG, MCBG;
 
@@ -583,6 +586,31 @@ function LoadFile(SkipAlert = true) {
 						}
 						Emitter.appendChild(BlendMode);
 
+						//!enabled
+						let disabled = document.createElement("input");
+						disabled.type = "checkbox";
+						disabled.className = `CheckBox Disable`;
+						if(DID >= 0){
+							disabled.checked = PropItems[DID].value
+							
+						}else{
+							DID = PropItems.length
+							PropItems.push(
+								{
+									"key": KEYS.Props.disabled,
+									"type": "bool",
+									"value": false
+								}
+							)
+						}
+						disabled.onchange = (Event) =>{
+							PropItems[DID].value = Event.target.checked
+							console.log(PropItems[DID].value)
+						}
+						Emitter.appendChild(disabled);
+
+						BlendMode.className = `Blend-Mode`;
+
 						DefDataDiv.appendChild(Emitter);
 					}
 				}
@@ -726,7 +754,9 @@ function ColorHelp() {
 			RC - Reflection Fresnel Color, changes reflective color
 			LC - Linger Color, changes color when the particle is dying
 			BC - Birth Color, changes color at the start
-			Main Color - Main particle color`,
+			Main Color - Main particle color
+			BM - Blend moded, changes how particle color is being applied to particle
+			D - is particle disabled?`,
 	});
 }
 
