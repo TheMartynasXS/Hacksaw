@@ -304,7 +304,6 @@ class SampleDB {
 	}
 
 	add(Palette) {
-
 		this.obj.push(
 			{
 				Name: `untitled ${this.obj.length + 1}`,

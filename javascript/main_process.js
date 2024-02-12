@@ -56,7 +56,6 @@ app.whenReady().then(() => {
         fs.writeFileSync(xRGBAPath, "[]", "utf8")
     }
     if (!fs.existsSync(PrefsPath) || Prefs?.RitoBinPath == undefined || Prefs?.RitoBinPath?.length == 0) {
-        fs.writeFileSync(PrefsPath, DefaultPreferences, "utf8")
         let button = dialog.showMessageBoxSync(null, {
             type: "warning",
             title: "Ritobin Missing",
@@ -70,7 +69,7 @@ app.whenReady().then(() => {
                 filters: [{ name: "ritobin_cli", extensions: ["exe"] }],
                 properties: ["openFile"],
             })[0]
-
+            fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
         }
         else {
             fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");

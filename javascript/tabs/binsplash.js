@@ -586,7 +586,6 @@ function LoadFile(SkipAlert = true) {
 						}
 						Emitter.appendChild(BlendMode);
 
-						//!enabled
 						let disabled = document.createElement("input");
 						disabled.type = "checkbox";
 						disabled.className = `CheckBox Disable`;
