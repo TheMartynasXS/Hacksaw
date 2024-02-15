@@ -10,3 +10,4 @@ dist/
 ./yarn-error.log
 skin0.json
 package-lock.json
+javascript/hashes.json
