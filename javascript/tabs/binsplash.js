@@ -5,6 +5,7 @@ const {
 	CreateMessage,
 	Sleep,
 } = require("../javascript/utils.js");
+
 const KEYS = require("../javascript/keys.json");
 
 const { execSync } = require("child_process");
@@ -338,7 +339,7 @@ async function OpenBin(skip = false) {
 		await ToJson();
 	}
 
-	File = JSON.parse(fs.readFileSync(FilePath.slice(0, -4) + ".json", "utf-8"));
+	JsonFile = JSON.parse(fs.readFileSync(FilePath.slice(0, -4) + ".json", "utf-8"));
 
 	LoadFile();
 	FileCache = [];
@@ -347,10 +348,10 @@ async function OpenBin(skip = false) {
 function LoadFile(SkipAlert = true) {
 	ParticleList.innerText = "";
 	let Relative = "";
-	for (let i = 0; i < File.linked.value.items.length; i++) {
-		Relative += `${File.linked.value.items[i]}\n`;
+	for (let i = 0; i < JsonFile.linked.value.items.length; i++) {
+		Relative += `${JsonFile.linked.value.items[i]}\n`;
 	}
-	let Container = File.entries.value.items;
+	let Container = JsonFile.entries.value.items;
 	if (!/(122655197|Materials)/i.test(JSON.stringify(Container))) {
 		CreateMessage({
 			type: "warning",
@@ -361,6 +362,7 @@ function LoadFile(SkipAlert = true) {
 	}
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
 		if (Container[PO_ID].value.name == KEYS.Definitions.vfx) {
+
 			ParticleName =
 				Container[PO_ID].value.items.find((item) => {
 					if (item.key == KEYS.Props.particleName) {
@@ -616,8 +618,9 @@ function LoadFile(SkipAlert = true) {
 			}
 			ParticleList.appendChild(ParticleDiv);
 		} else if (Container[PO_ID].value.name == KEYS.Definitions.staticMat) {
+
 			//! temporarily disabling until fixed
-			continue;
+			// continue;
 			//!
 			MaterialName =
 				"Materials/" +
@@ -630,6 +633,7 @@ function LoadFile(SkipAlert = true) {
 						.value.split("/")
 						.pop() ?? `unknown ${PO_ID}`;
 
+						
 			let MaterialDiv = document.createElement("div");
 			MaterialDiv.id = Container[PO_ID].key;
 			MaterialDiv.className = "Material-Div";
@@ -710,16 +714,24 @@ function LoadFile(SkipAlert = true) {
 				// 	item => item.key == KEYS.MatProps.params)
 				// console.log(DynProps[B])
 				Emitter.appendChild(Title);
+				
 				if (DynProps[B].key == KEYS.MatProps.params) {
-					console.log(DynProps[B].value.items[0].items);
-
 					Title.innerText +=
 						DynProps[B].value.items[0].items[
 							DynProps[B].value.items[0].items.findIndex(
-								(item) => item.key == KEYS.MatProps.tintColor
+								(item) => item.key == KEYS.MatProps.name
 							)
 						].value;
-					let TCID;
+					let vID = DynProps[B].value.items[0].items.findIndex(item => item.key == KEYS.MatProps.driver)
+					let values = DynProps[B].value.items[0].items[vID].value.items
+
+					let elID = values.findIndex(item => item.key == KEYS.MatProps.elements)
+					let elements = values[elID].value.items
+
+					let defID = values.findIndex(item => item.key == KEYS.MatProps.defaultValue)
+					let defaults = values[defID].value.items
+					console.log(elements)
+					console.log(defaults)
 					// let MainColorDiv = document.createElement("div")
 					// const MCColor = GetColor(DynProps[MCID])
 					// MCBG = ToBG(MCColor)
@@ -1300,7 +1312,7 @@ function RecolorSelected() {
 	}
 }
 async function FromBin() {
-	if (File == undefined) {
+	if (JsonFile == undefined) {
 		return;
 	}
 	let OldFilePath = ipcRenderer.sendSync("FileSelect", [
@@ -1319,7 +1331,7 @@ async function FromBin() {
 		fs.readFileSync(OldFilePath.slice(0, -4) + ".json", "utf-8")
 	);
 	let OldContainer = OldFile.entries.value.items;
-	let Container = File.entries.value.items;
+	let Container = JsonFile.entries.value.items;
 	for (let PO_ID = 0; PO_ID < OldContainer.length; PO_ID++) {
 		if (OldContainer[PO_ID].value.name == KEYS.Definitions.vfx) {
 			let NewId = Container.findIndex(
@@ -1425,7 +1437,7 @@ async function FromBin() {
 
 function Undo() {
 	if (FileCache.length > 0) {
-		File = _.cloneDeep(FileCache.pop());
+		JsonFile = _.cloneDeep(FileCache.pop());
 		LoadFile(true);
 	}
 	document.getElementById("CheckToggle").checked = false;
