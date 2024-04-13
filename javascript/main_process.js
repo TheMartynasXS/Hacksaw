@@ -7,26 +7,28 @@ const Open = require("open");
 const fs = require("fs");
 const { execSync, exec } = require("child_process");
 
+
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json")
 
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json")
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json")
 
-// let Prefs = fs.existsSync(PrefsPath)
-//     ? JSON.parse(fs.readFileSync(PrefsPath))
-//     : {
-//         PreferredMode: "random",
-//         IgnoreBW: true,
-//         RitoBinPath: "",
-//         Targets: [true, true, true, true, true],
-//         Regenerate: false,
-//     };
-// let Samples = fs.existsSync(SamplesPath)
-//     ? JSON.parse(fs.readFileSync(SamplesPath))
-//     : [];
-// let xRGBA = fs.existsSync(xRGBAPath)
-//     ? JSON.parse(fs.readFileSync(xRGBAPath))
-//     : [];
+let Prefs = fs.existsSync(PrefsPath)
+    ? JSON.parse(fs.readFileSync(PrefsPath))
+    : {
+        PreferredMode: "random",
+        IgnoreBW: true,
+        RitoBinPath: "",
+        Targets: [true, true, true, true, true],
+        Regenerate: false,
+    };
+let Samples = fs.existsSync(SamplesPath)
+    ? JSON.parse(fs.readFileSync(SamplesPath))
+    : [];
+let xRGBA = fs.existsSync(xRGBAPath)
+    ? JSON.parse(fs.readFileSync(xRGBAPath))
+    : [];
+
 let mainWindow
 const createWindow = (htmlDir) => {
     mainWindow = new BrowserWindow({
@@ -99,13 +101,13 @@ app.whenReady().then(() => {
 //     xRGBA = JSON.parse(arg);
 // });
 
-// app.setAppUserModelId("Hacksaw " + app.getVersion());
-// app.on("window-all-closed", () => {
-//     fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
-//     fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
-//     fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
-//     app.quit();
-// });
+app.setAppUserModelId("Hacksaw " + app.getVersion());
+app.on("window-all-closed", () => {
+    // fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
+    // fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
+    // fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
+    app.quit();
+});
 
 // const DefaultPreferences = JSON.stringify(
 //     {
@@ -232,19 +234,19 @@ app.whenReady().then(() => {
 // });
 
 
-let binPath = ""
-let binContent = {}
+let binPath = ""//isDev ? "C:\\Users\\mxs\\Desktop\\Jhin.wad.client\\data\\characters\\jhin\\skins\\skin5" : ""
+let binData = ""//isDev ? JSON.parse(fs.readFileSync("C:\\Users\\mxs\\Desktop\\Jhin.wad.client\\data\\characters\\jhin\\skins\\skin5.json")) : {}
 
 function ToJson(FilePath) {
     if (isDev) {
-        execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}.bin"`)
+        execSync(`"${Prefs.RitoBinPath}" -o json "${FilePath}.bin"`)
     }
     else {
-        execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}.bin" -k`)
+        execSync(`"${Prefs.RitoBinPath}" -o json "${FilePath}.bin" -k`)
     }
 }
 function ToBin(FilePath) {
-    execSync(`"${Prefs.obj.RitoBinPath}" -o bin "${FilePath}.json"`)
+    execSync(`"${Prefs.RitoBinPath}" -o bin "${FilePath}.json"`)
 }
 
 
@@ -254,18 +256,73 @@ ipcMain.handle('open-bin', async (event) => {
             filters: [{ name: "bin", extensions: ["bin"], multiSelections: false}],
             properties: ["openFile"],
         })
-    if (result.filePaths) {
+    if (result.filePaths[0] != undefined) {
         binPath = result.filePaths[0].slice(0, -4)
-    
+
         if (!fs.existsSync(`${binPath}.json`)) {
             ToJson(binPath)
         }
-        binContent = JSON.parse(fs.readFileSync(`${binPath}.json`))
+        binData = JSON.parse(fs.readFileSync(`${binPath}.json`))
         
-        return { "path": binPath, "content": binContent }
+        return { "path": binPath, "data": binData }
     }
 })
+ipcMain.handle('save-bin', async (event, content) => {
+    fs.writeFileSync(`${binPath}.json`, JSON.stringify(content, null, 2))
+    ToBin(binPath)
+})
+
+const {XXHash32,XXHash64} = require('xxhash-addon')
 
 ipcMain.handle('merge-bin', async (event) => {
-    
+    if (binPath == ""){return 0}
+    let match = binPath.match(/\.wad(\.client)?/)
+    let wadPath = binPath.split(match[0])[0]+match[0]
+    let newLinked = []
+    for(let i = 0; i < binData.linked.value.items.length; i++) {
+        let item = binData.linked.value.items[i]
+        
+        if (item.includes("Characters")){
+            newLinked.push(item)
+            continue
+        }
+        let unhashed = path.join(wadPath, item)
+        let hashed = path.join(wadPath, Hash(wadPath, item)+".bin")
+        let tempFile
+        if(fs.existsSync(unhashed)){
+            ToJson(unhashed.slice(0, -4))
+            tempFile = JSON.parse(fs.readFileSync(unhashed.slice(0, -4)+".json"))
+        }
+        else if(fs.existsSync(hashed)) {
+            ToJson(hashed.slice(0, -4))
+            tempFile = JSON.parse(fs.readFileSync(hashed.slice(0, -4)+".json"))
+        }
+        else{
+            continue;
+        }
+        tempFile.entries.value.items
+        let donor = tempFile.entries.value.items
+        for( let j = 0; j < donor.length; j++) {
+            if (!IsValue("ContextualActionData", donor[j].value.name) && 
+                findIndex(binData.entries.value.items,(item)=>{
+                    item.key == donor[j].key
+                }) < 0){
+                binData.entries.value.items.push(donor[j])
+            }
+        }
+    }
+    binData.linked.value.items = newLinked
+    fs.writeFileSync(`${binPath}.json`, JSON.stringify(binData, null, 2))
+    ToBin(binPath)
 })
+
+const fnv1a = require('fnv1a');
+const { findIndex } = require("lodash");
+
+function Hash(bin){
+    return XXHash64.hash(Buffer.from(bin.toLowerCase())).toString('hex')
+}
+function IsValue(expected, value){
+    return expected == value
+    || fnv1a(expected) == fnv1a(value)
+}

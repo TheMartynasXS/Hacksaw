@@ -48,9 +48,11 @@
   "dependencies": {
     "electron-color-picker": "^0.2.0",
     "electron-is-dev": "^2.0.0",
+    "fnv1a": "^1.1.1",
     "lodash": "^4.17.21",
     "open": "^8.4.0",
-    "path-sort": "^0.1.0"
+    "path-sort": "^0.1.0",
+    "xxhash-addon": "^2.0.3"
   },
   "devDependencies": {
     "electron": "^26.2.1",

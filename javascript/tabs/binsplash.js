@@ -6,3 +6,10 @@ function OpenBin(){
         console.log(result)
     })
 }
+
+function MergeBin(){
+    // Merge the bin file
+    ipcRenderer.invoke('merge-bin').then((result) => {
+        console.log(result)
+    })
+}
