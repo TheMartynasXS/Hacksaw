@@ -116,6 +116,11 @@ const DefaultPreferences = JSON.stringify(
     }
     , null, 4)
 
+ipcMain.on("ChangeTab", (event, arg) => {
+    mainWindow.loadFile(path.join(__dirname, "../html/"+arg));
+    event.returnValue = "done";
+})
+
 ipcMain.on("FileSelect", (event, arg) => {
     if (arg[1] == "Bin") {
         dialog

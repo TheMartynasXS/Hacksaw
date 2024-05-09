@@ -1,4 +1,8 @@
-const { Tab } = require("../javascript/utils.js");
+// const { Tab } = require("../javascript/utils.js");
+function Tab(link,filesaved = true){
+		ipcRenderer.send("ChangeTab",link)
+}
+
 const {
 	Prefs,
 	Samples,
@@ -15,6 +19,24 @@ const _ = require("lodash");
 const fs = require("fs");
 
 const { ColorHandler, GetColor, ToBG } = require("../javascript/colors.js");
+
+const fnv1a = require('fnv1a');
+
+Object.defineProperty(String.prototype, "check", {
+	value: function (expected) {
+		return expected == this || fnv1a(expected.toLowerCase()) == this
+	},
+	enumerable: false,
+});
+// Object.defineProperty(String.prototype, "fnv1a", {
+// 	value: function () {
+// 		return fnv1a(this.toLowerCase())
+// 	},
+// 	enumerable: false,
+// });
+tempvalue = "ValueColor";
+
+console.log(tempvalue.check("ValueColor"));
 
 let FileCache = [];
 let FileSaved = true;
@@ -34,55 +56,12 @@ let SAT = document.getElementById("Sat");
 let LIGHT = document.getElementById("Light");
 
 T1.checked = Prefs.obj.Targets[0];
-T2.checked = Prefs.obj.Targets[1];
-T3.checked = Prefs.obj.Targets[2];
-T4.checked = Prefs.obj.Targets[3];
-T5.checked = Prefs.obj.Targets[4];
-
-T1.addEventListener("change", (Event) => {
-	Prefs.Targets([
-		Event.target.checked,
-		T2.checked,
-		T3.checked,
-		T4.checked,
-		T5.checked,
-	]);
-});
-T2.addEventListener("change", (Event) => {
-	Prefs.Targets([
-		T1.checked,
-		Event.target.checked,
-		T3.checked,
-		T4.checked,
-		T5.checked,
-	]);
-});
-T3.addEventListener("change", (Event) => {
-	Prefs.Targets([
-		T1.checked,
-		T2.checked,
-		Event.target.checked,
-		T4.checked,
-		T5.checked,
-	]);
-});
-T4.addEventListener("change", (Event) => {
-	Prefs.Targets([
-		T1.checked,
-		T2.checked,
-		T3.checked,
-		Event.target.checked,
-		T5.checked,
-	]);
-});
-T5.addEventListener("change", (Event) => {
-	Prefs.Targets([
-		T1.checked,
-		T2.checked,
-		T3.checked,
-		T4.checked,
-		Event.target.checked,
-	]);
+[T1, T2, T3, T4, T5].forEach((T, index) => {
+	T.addEventListener("change", (Event) => {
+		const targets = [T1.checked, T2.checked, T3.checked, T4.checked, T5.checked];
+		targets[index] = Event.target.checked;
+		Prefs.Targets(targets);
+	});
 });
 
 let BlankDynamic = `{"key":"3154345447","type":"pointer","value":{"items":[{"key":"1567157941","type":"list","value":{"items":[],"valueType":"f32"}},{"key":"877087803","type":"list","value":{"items":[],"valueType":"vec4"}}],"name":"1128908277"}}`;
@@ -284,6 +263,17 @@ function ColorShift() {
 	HUE.value;
 	MapPalette();
 }
+
+function Inverse(){
+	for (let i = 0; i < Palette.length; i++) {
+		let inverse = [1-Palette[i].vec4[0], 1-Palette[i].vec4[1], 1-Palette[i].vec4[2], Palette[i].vec4[3]]
+		console.log(Palette[i].vec4)
+		console.log(inverse)
+		Palette[i].InputVec4(inverse)
+	}
+	MapPalette();
+}
+
 function ChangeColorCount(Count) {
 	let TempLenght = parseInt(Palette.length);
 	if (TempLenght < Count) {
@@ -606,7 +596,7 @@ function LoadFile(SkipAlert = true) {
 						}
 						disabled.onchange = (Event) =>{
 							PropItems[DID].value = Event.target.checked
-							console.log(PropItems[DID].value)
+							console.log(Event.target.checked)
 						}
 						Emitter.appendChild(disabled);
 
@@ -714,7 +704,7 @@ function LoadFile(SkipAlert = true) {
 				// 	item => item.key == KEYS.MatProps.params)
 				// console.log(DynProps[B])
 				Emitter.appendChild(Title);
-				
+				console.log(DynProps[B])
 				if (DynProps[B].key == KEYS.MatProps.params) {
 					Title.innerText +=
 						DynProps[B].value.items[0].items[
@@ -1159,11 +1149,11 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 
 function RecolorSelected() {
 	FileSaved = false;
-	FileCache.push(JSON.parse(JSON.stringify(File)));
+	FileCache.push(JSON.parse(JSON.stringify(JsonFile)));
 	if (FileCache.length > 10) {
 		FileCache.shift();
 	}
-	let Container = File.entries.value.items;
+	let Container = JsonFile.entries.value.items;
 
 	for (let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++) {
 		let Index = Container.findIndex(
@@ -1319,7 +1309,7 @@ async function FromBin() {
 		"Select Bin to take colors from",
 		"Bin",
 	]);
-	FileCache.push(_.cloneDeep(File));
+	FileCache.push(_.cloneDeep(JsonFile));
 
 	if (
 		fs.existsSync(OldFilePath.slice(0, -4) + ".json") == false ||
@@ -1447,7 +1437,7 @@ function Undo() {
 async function SaveBin() {
 	fs.writeFileSync(
 		FilePath.slice(0, -4) + ".json",
-		JSON.stringify(File, null, 2),
+		JSON.stringify(JsonFile, null, 2),
 		"utf8"
 	);
 	await ToBin();
