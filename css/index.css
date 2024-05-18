@@ -978,3 +978,8 @@ div.dropdown:hover{
 .Confirm-2 {
   outline: var(--gap) solid var(--accent-failure);
 }
+option,
+select{
+  text-overflow: ellipsis;
+  width: 100%;
+}

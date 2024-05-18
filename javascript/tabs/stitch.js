@@ -18,8 +18,6 @@ let DonorFile
 
 let FileSaved = true;
 
-let FileCache = [];
-
 let TargetList = document.getElementById("Target-Container")
 let DonorList = document.getElementById("Donor-Container")
 
@@ -30,19 +28,16 @@ function Undo() {
 	}
 }
 
-
 function OpenTargetBin() {
-	TargetPath = ipcRenderer.sendSync("FileSelect", [
-		"Select Bin to edit",
-		"Bin",
-	]);
+	let result = ipcRenderer.sendSync("OpenBin")
+
+	TargetPath = result.Path
+
 	if (TargetPath == undefined) {
 		return 0;
 	}
-	if (fs.existsSync(TargetPath.slice(0, -4) + ".json") == false) {
-		ToJson(TargetPath);
-	}
-	TargetFile = JSON.parse(fs.readFileSync(TargetPath.slice(0, -4) + ".json", "utf-8"))
+	
+	TargetFile = result.File;
 
 	document.getElementById("TargetPath").innerText = TargetPath.split(".wad.client\\").pop()
 	RenderTarget();
@@ -394,4 +389,11 @@ function ClearSelection() {
 let Active = null
 function RadioSelect(Target) {
 	Active = UTIL.GetChildIndex(Target.parentNode.parentNode)
+}
+
+let temp = ipcRenderer.sendSync("PullBin");
+TargetFile = temp.File;
+TargetPath = temp.Path;
+if (temp.Path != "") {
+	RenderTarget();
 }

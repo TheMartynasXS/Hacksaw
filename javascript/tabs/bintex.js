@@ -59,12 +59,14 @@ async function SelectWadFolder(Path = undefined) {
 
   Progress.max = BinFiles.length
   for (let i = 0; i < BinFiles.length; i++) {
-    ToJson(BinFiles[i])
-    BinCount.innerText = `Converting Bins - ${Progress.value}/${Progress.max}`
-    await sleep(10)
-    Progress.value = i + 1
+    // ToJson(BinFiles[i])
+    // BinCount.innerText = `Converting Bins - ${Progress.value}/${Progress.max}`
+    // await sleep(10)
+    // Progress.value = i + 1
   }
 
+  ipcRenderer.send("Bin2Json", WadPath)
+  
   BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".btx"))
   Progress.classList.add('Progress-Complete')
 

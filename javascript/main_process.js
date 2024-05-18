@@ -5,12 +5,15 @@ const { dialog } = require("electron");
 const isDev = require("electron-is-dev");
 const Open = require("open");
 const fs = require("fs");
+// const diffpatch = require("jsondiffpatch");
+const { execSync, exec } = require("child_process");
 
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json")
 
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json")
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json")
 
+//#region variables
 let Prefs = fs.existsSync(PrefsPath)
     ? JSON.parse(fs.readFileSync(PrefsPath))
     : {
@@ -20,12 +23,17 @@ let Prefs = fs.existsSync(PrefsPath)
         Targets: [true, true, true, true, true],
         Regenerate: false,
     };
+
 let Samples = fs.existsSync(SamplesPath)
     ? JSON.parse(fs.readFileSync(SamplesPath))
     : [];
 let xRGBA = fs.existsSync(xRGBAPath)
     ? JSON.parse(fs.readFileSync(xRGBAPath))
     : [];
+let FileCache = [];
+let currentFile = {};
+let FilePath = "";
+//#endregion
 let mainWindow
 const createWindow = (htmlDir) => {
     mainWindow = new BrowserWindow({
@@ -212,4 +220,86 @@ ipcMain.on("Message", (event, props = { title: "untitled", message: "unknownerro
             )
             break;
     }
+});
+
+ipcMain.on("Bin2Json", (event, path) => {
+    if (path.endsWith(".bin") && fs.existsSync(path) && fs.existsSync(path.slice(0,-4) + ".json") && Prefs.Regenerate) {
+        execSync(`"${Prefs.RitoBinPath}" -o json "${FilePath}" ${isDev ? "" : "-k"}`);
+    }
+    else if (fs.lstatSync(path).isDirectory() && fs.existsSync(path) && path.includes(".wad")) {
+        execSync(`"${Prefs.RitoBinPath}" -i bin -o json "${path}" ${isDev ? "" : "-k"}`);
+    }
+    event.returnValue = 0;
+});
+
+ipcMain.on("Json2Bin", (event, path) => {
+    if (path.endsWith(".json") && fs.existsSync(path) && path.includes(".wad")) {
+        execSync(`"${Prefs.RitoBinPath}" -o bin "${path}" ${isDev ? "" : "-k"}`);
+    }
+    else if (fs.lstatSync(path).isDirectory() && fs.existsSync(path) && path.includes(".wad")) {
+        execSync(`"${Prefs.RitoBinPath}" -i json -o bin "${path}" ${isDev ? "" : "-k"}`);
+    }
+    event.returnValue = 0;
+});
+
+
+ipcMain.on("OpenBin", (event) => {
+    FileCache = [];
+    try {
+        FilePath = dialog.showOpenDialogSync(
+            {
+                title: "Select Bin",
+                filters: [{ name: "bin", extensions: ["bin"] }],
+                properties: ["openFile"],
+                message: "Select a bin file",
+            }
+        )[0]
+    } catch (error) {
+        event.returnValue = error;
+    }
+    
+    if (fs.existsSync(FilePath.slice(0, -4) + ".json") && Prefs.Regenerate ||
+        !fs.existsSync(FilePath.slice(0, -4) + ".json") ){
+        execSync(`"${Prefs.RitoBinPath}" -o json "${FilePath}" ${isDev ? "" : "-k"}`);
+        
+    }
+    
+    currentFile = JSON.parse(fs.readFileSync(FilePath.slice(0, -4) + ".json"),null,2);
+    event.returnValue = {
+        Path: FilePath,
+        File: currentFile
+    };
+})
+
+ipcMain.on("PushHistory", (event, arg) => {
+    FileCache.push(arg);
+    event.returnValue = 0;
+});
+ipcMain.on("PopHistory", (event) => {
+    if (FileCache.length > 0) {
+        currentFile = FileCache.pop()
+        event.returnValue = {
+            Path: FilePath,
+            File: currentFile
+        };
+    }
+    else {
+        event.returnValue = 0;
+    }
+});
+ipcMain.on("PullBin", (event) => {
+    event.returnValue = {
+        Path: FilePath,
+        File: currentFile
+    };
+});
+ipcMain.on("UpdateBin", (event, arg) => {
+    currentFile = arg;
+    event.returnValue = 0;
+});
+
+ipcMain.on("SaveBin", (event) => {
+    fs.writeFileSync(arg[0].slice(0, -4) + ".json", JSON.stringify(FilePath, null, 2));
+    execSync(`"${Prefs.RitoBinPath}" -o bin "${arg[0].slice(0, -4) + ".json"}"}`);
+    event.returnValue = 0;
 });

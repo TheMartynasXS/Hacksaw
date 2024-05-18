@@ -1,20 +1,20 @@
-// const { Tab } = require("../javascript/utils.js");
-function Tab(link,filesaved = true){
-		ipcRenderer.send("ChangeTab",link)
-}
+const { ipcRenderer, ipcMain } = require("electron");
 
 const {
+	Tab,
 	Prefs,
 	Samples,
 	CreateMessage,
 	Sleep,
 } = require("../javascript/utils.js");
 
+let FileSaved = true;
+
 const KEYS = require("../javascript/keys.json");
 
 const { execSync } = require("child_process");
 const { getColorHexRGB } = require("electron-color-picker");
-const { ipcRenderer } = require("electron");
+
 const _ = require("lodash");
 const fs = require("fs");
 
@@ -28,22 +28,14 @@ Object.defineProperty(String.prototype, "check", {
 	},
 	enumerable: false,
 });
-// Object.defineProperty(String.prototype, "fnv1a", {
-// 	value: function () {
-// 		return fnv1a(this.toLowerCase())
-// 	},
-// 	enumerable: false,
-// });
+
 tempvalue = "ValueColor";
-
-console.log(tempvalue.check("ValueColor"));
-
-let FileCache = [];
-let FileSaved = true;
 
 let RecolorMode = document.getElementById("Mode");
 let RecolorTarget = document.getElementById("Target");
 RecolorMode.value = Prefs.obj.PreferredMode;
+let ActiveFile = {};
+
 
 let T1 = document.getElementById("T1");
 let T2 = document.getElementById("T2");
@@ -73,7 +65,7 @@ let ColorContainer = document.getElementById("Color-Container");
 let GradientIndicator = document.getElementById("Gradient-Indicator");
 // let OpacityContainer = document.getElementById("Opacity-Container");
 let ParticleList = document.getElementById("Particle-List");
-// let SampleContainer = document.getElementById("SampleContainer");
+// // let SampleContainer = document.getElementById("SampleContainer");
 
 window.onerror = function (msg, file, lineNo, columnNo) {
 	ipcRenderer.send("Message", {
@@ -82,6 +74,7 @@ window.onerror = function (msg, file, lineNo, columnNo) {
 		message: msg,
 	});
 };
+
 ChangeMode(RecolorMode.value);
 function ChangeMode(mode) {
 	switch (mode) {
@@ -209,6 +202,7 @@ function CreatePicker(Target, PaletteIndex) {
 		CreatePicker(Target, PaletteIndex);
 	}
 }
+
 function ReverseSample() {
 	let timeArray = [];
 	for (let i = 0; i < Palette.length; i++) {
@@ -293,55 +287,28 @@ function ChangeColorCount(Count) {
 }
 async function OpenBin(skip = false) {
 	document.getElementById("CheckToggle").checked = false;
-	if (FileSaved != true) {
-		CreateMessage(
-			{
-				type: "warning",
-				buttons: ["Open Bin", "Cancel"],
-				title: "File not saved",
-				message:
-					"You may have forgotten to save your bin.\nSave before proceeding please.",
-			},
-			async () => {
-				FileSaved = true;
-				await OpenBin();
-			}
-		);
-		FileSaved = true;
+
+	let result = ipcRenderer.sendSync("OpenBin")
+	
+
+	if (result == undefined) {
 		return 0;
-	}
-	if (!skip) {
-		FilePath = ipcRenderer.sendSync("FileSelect", [
-			"Select Bin to edit",
-			"Bin",
-		]);
 	}
 
-	if (FilePath == undefined) {
-		return 0;
-	}
 	document.getElementById("Title").innerText =
-		FilePath.split(".wad.client\\").pop();
-	if (
-		fs.existsSync(FilePath.slice(0, -4) + ".json") == false ||
-		Prefs.Regenerate
-	) {
-		await ToJson();
-	}
+		result.Path.split(".wad.client\\").pop();
 
-	JsonFile = JSON.parse(fs.readFileSync(FilePath.slice(0, -4) + ".json", "utf-8"));
-
+	ActiveFile = result.File;
 	LoadFile();
-	FileCache = [];
 }
 
 function LoadFile(SkipAlert = true) {
 	ParticleList.innerText = "";
 	let Relative = "";
-	for (let i = 0; i < JsonFile.linked.value.items.length; i++) {
-		Relative += `${JsonFile.linked.value.items[i]}\n`;
+	for (let i = 0; i < ActiveFile.linked.value.items.length; i++) {
+		Relative += `${ActiveFile.linked.value.items[i]}\n`;
 	}
-	let Container = JsonFile.entries.value.items;
+	let Container = ActiveFile.entries.value.items;
 	if (!/(122655197|Materials)/i.test(JSON.stringify(Container))) {
 		CreateMessage({
 			type: "warning",
@@ -1149,11 +1116,8 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 
 function RecolorSelected() {
 	FileSaved = false;
-	FileCache.push(JSON.parse(JSON.stringify(JsonFile)));
-	if (FileCache.length > 10) {
-		FileCache.shift();
-	}
-	let Container = JsonFile.entries.value.items;
+	ipcRenderer.send("PushHistory", ActiveFile);
+	let Container = ActiveFile.entries.value.items;
 
 	for (let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++) {
 		let Index = Container.findIndex(
@@ -1300,6 +1264,7 @@ function RecolorSelected() {
 			// let dynIndex = DefData.findIndex(index => item.key == KEYS.Definitions.dynMat)
 		}
 	}
+	ipcRenderer.send("UpdateBin", ActiveFile);
 }
 async function FromBin() {
 	if (JsonFile == undefined) {
@@ -1426,47 +1391,19 @@ async function FromBin() {
 }
 
 function Undo() {
-	if (FileCache.length > 0) {
-		JsonFile = _.cloneDeep(FileCache.pop());
-		LoadFile(true);
+	ActiveFile = ipcRenderer.sendSync("PopHistory").File;
+	if (ActiveFile == undefined) {
+		return;
 	}
+	
+	LoadFile(true);
 	document.getElementById("CheckToggle").checked = false;
 	FilterParticles(document.getElementById("Filter").value);
 }
 
 async function SaveBin() {
-	fs.writeFileSync(
-		FilePath.slice(0, -4) + ".json",
-		JSON.stringify(JsonFile, null, 2),
-		"utf8"
-	);
-	await ToBin();
+	ipcMain.send("SaveBin");
 	FileSaved = true;
-}
-
-async function ToJson() {
-	await Sleep(100);
-	execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" -k`);
-}
-
-async function ToBin() {
-	await Sleep(100);
-	try {
-		let res = execSync(
-			`"${Prefs.obj.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}"`
-		);
-		CreateMessage({
-			type: "info",
-			title: "File Saved Successfully",
-			message: "Don't forget to delete the json files.",
-		});
-	} catch (err) {
-		CreateMessage({
-			type: "error",
-			title: "Error Converting to bin",
-			message: "err.stderr.toString()",
-		});
-	}
 }
 
 function SaveSample() {
@@ -1478,3 +1415,10 @@ function OpenSampleWindow() {
 }
 
 ChangeColorCount(2);
+
+let temp = ipcRenderer.sendSync("PullBin");
+ActiveFile = temp.File;
+if (temp.Path != "") {
+	document.getElementById("Title").innerText = temp.Path.split(".wad.client\\").pop();
+	LoadFile(true);
+}

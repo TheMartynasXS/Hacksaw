@@ -5,7 +5,7 @@ const { ColorHandler, ToBG } = require('./colors.js');
 const { clipboard } = require('electron');
 const _ = require("lodash")
 
-async function Tab(Location, FileSaved = true) {
+async function Tab(Location) {
 	if (FileSaved == true) {
 		window.location.href = Location;
 	} else {
@@ -355,7 +355,11 @@ function getAllFiles(dir, files_) {
 	}
 	return files_;
 }
+function Tab(link,filesaved = true){
+	ipcRenderer.send("ChangeTab",link)
+}
 
 module.exports = {
+	
 	Tab, Prefs, Samples, Sleep, CreateMessage, getAllFiles
 }

@@ -49,6 +49,7 @@
     "electron-color-picker": "^0.2.0",
     "electron-is-dev": "^2.0.0",
     "fnv1a": "^1.1.1",
+    "jsondiffpatch": "^0.6.0",
     "lodash": "^4.17.21",
     "open": "^8.4.0",
     "path-sort": "^0.1.0",
