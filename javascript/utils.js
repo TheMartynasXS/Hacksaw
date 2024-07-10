@@ -21,6 +21,9 @@ async function Tab(Location) {
 	}
 }
 
+
+const fnv1a = require('fnv1a');
+
 const UserData = ipcRenderer.sendSync("UserPath")
 
 const PrefsPath = path.join(UserData, "UserPrefs.json")
@@ -359,7 +362,23 @@ function Tab(link,filesaved = true){
 	ipcRenderer.send("ChangeTab",link)
 }
 
+
+function extendPrototypes() {
+    Object.defineProperty(String.prototype, "fnv", {
+        value: function (expected) {
+            return expected.toLowerCase() == this.toLowerCase() || fnv1a(expected.toLowerCase()) == this;
+        },
+        enumerable: false,
+    });
+    Object.defineProperty(Number.prototype, "fnv", {
+        value: function (expected) {
+            return expected == this.toString() || fnv1a(expected.toString().toLowerCase()) == this;
+        },
+        enumerable: false,
+    });
+}
+
 module.exports = {
 	
-	Tab, Prefs, Samples, Sleep, CreateMessage, getAllFiles
+	extendPrototypes, Tab, Prefs, Samples, Sleep, CreateMessage, getAllFiles
 }

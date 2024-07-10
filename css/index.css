@@ -630,6 +630,19 @@ input[type="color"]::-webkit-color-swatch {
 .Saved-Color-Item {
   height: 1.6rem;
 }
+#ColorSwap > .Target-Container{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 2rem;
+  background-image: linear-gradient(90deg, var(--bg-100) calc(33% - 0.5rem), var(--bg-300) calc(33% - 0.5rem), var(--bg-300) calc(66% - 0.5rem), var(--bg-100) calc(66% - 0.5rem), var(--bg-100) 100%);
+}
+/* #ColorSwap > .Target-Container > .Input-Group:nth-child(3n+2){
+  background: var(--bg-300);
+  padding-inline: 1rem;
+} */
+
+
+
 
 .Material-Div,
 .Particle-Div {
@@ -981,5 +994,4 @@ div.dropdown:hover{
 option,
 select{
   text-overflow: ellipsis;
-  width: 100%;
 }

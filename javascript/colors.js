@@ -1,12 +1,13 @@
 function Clamp(num, min = 0, max = 1) { return Math.min(Math.max(num, min), max); }
 let x = Math.random
+
 function GetColor(Property) {
     if (/vec4/i.test(Property?.type)) return [new ColorHandler(Property.value)]
 
-    let DynID = Property?.findIndex(item => item.key == 3154345447)
-    let ConstID = Property?.findIndex(item => item.key == 3031705514)
+    let DynID = Property?.findIndex(item => item.key.fnv("dynamics"))
+    let ConstID = Property?.findIndex(item => item.key.fnv("constantValue"))
     if (DynID >= 0) {
-        let ProbTableID = Property[DynID].value.items.findIndex(item => item.key == 2802337561)
+        let ProbTableID = Property[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
         if (ProbTableID >= 0) Property[DynID].value.items.shift()
     }
     let Palette = []

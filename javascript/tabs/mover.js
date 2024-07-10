@@ -12,8 +12,6 @@ let BinCount = document.getElementById('Bin-Count')
 
 let UnusedButton = document.getElementById('Delete-Unused')
 
-
-
 let AllFiles;
 let JsonFiles = [];
 let WadPath = "";
@@ -50,15 +48,14 @@ function OpenLocation() {
     RedirectList.innerText = Origin.replace(pathRegExp, (match) => { return NewPath.split(".wad.client/").pop() + match.split("/").pop() })
 }
 
-
 async function SelectWadFolder(Path = undefined) {
     RedirectList.innerText = ""
-    WadPath = ipcRenderer.sendSync("FileSelect", [
+    WadPath = Path == undefined? ipcRenderer.sendSync("FileSelect", [
         "Select wad folder",
         "Folder",
-    ])[0];
+    ])[0]: Path;
     AllFiles = new Set();
-    if (!fs.existsSync(WadPath) || !WadPath.toLowerCase().endsWith(".wad.client")) {
+    if (!fs.existsSync(WadPath) || !(WadPath.toLowerCase().endsWith(".wad.client") || WadPath.toLowerCase().endsWith(".wad"))) {
         CreateMessage({
             type: "info",
             title: "Error",

@@ -6,6 +6,7 @@ const {
 	Samples,
 	CreateMessage,
 	Sleep,
+	extendPrototypes,
 } = require("../javascript/utils.js");
 
 let FileSaved = true;
@@ -22,12 +23,7 @@ const { ColorHandler, GetColor, ToBG } = require("../javascript/colors.js");
 
 const fnv1a = require('fnv1a');
 
-Object.defineProperty(String.prototype, "check", {
-	value: function (expected) {
-		return expected == this || fnv1a(expected.toLowerCase()) == this
-	},
-	enumerable: false,
-});
+extendPrototypes();
 
 tempvalue = "ValueColor";
 
@@ -261,8 +257,6 @@ function ColorShift() {
 function Inverse(){
 	for (let i = 0; i < Palette.length; i++) {
 		let inverse = [1-Palette[i].vec4[0], 1-Palette[i].vec4[1], 1-Palette[i].vec4[2], Palette[i].vec4[3]]
-		console.log(Palette[i].vec4)
-		console.log(inverse)
 		Palette[i].InputVec4(inverse)
 	}
 	MapPalette();
@@ -289,7 +283,6 @@ async function OpenBin(skip = false) {
 	document.getElementById("CheckToggle").checked = false;
 
 	let result = ipcRenderer.sendSync("OpenBin")
-	
 
 	if (result == undefined) {
 		return 0;
@@ -299,6 +292,7 @@ async function OpenBin(skip = false) {
 		result.Path.split(".wad.client\\").pop();
 
 	ActiveFile = result.File;
+	console.log(ActiveFile)
 	LoadFile();
 }
 
@@ -309,20 +303,13 @@ function LoadFile(SkipAlert = true) {
 		Relative += `${ActiveFile.linked.value.items[i]}\n`;
 	}
 	let Container = ActiveFile.entries.value.items;
-	if (!/(122655197|Materials)/i.test(JSON.stringify(Container))) {
-		CreateMessage({
-			type: "warning",
-			title: "warning",
-			message: `No color values found\nCheck other bins.\n${Relative}`,
-		});
-		return 0;
-	}
+	
 	for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
-		if (Container[PO_ID].value.name == KEYS.Definitions.vfx) {
+		if (Container[PO_ID].value.name.fnv("VfxSystemDefinitionData")) {
 
 			ParticleName =
 				Container[PO_ID].value.items.find((item) => {
-					if (item.key == KEYS.Props.particleName) {
+					if (item.key.fnv("particleName")) {
 						return item;
 					}
 				}).value ?? `unknown ${PO_ID}`;
@@ -336,46 +323,48 @@ function LoadFile(SkipAlert = true) {
             </div>`;
 			let DefData = Container[PO_ID].value.items.filter(
 				(item) =>
-					item.key == KEYS.Definitions.complex ||
-					item.key == KEYS.Definitions.simple
+					item.key.fnv("complexEmitterDefinitionData") ||
+					item.key.fnv("simpleEmitterDefinitionData")
 			);
 			for (let B = 0; B < DefData.length; B++) {
 				let DefDataDiv = document.createElement("div");
 				DefDataDiv.className = "DefDataDiv";
 				ParticleDiv.appendChild(DefDataDiv);
 				if (
-					DefData[B].key == KEYS.Definitions.complex ||
-					DefData[B].key == KEYS.Definitions.simple
+					DefData[B].key.fnv("complexEmitterDefinitionData") ||
+					DefData[B].key.fnv("simpleEmitterDefinitionData")
 				) {
 					let Props = DefData[B].value.items;
 					for (let C = 0; C < Props.length; C++) {
 						let PropItems = Props[C].items;
-
+						
 						let RDID = PropItems?.findIndex(
-							(item) => item.key == KEYS.Definitions.reflection
+							(item) => item.key.fnv("reflectionDefinition")
 						);
+						
 						let RDProp = PropItems[RDID]?.value.items;
 
 						let OFCID = RDProp?.findIndex(
-							(item) => item.key == KEYS.Props.fresnelColor
+							(item) => item.key.fnv("fresnelColor")
 						); // Outline Fresnel Color
 						let RFCID = RDProp?.findIndex(
-							(item) => item.key == KEYS.Props.reflectionColor
+							(item) => item.key.fnv("reflectionFresnelColor")
 						); // Reflective Fresnel Color
+						
 						let LCID = PropItems?.findIndex(
-							(item) => item.key == KEYS.Props.lingerColor
+							(item) => item.key.fnv("Linger")
 						); // Linger Color
 						let BCID = PropItems?.findIndex(
-							(item) => item.key == KEYS.Props.birthColor
+							(item) => item.key.fnv("birthColor")
 						); // Birth Color
 						let MCID = PropItems?.findIndex(
-							(item) => item.key == KEYS.Props.color
+							(item) => item.key.fnv("color")
 						); // Main Color
 						let BMID = PropItems?.findIndex(
-							(item) => item.key == KEYS.Props.blendMode
+							(item) => item.key.fnv("blendMode")
 						); // Blend Mode
 						let DID = PropItems?.findIndex(
-							(item) => item.key == KEYS.Props.disabled
+							(item) => item.key.fnv("disabled")
 						)  // Disabled
 
 						let OFBG, RFBG, LCBG, BCBG, MCBG;
@@ -393,7 +382,7 @@ function LoadFile(SkipAlert = true) {
 						Title.innerText =
 							Props[C].items[
 								Props[C].items.findIndex(
-									(item) => item.key == KEYS.Props.emitterName
+									(item) => item.key.fnv("emitterName")
 								)
 							]?.value;
 						Emitter.appendChild(Title);
@@ -436,18 +425,18 @@ function LoadFile(SkipAlert = true) {
 
 						breakpoint: if (LCID >= 0) {
 							LDID = PropItems[LCID].value.items.findIndex(
-								(item) => item.key == KEYS.Props.lingerDriver
+								(item) => item.key.fnv(1803004106)
 							);
 							if (LDID < 0) break breakpoint;
 							let PropType = PropItems[LCID].value.items[LDID];
 							let DynID = PropType.value.items.findIndex(
-								(item) => item.key == KEYS.Definitions.dynamics
+								(item) => item.key.fnv("dynamics")
 							);
 							if (DynID >= 0) {
 								let ProbTableID = PropType.value.items[
 									DynID
 								].value.items.findIndex(
-									(item) => item.key == KEYS.Definitions.probability
+									(item) => item.key.fnv("probabilityTables")
 								);
 								if (ProbTableID >= 0)
 									PropType.value.items[DynID].value.items.shift();
@@ -473,11 +462,11 @@ function LoadFile(SkipAlert = true) {
 						if (BCID >= 0) {
 							let PropType = PropItems[BCID].value.items;
 							let DynID = PropType.findIndex(
-								(item) => item.key == KEYS.Definitions.dynamics
+								(item) => item.key.fnv("dynamics")
 							);
 							if (DynID >= 0) {
 								let ProbTableID = PropType[DynID].value.items.findIndex(
-									(item) => item.key == KEYS.Definitions.probability
+									(item) => item.key.fnv("probabilityTables")
 								);
 								if (ProbTableID >= 0) PropType[DynID].value.items.shift();
 							}
@@ -500,11 +489,11 @@ function LoadFile(SkipAlert = true) {
 						if (MCID >= 0) {
 							let PropType = PropItems[MCID].value.items;
 							let DynID = PropType?.findIndex(
-								(item) => item.key == KEYS.Definitions.dynamics
+								(item) => item.key.fnv("dynamics")
 							);
 							if (DynID >= 0) {
 								let ProbTableID = PropType[DynID].value.items.findIndex(
-									(item) => item.key == KEYS.Definitions.probability
+									(item) => item.key.fnv("probabilityTables")
 								);
 								if (ProbTableID >= 0) PropType[DynID].value.items.shift();
 							}
@@ -577,7 +566,7 @@ function LoadFile(SkipAlert = true) {
 		} else if (Container[PO_ID].value.name == KEYS.Definitions.staticMat) {
 
 			//! temporarily disabling until fixed
-			// continue;
+			continue;
 			//!
 			MaterialName =
 				"Materials/" +
@@ -711,7 +700,14 @@ function LoadFile(SkipAlert = true) {
 			ParticleList.appendChild(MaterialDiv);
 		}
 	}
-	MapPalette();
+	if (ParticleList.children.length == 0) {
+		CreateMessage({
+			type: "warning",
+			title: "warning",
+			message: `No color values found\nCheck other bins.\n${Relative}`,
+		});
+		return 0;
+	}
 }
 function ColorHelp() {
 	CreateMessage({
@@ -723,8 +719,8 @@ function ColorHelp() {
 			LC - Linger Color, changes color when the particle is dying
 			BC - Birth Color, changes color at the start
 			Main Color - Main particle color
-			BM - Blend moded, changes how particle color is being applied to particle
-			D - is particle disabled?`,
+			BM - Blend mode, changes how particle color is being applied to particle
+			ON - is particle enabled?`,
 	});
 }
 
@@ -809,6 +805,9 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 			case "semi-override":
 				NewColor = Palette[0].vec4;
 				break;
+			case "inverse":
+				NewColor = [1 - ColorProp.value[0], 1 - ColorProp.value[1], 1 - ColorProp.value[2], ColorProp.value[3]];
+				break;
 			case "shift":
 				NewColor = new ColorHandler(ColorProp.value);
 				NewColor.HSLShift(
@@ -835,10 +834,10 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 
 	let PropType = ColorProp.value.items;
 	let ConstID = PropType?.findIndex(
-		(item) => item.key == KEYS.Definitions.constant
+		(item) => item.key.fnv("constantValue")
 	);
 	let DynID = PropType?.findIndex(
-		(item) => item.key == KEYS.Definitions.dynamics
+		(item) => item.key.fnv("dynamics")
 	);
 	switch (RecolorMode.value) {
 		case "random":
@@ -887,10 +886,10 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 			}
 
 			ConstID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.constant
+				(item) => item.key.fnv("constantValue")
 			);
 			DynID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.dynamics
+				(item) => item.key.fnv("dynamics")
 			);
 
 			if (DynID >= 0) {
@@ -944,10 +943,10 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 			}
 
 			ConstID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.constant
+				(item) => item.key.fnv("constantValue")
 			);
 			DynID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.dynamics
+				(item) => item.key.fnv("dynamics")
 			);
 
 			if (DynID >= 0) {
@@ -999,10 +998,10 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 			}
 
 			ConstID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.constant
+				(item) => item.key.fnv("constantValue")
 			);
 			DynID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.dynamics
+				(item) => item.key.fnv("dynamics")
 			);
 
 			if (DynID >= 0) {
@@ -1050,12 +1049,58 @@ function RecolorProp(ColorProp, ConstOnly = false) {
 				}
 			}
 			break;
-		case "shift":
+		case "inverse":
 			ConstID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.constant
+				(item) => item.key.fnv("constantValue")
 			);
 			DynID = PropType.findIndex(
-				(item) => item.key == KEYS.Definitions.dynamics
+				(item) => item.key.fnv("dynamics")
+			);
+
+			if (DynID >= 0) {
+				let DynValue = PropType[DynID].value.items;
+				let DynTimes = DynValue[0].value.items;
+				let DynColors = DynValue[1].value.items;
+
+				for (let i = 0; i < DynTimes.length; i++) {
+					let NewColor = [1 - DynColors[i][0], 1 - DynColors[i][1], 1 - DynColors[i][2], DynColors[i][3]];
+					if (
+						!(
+							Prefs.IgnoreBW &&
+							IsBW(DynColors[i][0], DynColors[i][1], DynColors[i][2])
+						)
+					) {
+						DynColors[i][0] = NewColor[0];
+						DynColors[i][1] = NewColor[1];
+						DynColors[i][2] = NewColor[2];
+					}
+				}
+			} else {
+				let NewColor = [1 - PropType[ConstID].value[0], 1 - PropType[ConstID].value[1], 1 - PropType[ConstID].value[2], PropType[ConstID].value[3]];
+
+				if (
+					!(
+						Prefs.IgnoreBW &&
+						IsBW(
+							PropType[ConstID].value[0],
+							PropType[ConstID].value[1],
+							PropType[ConstID].value[2]
+						)
+					)
+				) {
+					PropType[ConstID].value[0] = NewColor[0];
+					PropType[ConstID].value[1] = NewColor[1];
+					PropType[ConstID].value[2] = NewColor[2];
+					PropType[ConstID].value[3] = NewColor[3];
+				}
+			}
+			break;
+		case "shift":
+			ConstID = PropType.findIndex(
+				(item) => item.key.fnv("constantValue")
+			);
+			DynID = PropType.findIndex(
+				(item) => item.key.fnv("dynamics")
 			);
 
 			if (DynID >= 0) {
@@ -1121,16 +1166,15 @@ function RecolorSelected() {
 
 	for (let PO_ID = 0; PO_ID < ParticleList.children.length; PO_ID++) {
 		let Index = Container.findIndex(
-			(item) => item.key == ParticleList.children[PO_ID].id
-		);
+			(item) => item.key.fnv(ParticleList.children[PO_ID].id));
 
 		let DefData = Container[Index].value.items;
 		let DomDefData = ParticleList.children[PO_ID].children;
 		if (ParticleList.children[PO_ID].className == "Particle-Div") {
 			let start = DefData.findIndex(
 				(item) =>
-					item.key == KEYS.Definitions.complex ||
-					item.key == KEYS.Definitions.simple
+					item.key.fnv("complexEmitterDefinitionData") ||
+					item.key.fnv("simpleEmitterDefinitionData")
 			);
 			start = start > 0 ? start : 0;
 			for (let defID = 0; defID < DomDefData.length - 1; defID++) {
@@ -1144,25 +1188,25 @@ function RecolorSelected() {
 					if (!domEmitDef[0].checked) continue;
 
 					let RDID = emitDef.findIndex(
-						(item) => item.key == KEYS.Definitions.reflection
+						(item) => item.key.fnv("reflectionDefinition")
 					);
 					let RDProp = emitDef[RDID]?.value.items;
 
 					let OFCID = RDProp?.findIndex(
-						(item) => item.key == KEYS.Props.fresnelColor
+						(item) => item.key.fnv("fresnelColor")
 					); // Outline Fresnel Color
 					let RFCID = RDProp?.findIndex(
-						(item) => item.key == KEYS.Props.reflectionColor
+						(item) => item.key.fnv("reflectionFresnelColor")
 					); // Reflective Fresnel Color
 
 					let LCID = emitDef?.findIndex(
-						(item) => item.key == KEYS.Props.lingerColor
+						(item) => item.key.fnv("lingerColor")
 					); // Linger Color
 					let BCID = emitDef?.findIndex(
-						(item) => item.key == KEYS.Props.birthColor
+						(item) => item.key.fnv("birthColor")
 					); // Birth Color
 
-					let MCID = emitDef?.findIndex((item) => item.key == KEYS.Props.color);
+					let MCID = emitDef?.findIndex((item) => item.key.fnv("color"));
 					if (OFCID >= 0 && T1.checked) {
 						RDProp[OFCID] = RecolorProp(RDProp[OFCID], true);
 						const OFColor = GetColor(RDProp[OFCID]);
@@ -1187,7 +1231,7 @@ function RecolorSelected() {
 					}
 					breakpoint: if (LCID >= 0 && T3.checked) {
 						LDID = emitDef[LCID].value.items.findIndex(
-							(item) => item.key == KEYS.Props.lingerDriver
+							(item) => item.key.fnv(1803004106)
 						);
 						if (LDID < 0) break breakpoint;
 						emitDef[LCID].value.items[LDID] = RecolorProp(
@@ -1266,129 +1310,7 @@ function RecolorSelected() {
 	}
 	ipcRenderer.send("UpdateBin", ActiveFile);
 }
-async function FromBin() {
-	if (JsonFile == undefined) {
-		return;
-	}
-	let OldFilePath = ipcRenderer.sendSync("FileSelect", [
-		"Select Bin to take colors from",
-		"Bin",
-	]);
-	FileCache.push(_.cloneDeep(JsonFile));
 
-	if (
-		fs.existsSync(OldFilePath.slice(0, -4) + ".json") == false ||
-		Prefs.Regenerate
-	) {
-		await ToJson();
-	}
-	let OldFile = JSON.parse(
-		fs.readFileSync(OldFilePath.slice(0, -4) + ".json", "utf-8")
-	);
-	let OldContainer = OldFile.entries.value.items;
-	let Container = JsonFile.entries.value.items;
-	for (let PO_ID = 0; PO_ID < OldContainer.length; PO_ID++) {
-		if (OldContainer[PO_ID].value.name == KEYS.Definitions.vfx) {
-			let NewId = Container.findIndex(
-				(item) => item.key == OldContainer[PO_ID].key
-			);
-
-			let OldDefData = OldContainer[PO_ID].value.items[0].value.items;
-			let DefData = Container[NewId].value.items[0].value.items;
-
-			for (let B = 0; B < OldDefData?.length; B++) {
-				let OldEmitterName = OldDefData[B].items
-					.find((item) => item.key == KEYS.Props.emitterName)
-					.value.toLowerCase();
-
-				let EmitterIndex = DefData.findIndex((item) => {
-					let index =
-						item.items
-							.find((item) => item.key == KEYS.Props.emitterName)
-							.value.toLowerCase() == OldEmitterName;
-					return index == true;
-				});
-				let PropItems = DefData[EmitterIndex].items;
-				let OldPropItems = OldDefData[B].items;
-
-				let OldRDID = OldPropItems?.findIndex(
-					(item) => item.key == KEYS.Definitions.reflection
-				);
-				let OldRDProp = OldPropItems[OldRDID]?.value.items;
-
-				let OldOFCID = OldRDProp?.findIndex(
-					(item) => item.key == KEYS.Props.fresnelColor
-				); // Outline Fresnel Color
-				let OldRFCID = OldRDProp?.findIndex(
-					(item) => item.key == KEYS.Props.reflectionColor
-				); // Reflective Fresnel Color
-				let OldLCID = OldPropItems?.findIndex(
-					(item) => item.key == KEYS.Props.lingerColor
-				); // Linger Color
-				let OldBCID = OldPropItems?.findIndex(
-					(item) => item.key == KEYS.Props.birthColor
-				); // Birth Color
-				let OldMCID = OldPropItems?.findIndex(
-					(item) => item.key == KEYS.Props.color
-				); // Main Color
-				let OldBMID = OldPropItems?.findIndex(
-					(item) => item.key == KEYS.Props.blendMode
-				);
-
-				let OldLDID = OldPropItems[OldLCID]?.value.items.findIndex(
-					(item) => item.key == KEYS.Props.lingerDriver
-				);
-
-				let RDID = PropItems?.findIndex(
-					(item) => item.key == KEYS.Definitions.reflection
-				);
-				let RDProp = PropItems[RDID]?.value.items;
-
-				let OFCID = RDProp?.findIndex(
-					(item) => item.key == KEYS.Props.fresnelColor
-				); // Outline Fresnel Color
-				let RFCID = RDProp?.findIndex(
-					(item) => item.key == KEYS.Props.reflectionColor
-				); // Reflective Fresnel Color
-				let LCID = PropItems?.findIndex(
-					(item) => item.key == KEYS.Props.lingerColor
-				); // Linger Color
-				let BCID = PropItems?.findIndex(
-					(item) => item.key == KEYS.Props.birthColor
-				); // Birth Color
-				let MCID = PropItems?.findIndex((item) => item.key == KEYS.Props.color); // Main Color
-				let BMID = PropItems?.findIndex(
-					(item) => item.key == KEYS.Props.blendMode
-				);
-
-				let LDID = PropItems[LCID]?.value.items.findIndex(
-					(item) => item.key == KEYS.Props.lingerDriver
-				);
-				if (OldOFCID >= 0 && OFCID >= 0) {
-					RDProp[OFCID] = _.cloneDeep(OldRDProp[OldOFCID]);
-				}
-				if (OldRFCID >= 0 && RFCID >= 0) {
-					RDProp[RFCID] = _.cloneDeep(OldRDProp[OldRFCID]);
-				}
-				if (OldLCID >= 0 && LCID >= 0) {
-					PropItems[LCID].value.items[LDID] = _.cloneDeep(
-						OldPropItems[OldLCID].value.items[OldLDID]
-					);
-				}
-				if (OldBCID >= 0 && BCID >= 0) {
-					PropItems[BCID] = _.cloneDeep(OldPropItems[OldBCID]);
-				}
-				if (OldMCID >= 0 && MCID >= 0) {
-					PropItems[MCID] = _.cloneDeep(OldPropItems[OldMCID]);
-				}
-				if (OldBMID >= 0 && BMID >= 0) {
-					PropItems[BMID] = _.cloneDeep(OldPropItems[OldBMID]);
-				}
-			}
-		}
-	}
-	LoadFile(true);
-}
 
 function Undo() {
 	ActiveFile = ipcRenderer.sendSync("PopHistory").File;

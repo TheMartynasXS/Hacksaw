@@ -1,4 +1,4 @@
-const { Prefs, Tab, CreateMessage, Sleep } = require('../javascript/utils.js');
+const { Prefs, Tab, CreateMessage, Sleep, extendPrototypes } = require('../javascript/utils.js');
 const fs = require('fs')
 const { ipcRenderer } = require('electron');
 const { execSync } = require("child_process");
@@ -13,8 +13,10 @@ window.onerror = function (msg, file, lineNo, columnNo) {
         message: msg
     })
 };
+extendPrototypes()
+
 let FilePath
-let File
+let ActiveFile
 let Colors
 let AltColors
 
@@ -56,10 +58,10 @@ function LoadFile(SkipAlert = true) {
     Colors = new Set()
     ColorList.innerText = "";
     let Relative = ""
-    for (let i = 0; i < File.linked.value.items.length; i++) {
-        Relative += `${File.linked.value.items[i]}\n`
+    for (let i = 0; i < ActiveFile.linked.value.items.length; i++) {
+        Relative += `${ActiveFile.linked.value.items[i]}\n`
     }
-    let Container = File.entries.value.items;
+    let Container = ActiveFile.entries.value.items;
     if (!/(122655197|Materials)/i.test(JSON.stringify(Container))) {
         CreateMessage({
             type: "warning",
@@ -72,27 +74,27 @@ function LoadFile(SkipAlert = true) {
         if (Container[PO_ID].value.name == KEYS.Definitions.vfx) {
             let DefData = Container[PO_ID].value.items.filter(
                 (item) =>
-                    item.key == KEYS.Definitions.complex ||
-                    item.key == KEYS.Definitions.simple
+                    item.key.fnv("complexEmitterDefinitionData") ||
+					item.key.fnv("simpleEmitterDefinitionData")
             );
             for (let B = 0; B < DefData.length; B++) {
                 if (
-                    DefData[B].key == KEYS.Definitions.complex ||
-                    DefData[B].key == KEYS.Definitions.simple
+                    DefData[B].key.fnv("complexEmitterDefinitionData") ||
+                    DefData[B].key.fnv("simpleEmitterDefinitionData")
                 ) {
                     let Props = DefData[B].value.items;
                     for (let C = 0; C < Props.length; C++) {
                         let PropItems = Props[C].items
 
 
-                        let RDID = PropItems?.findIndex(item => item.key == KEYS.Definitions.reflection)
+                        let RDID = PropItems?.findIndex(item => item.key.fnv("reflectionDefinition"))
                         let RDProp = PropItems[RDID]?.value.items
 
-                        let OFCID = RDProp?.findIndex(item => item.key == KEYS.Props.fresnelColor)           // Outline Fresnel Color
-                        let RFCID = RDProp?.findIndex(item => item.key == KEYS.Props.reflectionColor) // Reflective Fresnel Color
-                        let LCID = PropItems?.findIndex(item => item.key == KEYS.Props.lingerColor)			// Linger Color
-                        let BCID = PropItems?.findIndex(item => item.key == KEYS.Props.birthColor)			// Birth Color
-                        let MCID = PropItems?.findIndex(item => item.key == KEYS.Props.color)				// Main Color
+                        let OFCID = RDProp?.findIndex(item => item.key.fnv("fresnelColor"))           // Outline Fresnel Color
+                        let RFCID = RDProp?.findIndex(item => item.key.fnv("reflectionFresnelColor")) // Reflective Fresnel Color
+                        let LCID = PropItems?.findIndex(item => item.key.fnv("lingerColor"))			// Linger Color
+                        let BCID = PropItems?.findIndex(item => item.key.fnv("birthColor"))			// Birth Color
+                        let MCID = PropItems?.findIndex(item => item.key.fnv("color"))				// Main Color
 
                         if (OFCID >= 0) {
                             const OFColor = GetColor(RDProp[OFCID])
@@ -108,12 +110,12 @@ function LoadFile(SkipAlert = true) {
                             }
                         }
                         if (LCID >= 0) {
-                            LDID = PropItems[LCID].value.items.findIndex(item => item.key == KEYS.Props.lingerDriver)
+                            LDID = PropItems[LCID].value.items.findIndex(item => item.key.fnv(1803004106))
 
                             let PropType = PropItems[LCID].value.items[LDID]
-                            let DynID = PropType?.value.items.findIndex(item => item.key == KEYS.Definitions.dynamics)
+                            let DynID = PropType?.value.items.findIndex(item => item.key.fnv("dynamics"))
                             if (DynID >= 0) {
-                                let ProbTableID = PropType.value.items[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+                                let ProbTableID = PropType.value.items[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
                                 if (ProbTableID >= 0) PropType.value.items[DynID].value.items.shift()
                             }
                             const LCColor = GetColor(PropItems[LCID]?.value.items[LDID]?.value.items)
@@ -123,9 +125,9 @@ function LoadFile(SkipAlert = true) {
                         }
                         if (BCID >= 0) {
                             let PropType = PropItems[BCID].value.items
-                            let DynID = PropType.findIndex(item => item.key == KEYS.Definitions.dynamics)
+                            let DynID = PropType.findIndex(item => item.key.fnv("dynamics"))
                             if (DynID >= 0) {
-                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
                                 if (ProbTableID >= 0) PropType[DynID].value.items.shift()
                             }
                             const BCColor = GetColor(PropItems[BCID].value.items)
@@ -136,9 +138,9 @@ function LoadFile(SkipAlert = true) {
 
                         if (MCID >= 0) {
                             let PropType = PropItems[MCID].value.items
-                            let DynID = PropType?.findIndex(item => item.key == KEYS.Definitions.dynamics)
+                            let DynID = PropType?.findIndex(item => item.key.fnv("dynamics"))
                             if (DynID >= 0) {
-                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
                                 if (ProbTableID >= 0) PropType[DynID].value.items.shift()
                             }
                             const MCColor = GetColor(PropItems[MCID].value.items)
@@ -183,10 +185,7 @@ function LoadFile(SkipAlert = true) {
     }
 }
 
-async function ToJson() {
-    await Sleep(100)
-    execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" -k`);
-}
+
 
 function SwapColors() {
     AltColors = []
@@ -195,25 +194,25 @@ function SwapColors() {
     }
     let Container = File.entries.value.items
     for (let PO_ID = 0; PO_ID < Container.length; PO_ID++) {
-        if (Container[PO_ID].value.name == KEYS.Definitions.vfx) {
+        if (Container[PO_ID].value.name.fnv("VfxSystemDefinitionData")) {
 
             let DefData = Container[PO_ID].value.items
             for (let B = 0; B < DefData.length; B++) {
                 if (
-                    DefData[B].key == KEYS.Definitions.complex ||
-                    DefData[B].key == KEYS.Definitions.simple
+                    DefData[B].key.fnv("complexEmitterDefinitionData") ||
+					DefData[B].key.fnv("simpleEmitterDefinitionData")
                 ) {
                     let Props = DefData[B].value.items;
                     for (let C = 0; C < Props.length; C++) {
                         let PropItems = Props[C].items
-                        let RDID = PropItems?.findIndex(item => item.key == KEYS.Definitions.reflection)
+                        let RDID = PropItems?.findIndex(item => item.key.fnv("reflectionDefinition"))
                         let RDProp = PropItems[RDID]?.value.items
 
-                        let OFCID = RDProp?.findIndex(item => item.key == KEYS.Props.fresnelColor)           // Outline Fresnel Color
-                        let RFCID = RDProp?.findIndex(item => item.key == KEYS.Props.reflectionColor) // Reflective Fresnel Color
-                        let LCID = PropItems?.findIndex(item => item.key == KEYS.Props.lingerColor)			// Linger Color
-                        let BCID = PropItems?.findIndex(item => item.key == KEYS.Props.birthColor)			// Birth Color
-                        let MCID = PropItems?.findIndex(item => item.key == KEYS.Props.color)				// Main Color
+                        let OFCID = RDProp?.findIndex(item => item.key.fnv("fresnelColor"))           // Outline Fresnel Color
+                        let RFCID = RDProp?.findIndex(item => item.key.fnv("reflectionFresnelColor")) // Reflective Fresnel Color
+                        let LCID = PropItems?.findIndex(item => item.key.fnv("Linger"))			// Linger Color
+                        let BCID = PropItems?.findIndex(item => item.key.fnv("birthColor"))			// Birth Color
+                        let MCID = PropItems?.findIndex(item => item.key.fnv("color"))				// Main Color
 
                         if (OFCID >= 0) {
                             RDProp[OFCID] = RecolorProp(RDProp[OFCID], true)
@@ -223,21 +222,21 @@ function SwapColors() {
                             RDProp[RFCID] = RecolorProp(RDProp[RFCID], true)
                         }
                         breakpoint: if (LCID >= 0) {
-                            LDID = PropItems[LCID].value.items.findIndex(item => item.key == KEYS.Props.lingerDriver)
+                            LDID = PropItems[LCID].value.items.findIndex(item => item.key.fnv(1803004106))
                             if (LDID < 0) break breakpoint;
                             let PropType = PropItems[LCID].value.items[LDID]
-                            let DynID = PropType?.value.items.findIndex(item => item.key == KEYS.Definitions.dynamics)
+                            let DynID = PropType?.value.items.findIndex(item => item.key.fnv("dynamics"))
                             if (DynID >= 0) {
-                                let ProbTableID = PropType.value.items[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+                                let ProbTableID = PropType.value.items[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
                                 if (ProbTableID >= 0) PropType.value.items[DynID].value.items.shift()
                             }
                             PropItems[LCID].value.items[LDID] = RecolorProp(PropItems[LCID].value.items[LDID])
                         }
                         if (BCID >= 0) {
                             let PropType = PropItems[BCID].value.items
-                            let DynID = PropType.findIndex(item => item.key == KEYS.Definitions.dynamics)
+                            let DynID = PropType.findIndex(item => item.key.fnv("dynamics"))
                             if (DynID >= 0) {
-                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
                                 if (ProbTableID >= 0) PropType[DynID].value.items.shift()
                             }
                             PropItems[BCID] = RecolorProp(PropItems[BCID])
@@ -245,9 +244,9 @@ function SwapColors() {
 
                         if (MCID >= 0) {
                             let PropType = PropItems[MCID].value.items
-                            let DynID = PropType?.findIndex(item => item.key == KEYS.Definitions.dynamics)
+                            let DynID = PropType?.findIndex(item => item.key.fnv("dynamics"))
                             if (DynID >= 0) {
-                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key == KEYS.Definitions.probability)
+                                let ProbTableID = PropType[DynID].value.items.findIndex(item => item.key.fnv("probabilityTables"))
                                 if (ProbTableID >= 0) PropType[DynID].value.items.shift()
                             }
                             PropItems[MCID] = RecolorProp(PropItems[MCID])
@@ -307,32 +306,20 @@ function RecolorProp(ColorProp, ConstOnly = false) {
     return ColorProp
 }
 
-async function ToBin() {
-    await Sleep(100)
-    try {
-        let res = execSync(
-            `"${Prefs.obj.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}"`
-        );
-        CreateMessage({
-            type: "info",
-            title: "File Saved Successfully",
-            message: "Don't forget to delete the json files."
-        })
-    }
-    catch (err) {
-        CreateMessage({
-            type: "error",
-            title: "Error Converting to bin",
-            message: err.stderr.toString()
-        })
-    }
-}
-async function Save() {
-    fs.writeFileSync(
-        FilePath.slice(0, -4) + ".json",
-        JSON.stringify(File, null, 2),
-        "utf8"
-    );
-    await ToBin();
-    FileSaved = true;
+
+// async function Save() {
+//     fs.writeFileSync(
+//         FilePath.slice(0, -4) + ".json",
+//         JSON.stringify(File, null, 2),
+//         "utf8"
+//     );
+//     await ToBin();
+//     FileSaved = true;
+// }
+
+let temp = ipcRenderer.sendSync("PullBin");
+ActiveFile = temp.File;
+if (temp.Path != "") {
+	document.getElementById("Title").innerText = temp.Path.split(".wad.client\\").pop();
+	LoadFile(true);
 }

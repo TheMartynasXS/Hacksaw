@@ -34,6 +34,7 @@ let FileCache = [];
 let currentFile = {};
 let FilePath = "";
 //#endregion
+
 let mainWindow
 const createWindow = (htmlDir) => {
     mainWindow = new BrowserWindow({

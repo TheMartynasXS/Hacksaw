@@ -1,6 +1,6 @@
 const { execSync } = require("child_process");
 const sorter = require("path-sort").standalone('/');
-const { Tab, Prefs, CreateMessage, getAllFiles } = require('../javascript/utils.js');
+const { Tab, Prefs, CreateMessage, getAllFiles, extendPrototypes } = require('../javascript/utils.js');
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
@@ -23,6 +23,8 @@ let MissingOutput = []
 
 let pathRegExp = new RegExp(/ASSETS.+(?:dds|skn|skl|sco|scb|tex)/gi)
 
+extendPrototypes()
+
 function Undo() {
   if (FileCache.length > 0) {
     File = JSON.parse(JSON.stringify(FileCache[FileCache.length - 1]))
@@ -38,11 +40,11 @@ async function SelectWadFolder(Path = undefined) {
     "Select wad folder",
     "Folder",
   ])[0];
-  if (!fs.existsSync(WadPath) || !WadPath.toLowerCase().endsWith(".wad.client")) {
+  if (!fs.existsSync(WadPath) || !(WadPath.toLowerCase().endsWith(".wad.client")||WadPath.toLowerCase().endsWith(".wad"))) {
     CreateMessage({
       type: "info",
       title: "Error",
-      message: "Invalid Path.\nFolder name must end in \'.wad.client\' for the sake of safety."
+      message: "Invalid Path.\nFolder name must end in \'.wad.client\' or \'.wad\' for the sake of safety."
     })
     return 0;
   }
@@ -67,7 +69,7 @@ async function SelectWadFolder(Path = undefined) {
 
   ipcRenderer.send("Bin2Json", WadPath)
   
-  BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".btx"))
+  BTXFiles = getAllFiles(WadPath, BTXFiles).filter(file => file.endsWith(".json"))
   Progress.classList.add('Progress-Complete')
 
   for (let i = 0; i < BTXFiles.length; i++) {
@@ -87,26 +89,27 @@ async function SelectWadFolder(Path = undefined) {
   for (let i = 0; i < BTXFiles.length; i++) {
     let currentFile = JSON.parse(fs.readFileSync(BTXFiles[i], "utf-8"))
     let ParticleObject = currentFile.entries.value.items
-
     for (let PO_ID = 0; PO_ID < ParticleObject.length; PO_ID++) {
-      if (ParticleObject[PO_ID].value.name.toString().toLowerCase() == "vfxsystemdefinitiondata") {
+      if (ParticleObject[PO_ID].value.name.fnv("vfxsystemdefinitiondata")) {
+        
         let tempname = ParticleObject[PO_ID].value.items.find((item) => {
-          if (item.key.toString().toLowerCase() == "particlename") { return item }
+          if (item.key.fnv("particlename")) { return item }
         })?.value.toString().toLowerCase()
+
         SeparateOutput.push({
           Particle: tempname,
-          Bin: BTXFiles[i].replace(/\.btx$/, ".bin").replace(/\\/g, "/"),
+          Bin: BTXFiles[i].replace(/\.json$/, ".bin").replace(/\\/g, "/"),
           Files: []
         })
 
         let DefData = ParticleObject[PO_ID].value.items.filter(item =>
-          item.key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-          item.key.toString().toLowerCase() == "simpleemitterdefinitiondata")
+          item.key.fnv("complexemitterdefinitiondata") ||
+          item.key.fnv("simpleemitterdefinitiondata"))
         for (let B = 0; B < DefData.length; B++) {
           let Props = DefData[B].value.items
           for (let C = 0; C < Props.length; C++) {
-            if (DefData[B].key.toString().toLowerCase() == "complexemitterdefinitiondata" ||
-              DefData[B].key.toString().toLowerCase() == "simpleemitterdefinitiondata") {
+            if (DefData[B].key.fnv("complexemitterdefinitiondata") ||
+              DefData[B].key.fnv("simpleemitterdefinitiondata")) {
               let StringObj = JSON.stringify(DefData[B], null, 2)
               let Matches = StringObj.match(pathRegExp)
               Matches?.forEach(Match => {
@@ -120,17 +123,18 @@ async function SelectWadFolder(Path = undefined) {
         }
       }
       else {
-        let tempname = ParticleObject[PO_ID].value.name
+        let tempname = ParticleObject[PO_ID].value.key != undefined ? ParticleObject[PO_ID].value.key.toString().toLowerCase() : ParticleObject[PO_ID].value.name.toString().toLowerCase()
 
-        let MiscIndex = SeparateOutput.findIndex(item => item.Particle == "!Misc" && item.Bin == BTXFiles[i].replace(/\.btx$/, ".bin"))
-
+        let MiscIndex = SeparateOutput.findIndex(item => item.Particle == tempname
+          && item.Bin == BTXFiles[i].replace(/\.json$/, ".bin").replace(/\\/g, "/"));
+        
         if (MiscIndex < 0) {
-          SeparateOutput.push({
-            Particle: "!Misc",
-            Bin: BTXFiles[i].replace(/\.btx$/, ".bin").replace(/\\/g, "/"),
-            Files: []
-          })
-          MiscIndex = SeparateOutput.length - 1
+            SeparateOutput.push({
+                Particle: `${tempname}`,
+                Bin: BTXFiles[i].replace(/\.json$/, ".bin").replace(/\\/g, "/"),
+                Files: []
+            });
+            MiscIndex = SeparateOutput.length - 1;
         }
         let MatData = ParticleObject[PO_ID].value.items
         let StringObj = JSON.stringify(MatData, null, 2)
@@ -168,15 +172,16 @@ async function SelectWadFolder(Path = undefined) {
   for (let i = 0; i < SeparateOutput.length; i++) {
     SeparateOutput[i].Files.sort(sorter)
   }
-  fs.writeFileSync(`${WadPath}\\Separate.json`, JSON.stringify(SeparateOutput, null, 2))
+  
+  fs.writeFileSync(`${WadPath}\\Separate.jsonc`, JSON.stringify(SeparateOutput, null, 2))
   CombinedOutput.sort((a, b) => (a > b) ? 1 : ((b > a) ? -1 : 0))
-  fs.writeFileSync(`${WadPath}\\Combined.json`, JSON.stringify(CombinedOutput, null, 2))
+  fs.writeFileSync(`${WadPath}\\Combined.jsonc`, JSON.stringify(CombinedOutput, null, 2))
   for (let i = 0; i < CombinedOutput.length; i++) {
     if (!fs.existsSync(path.join(WadPath, CombinedOutput[i]))) {
       MissingOutput.push(CombinedOutput[i])
     }
   }
-  fs.writeFileSync(`${WadPath}\\Missing.json`, JSON.stringify(MissingOutput, null, 2))
+  fs.writeFileSync(`${WadPath}\\Missing.jsonc`, JSON.stringify(MissingOutput, null, 2))
 
 }
 
@@ -216,13 +221,6 @@ async function DeleteUnused() {
   }
   UnlinkList.innerText = ""
   Progress.classList.replace('Progress-Delete', 'Progress-Complete')
-}
-
-function ToJson(FilePath) {
-  let TempFile = FilePath.replace(/\.bin$/, ".btx")
-  if (!fs.existsSync(TempFile)) {
-    execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" "${TempFile}"`);
-  }
 }
 
 function sleep(ms) {

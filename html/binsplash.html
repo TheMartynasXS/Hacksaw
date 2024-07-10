@@ -46,10 +46,9 @@
     </div>
     <div id="Main" class="Main Flex-1">
         <div id="Splash" class="Tab Flex Flex-Col">
-            <div class="Input-Group Margin-Bottom">
+            <div class="Input-Group Margin-Bottom Flex">
                 <button class="Special-Input" onclick="OpenBin()">Open Bin</button>
-                <label class="Label Flex-1" id="Title"><strong>
-                        <- Select a file</strong></label>
+                <label class="Label Flex-1" id="Title"><strong><- Select a file</strong></label>
                 <label class="Label" id="Title"><strong>Mode:</strong></label>
                 <select name="Mode" id="Mode" oninput="ChangeMode(this.value)">
                     <option value="random">Random</option>
@@ -57,6 +56,7 @@
                     <option value="wrap">Wrap</option>
                     <option value="semi-override">Semi-Override</option>
                     <option value="shift">Shift</option>
+                    <option value="inverse">Inverse</option>
                 </select>
             </div>
             <div id="Slider-Container" class="Flex-Col">
