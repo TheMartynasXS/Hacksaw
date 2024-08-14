@@ -364,21 +364,24 @@ function Tab(link,filesaved = true){
 
 
 function extendPrototypes() {
-    Object.defineProperty(String.prototype, "fnv", {
-        value: function (expected) {
-            return expected.toLowerCase() == this.toLowerCase() || fnv1a(expected.toLowerCase()) == this;
-        },
-        enumerable: false,
-    });
-    Object.defineProperty(Number.prototype, "fnv", {
-        value: function (expected) {
-            return expected == this.toString() || fnv1a(expected.toString().toLowerCase()) == this;
-        },
-        enumerable: false,
-    });
+	Object.defineProperty(String.prototype, "fnv", {
+		value: function (expected) {
+			return expected.toLowerCase() == this.toLowerCase() || fnv1a(expected.toLowerCase()) == this;
+		},
+		enumerable: false,
+	});
+	Object.defineProperty(Number.prototype, "fnv", {
+		value: function (expected) {
+			return expected == this.toString() || fnv1a(expected.toString().toLowerCase()) == this;
+		},
+		enumerable: false,
+	});
+}
+
+function fnvCheck(x,y){
+	return x.toString().toLowerCase() == y.toLowerCase() || x == fnv1a(y.toLowerCase())
 }
 
 module.exports = {
-	
-	extendPrototypes, Tab, Prefs, Samples, Sleep, CreateMessage, getAllFiles
+	extendPrototypes, Tab, Prefs, Samples, Sleep, CreateMessage, getAllFiles, fnvCheck
 }
