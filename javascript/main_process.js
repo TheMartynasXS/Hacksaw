@@ -267,7 +267,6 @@ ipcMain.on("Json2Bin", (event, path) => {
 });
 
 ipcMain.on("OpenBin", (event) => {
-  FileCache = [];
   try {
     FilePath = dialog.showOpenDialogSync({
       title: "Select Bin",
@@ -275,8 +274,11 @@ ipcMain.on("OpenBin", (event) => {
       properties: ["openFile"],
       message: "Select a bin file",
     })[0];
+    FileCache = [];
   } catch (error) {
-    event.returnValue = error;
+    event.returnValue = undefined;
+    console.log(FilePath);
+    return 0;
   }
 
   if (
@@ -327,9 +329,9 @@ ipcMain.on("UpdateBin", (event, arg) => {
 
 ipcMain.on("SaveBin", (event) => {
   fs.writeFileSync(
-    arg[0].slice(0, -4) + ".json",
-    JSON.stringify(FilePath, null, 2)
+    FilePath.slice(0, -4) + ".json",
+    JSON.stringify(currentFile, null, 2)
   );
-  execSync(`"${Prefs.RitoBinPath}" -o bin "${arg[0].slice(0, -4) + ".json"}"}`);
+  execSync(`"${Prefs.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}`);
   event.returnValue = 0;
 });

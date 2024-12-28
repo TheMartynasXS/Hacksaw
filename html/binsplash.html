@@ -126,6 +126,33 @@
             <div class="Input-Group Margin-Top">
                 <button onclick="SaveBin()" class="Flex-1 Special-Input">Save Bin</button>
             </div>
+            <template>
+                <div id="" class="Particle-Div"><div class="Particle-Title-Div Flex">
+                    <input type="checkbox" class="CheckBox" onclick="CheckChildren(this.parentNode.parentNode.children, this.checked)">
+                    <div class="Label Ellipsis Flex-1"></div>
+                    </div>
+                </div>
+            </template>
+            <template>
+                <div class="Flex Emitter-Div">
+                    <input type="checkbox" class="CheckBox">
+                    <div class="Label Flex-1 Ellipsis">placeholder</div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="fresnelColor" onclick="ClickColor(this)"></div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="reflectionFresnelColor" onclick="ClickColor(this)"></div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="linger" onclick="ClickColor(this)"></div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="birthColor" onclick="ClickColor(this)"></div>
+                    <div class="Prop-Block Pointer Blank-Obj" color-type="color" onclick="ClickColor(this)"></div>
+                    <input class="Blend-Mode" type="number" min="0" max="9" placeholder="1">
+                    <input type="checkbox" class="CheckBox Disable">
+                </div>
+            </template>
+            <template>
+                <div class="Flex Emitter-Div">
+                    <input type="checkbox" class="CheckBox">
+                    <div class="Label Flex-1 Ellipsis">placeholder</div>
+                    <div class="Prop-Block Pointer Blank-Obj" color-type="material" onclick="ClickMaterial(this)"></div>
+                </div>
+            </template>
             <script src="../javascript/tabs/binsplash.js"></script>
         </div>
     </div>

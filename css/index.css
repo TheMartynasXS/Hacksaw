@@ -5,7 +5,7 @@
 
 :root {
   --accent: #ffc24f;
-  --accent-success: #7BBA9C;
+  --accent-success: #7bba9c;
   --accent-failure: #ff4f7b;
 
   --text-primary: #ececec;
@@ -26,10 +26,6 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
-}
-
-.Pointer {
-  cursor: pointer;
 }
 
 .Main {
@@ -67,7 +63,7 @@ option {
 
 * {
   font-size: small;
-  font-family: 'Jetbrains Mono';
+  font-family: "Jetbrains Mono";
   outline: none;
 }
 
@@ -82,7 +78,7 @@ strong {
 
 mark {
   background-color: transparent;
-  color: var(--accent-failure)
+  color: var(--accent-failure);
 }
 b {
   color: var(--accent-success);
@@ -93,11 +89,11 @@ b {
   height: 2rem;
 }
 
-.Input-Group>input[type="number"],
-.Input-Group>input[type="text"],
-.Input-Group>button,
-.Input-Group>select,
-.Input-Group>.Label{
+.Input-Group > input[type="number"],
+.Input-Group > input[type="text"],
+.Input-Group > button,
+.Input-Group > select,
+.Input-Group > .Label {
   margin: 0.1rem;
   padding-inline: 1rem;
   background-color: var(--bg-200);
@@ -107,32 +103,32 @@ b {
   color: var(--text-primary);
 }
 
-.Input-Group>.Reduced-Padding {
+.Input-Group > .Reduced-Padding {
   padding-inline: 0rem;
 }
 
-.Input-Group>input[type="color"] {
+.Input-Group > input[type="color"] {
   margin: 0.1rem;
 }
 
-.Input-Group>input {
+.Input-Group > input {
   width: 10px;
 }
 
-.Input-Group>button:disabled {
+.Input-Group > button:disabled {
   color: var(--bg-300);
 }
 
-.Input-Group>button:disabled:hover {
+.Input-Group > button:disabled:hover {
   background: var(--bg-200);
   cursor: default;
 }
 
-.Input-Group>button:hover {
-  background: var(--bg-300)
+.Input-Group > button:hover {
+  background: var(--bg-300);
 }
 
-.Input-Group>button {
+.Input-Group > button {
   min-width: fit-content;
   background-color: var(--bg-200);
 }
@@ -151,7 +147,16 @@ b {
 }
 
 .Blend-Mode:disabled {
-  background-image: linear-gradient(45deg, var(--bg-300) 25%, var(--bg-200) 25%, var(--bg-200) 50%, var(--bg-300) 50%, var(--bg-300) 75%, var(--bg-200) 75%, var(--bg-200) 100%);
+  background-image: linear-gradient(
+    45deg,
+    var(--bg-300) 25%,
+    var(--bg-200) 25%,
+    var(--bg-200) 50%,
+    var(--bg-300) 50%,
+    var(--bg-300) 75%,
+    var(--bg-200) 75%,
+    var(--bg-200) 100%
+  );
 }
 
 .Sample {
@@ -220,11 +225,10 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: auto;
 }
 
-.Input-Group>.CheckBox,
-.Input-Group>.CheckBox {
+.Input-Group > .CheckBox,
+.Input-Group > .CheckBox {
   background-color: var(--bg-200);
 }
-
 
 .Type {
   /* filter: grayscale(1) brightness(1); */
@@ -279,7 +283,6 @@ input[type="number"]::-webkit-outer-spin-button {
   left: 14px;
 }
 
-
 .CheckBox.Disable:checked {
   background-color: red;
 }
@@ -289,7 +292,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .CheckBox.Disable {
   background-color: green;
 }
-.CheckBox.Disable:before{
+.CheckBox.Disable:before {
   left: 14px;
   background-color: var(--bg-300);
 }
@@ -320,20 +323,29 @@ input[type="range"].Range::-webkit-slider-thumb {
 input[type="range"].Range::-webkit-slider-thumb:hover {
   background: var(--accent);
 }
-*.HUE{
- background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%) !important;  
+*.HUE {
+  background: linear-gradient(
+    to right,
+    #ff0000 0%,
+    #ffff00 17%,
+    #00ff00 33%,
+    #00ffff 50%,
+    #0000ff 67%,
+    #ff00ff 83%,
+    #ff0000 100%
+  ) !important;
 }
-*.SAT{
- background: linear-gradient(to right, #808080, #ff0000) !important;
+*.SAT {
+  background: linear-gradient(to right, #808080, #ff0000) !important;
 }
-*.LIGHT{
- background: linear-gradient(to right, #000000, #ff8080, #fff) !important;
+*.LIGHT {
+  background: linear-gradient(to right, #000000, #ff8080, #fff) !important;
 }
 .HUE,
 .SAT,
-.LIGHT{
- border-radius: 0.4rem;
- height: 1.8rem;
+.LIGHT {
+  border-radius: 0.4rem;
+  height: 1.8rem;
 }
 progress {
   border-radius: 0.4rem;
@@ -345,7 +357,16 @@ progress {
 }
 
 progress::-webkit-progress-bar {
-  background-image: linear-gradient(45deg, var(--bg-300) 25%, var(--bg-200) 25%, var(--bg-200) 50%, var(--bg-300) 50%, var(--bg-300) 75%, var(--bg-200) 75%, var(--bg-200) 100%);
+  background-image: linear-gradient(
+    45deg,
+    var(--bg-300) 25%,
+    var(--bg-200) 25%,
+    var(--bg-200) 50%,
+    var(--bg-300) 50%,
+    var(--bg-300) 75%,
+    var(--bg-200) 75%,
+    var(--bg-200) 100%
+  );
   background-size: 25px 25px;
   border-radius: 0.4rem;
   width: auto;
@@ -369,7 +390,6 @@ progress.Progress-Delete::-webkit-progress-value {
 #Slider-Input {
   margin-block-end: 0.5rem;
 }
-
 
 #Gradient-Indicator {
   height: 0.75rem;
@@ -491,7 +511,7 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .NavBar:hover {
-  width: 14rem
+  width: 14rem;
 }
 
 .TabTitle {
@@ -538,18 +558,17 @@ input[type="color"]::-webkit-color-swatch {
 
 .NavButton:enabled:hover,
 .NavButton:disabled {
-  background-color: var(--bg-300)
+  background-color: var(--bg-300);
 }
 
-.NavButton:hover:enabled .Icon{
+.NavButton:hover:enabled .Icon {
   transform: rotate(7deg) scale(1.1);
   filter: grayscale(0);
 }
 
 #Skin-Ideas.Tab,
 #Stitch.Tab,
-#Splash.Tab
-#ColorSwap.Tab {
+#Splash.Tab #ColorSwap.Tab {
   overflow: hidden;
 }
 
@@ -564,7 +583,7 @@ input[type="color"]::-webkit-color-swatch {
     ". ."
     "b b";
 }
-#ColorSwap{
+#ColorSwap {
   display: flex;
 }
 
@@ -575,7 +594,7 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #Origin-List,
-#Redirect-List{
+#Redirect-List {
   scrollbar-gutter: stable;
   word-wrap: break-word;
   hyphens: none;
@@ -599,7 +618,7 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #Idea-Count {
-  color: var(--accent)
+  color: var(--accent);
 }
 
 #Unlink-List {
@@ -630,19 +649,23 @@ input[type="color"]::-webkit-color-swatch {
 .Saved-Color-Item {
   height: 1.6rem;
 }
-#ColorSwap > .Target-Container{
-  display:grid;
+#ColorSwap > .Target-Container {
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   column-gap: 2rem;
-  background-image: linear-gradient(90deg, var(--bg-100) calc(33% - 0.5rem), var(--bg-300) calc(33% - 0.5rem), var(--bg-300) calc(66% - 0.5rem), var(--bg-100) calc(66% - 0.5rem), var(--bg-100) 100%);
+  background-image: linear-gradient(
+    90deg,
+    var(--bg-100) calc(33% - 0.5rem),
+    var(--bg-300) calc(33% - 0.5rem),
+    var(--bg-300) calc(66% - 0.5rem),
+    var(--bg-100) calc(66% - 0.5rem),
+    var(--bg-100) 100%
+  );
 }
 /* #ColorSwap > .Target-Container > .Input-Group:nth-child(3n+2){
   background: var(--bg-300);
   padding-inline: 1rem;
 } */
-
-
-
 
 .Material-Div,
 .Particle-Div {
@@ -686,11 +709,11 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .Emitter-Div button {
-  Color: var(--accent);
+  color: var(--accent);
   background: var(--bg-accent);
   border: none;
   border-radius: 0.4rem;
-  margin: 0.1rem
+  margin: 0.1rem;
 }
 
 .Prop-Block,
@@ -706,18 +729,17 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .Prop-Block {
-  width: 7.8rem;
+  width: 8rem;
 }
 
 .Prop-Block-Secondary {
-  width: 3.4rem;
+  width: 3.3rem;
 }
 
 .ColorHelp {
   padding: 0px !important;
   width: 1.5rem;
 }
-
 
 .dropbtn {
   color: white;
@@ -728,7 +750,7 @@ input[type="color"]::-webkit-color-swatch {
 
 div.dropdown {
   position: relative;
-  padding:0;
+  padding: 0;
   margin: 0.1rem;
   padding-inline: 1rem;
   background-color: var(--bg-200);
@@ -737,7 +759,7 @@ div.dropdown {
   text-align: center;
   color: var(--text-primary);
 }
-div.dropdown:hover{
+div.dropdown:hover {
   background-color: var(--bg-300);
 }
 /* Dropdown Content (Hidden by Default) */
@@ -755,7 +777,7 @@ div.dropdown:hover{
 
 /* Links inside the dropdown */
 .dropdown-content button {
-  display:grid !important;
+  display: grid !important;
   place-items: center;
   background-color: transparent;
   width: 100%;
@@ -775,7 +797,6 @@ div.dropdown:hover{
 .dropdown:hover .dropdown-content {
   display: block;
 }
-
 
 .Flex-Col {
   display: flex;
@@ -851,8 +872,6 @@ div.dropdown:hover{
   margin-top: auto;
 }
 
-
-
 #Dim {
   top: 0px;
   left: 0px;
@@ -922,8 +941,7 @@ div.dropdown:hover{
 .AlertModalBG {
   position: absolute;
   z-index: 100;
-  background-color:
-    var(--shadow);
+  background-color: var(--shadow);
   inset: 0;
 }
 
@@ -992,6 +1010,10 @@ div.dropdown:hover{
   outline: var(--gap) solid var(--accent-failure);
 }
 option,
-select{
+select {
   text-overflow: ellipsis;
+}
+
+.Pointer {
+  cursor: pointer;
 }
