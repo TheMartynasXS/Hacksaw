@@ -32,6 +32,8 @@ let RecolorMode = document.getElementById("Mode");
 let RecolorTarget = document.getElementById("Target");
 RecolorMode.value = Prefs.obj.PreferredMode;
 let ActiveFile = {};
+let mids = [];
+let pids = [];
 
 let T1 = document.getElementById("T1");
 let T2 = document.getElementById("T2");
@@ -43,7 +45,8 @@ let HUE = document.getElementById("Hue");
 let SAT = document.getElementById("Sat");
 let LIGHT = document.getElementById("Light");
 
-T1.checked = Prefs.obj.Targets[0];
+
+
 [T1, T2, T3, T4, T5].forEach((T, index) => {
   T.addEventListener("change", (Event) => {
     const targets = [
@@ -56,6 +59,7 @@ T1.checked = Prefs.obj.Targets[0];
     targets[index] = Event.target.checked;
     Prefs.Targets(targets);
   });
+  T.checked = Prefs.obj.Targets[index];
 });
 
 let BlankDynamic;
@@ -443,14 +447,9 @@ function MaterialParamDom(Params) {
   let dMid = Params.findIndex((item) => item.key.fnv("dynamicMaterial"));
 
   if (pVid >= 0) {
-    // console.log(Params[pVid].value.items);
     for (let i = 0; i < Params[pVid].value.items.length; i++) {
       if (Params[pVid].value.items[i].items[1] == undefined) continue;
-
       if (!/Color/i.test(Params[pVid].value.items[i].items[0].value)) continue;
-
-      // console.log(`${Params[pVid].value.items[i].items[0].value}`);
-      // console.log(Params[pVid].value.items[i]);
       let param_object = document
         .getElementsByTagName("template")[2]
         .content.cloneNode(true).firstElementChild;
@@ -461,13 +460,6 @@ function MaterialParamDom(Params) {
       )}; border: none;`;
       nodes.push(param_object);
     }
-    // Params[pVid].value.items.map((item) => {
-    //   let param_object = document
-    //     .getElementsByTagName("template")[2]
-    //     .content.cloneNode(true).firstElementChild;
-    //   param_object.children[1].innerText = item.name;
-    //   nodes.push(param_object);
-    // });
   }
   if (dMid >= 0) {
     let x = nodes.find(
@@ -476,30 +468,7 @@ function MaterialParamDom(Params) {
         Params[dMid].value.items[0].value.items[0].items[0].value
     );
     console.log(Params[dMid]);
-    // if (x != undefined) {
-    //   console.log(Params[dMid].value.items[0].value.items[0].items[0].value);
-    //   console.log(nodes);
-    //   console.log(x.children[3]);
-    //   console.log(Params[dMid].value.items[0].value.items[0].items[1].value.items);
-    // }
-    // let x = Params[pVid].value.items.find((item) => {
-    //   return (
-    //     item.items[0].value ==
-    //     Params[dMid].value.items[0].value.items[0].items[0].value
-    //   );
-    // })
-    // console.log(x.items)
   }
-  // if (pVid >= 0 && dMid >= 0) {
-  //   console.log(
-  //     `${Params[pVid].value.items.length} == ${Params[dMid].value.items[0].value.items.length}`
-  //   );
-  //   console.log(
-  //     Params[pVid].value.items.length ==
-  //       Params[dMid].value.items[0].value.items.length
-  //   );
-  // }
-  // nodes += param_object;
   return nodes;
 }
 
@@ -550,33 +519,293 @@ function ParticleDom(containers) {
   return nodes;
 }
 
+function filterIndices(array, condition) {
+  return array.reduce((acc, value, index) => {
+    if (condition(value)) acc.push(index);
+    return acc;
+  }, []);
+}
+
 function LoadFile(SkipAlert = true) {
   ParticleList.innerText = "";
   let Relative = "";
   for (let i = 0; i < ActiveFile.linked.value.items.length; i++) {
     Relative += `${ActiveFile.linked.value.items[i]}\n`;
   }
-  let Container = ActiveFile.entries.value.items;
+  let Containers = ActiveFile.entries.value.items;
 
-  let Containers = getContainers(ActiveFile);
-  ParticleList.append(...ParticleDom(Container));
-}
+  pids = filterIndices(Containers, (item) =>
+    item.value.name.fnv("VfxSystemDefinitionData")
+  );
+  mids = filterIndices(Containers, (item) =>
+    item.value.name.fnv("StaticMaterialDef")
+  );
 
-class Container {
-  constructor(item) {
-    this.key = item.key;
-    this.value = item.value;
+  for (let cid = 0; cid < pids.length; cid++) {
+    let ParticleDiv = document
+      .getElementsByTagName("template")[0]
+      .content.cloneNode(true).firstElementChild;
+
+    ParticleDiv.setAttribute("type", "vfx");
+
+    let Container = Containers[pids[cid]];
+
+    ParticleDiv.children[0].children[1].innerText =
+      Container.value.items.find((item) => item.key.fnv("particleName"))
+        ?.value ?? `unknown ${nodes.length + 1}`;
+    ParticleDiv.id = Container.key;
+    ParticleList.appendChild(ParticleDiv);
+
+    // console.log(Container.value.items)
+    let indices = filterIndices(
+      Container.value.items,
+      (item) =>
+        item.key.fnv("complexEmitterDefinitionData") ||
+        item.key.fnv("simpleEmitterDefinitionData")
+    );
+    for (let ddid = 0; ddid < indices?.length; ddid++) {
+      let DefDataDiv = document.createElement("div");
+      DefDataDiv.className = "DefDataDiv";
+      ParticleDiv.appendChild(DefDataDiv);
+      let Props = Container.value.items[indices[ddid]].value.items;
+      // console.log(Props)
+      for (let pid = 0; pid < Props.length; pid++) {
+        let PropItems = Props[pid].items;
+        // console.log(PropItems);
+        let RDID = PropItems?.findIndex((item) =>
+          item.key.fnv("reflectionDefinition")
+        );
+        let RDProp = PropItems[RDID]?.value.items;
+
+        let OFCID = RDProp?.findIndex((item) => item.key.fnv("fresnelColor")); // Outline Fresnel Color
+        let RFCID = RDProp?.findIndex((item) =>
+          item.key.fnv("reflectionFresnelColor")
+        ); // Reflective Fresnel Color
+        let LCID = PropItems?.findIndex((item) => item.key.fnv("lingerColor")); // Linger Color
+        let BCID = PropItems?.findIndex((item) => item.key.fnv("birthColor")); // Birth Color
+        let MCID = PropItems?.findIndex((item) => item.key.fnv("color")); // Main Color
+        let BMID = PropItems?.findIndex((item) => item.key.fnv("blendMode")); // Blend Mode
+        let DID = PropItems?.findIndex((item) => item.key.fnv("disabled"));
+        let OFBG, RFBG, LCBG, BCBG, MCBG;
+
+        let Emitter = document
+          .getElementsByTagName("template")[1]
+          .content.cloneNode(true).firstElementChild;
+
+        Emitter.children[1].innerText =
+          Props[pid].items[
+            Props[pid].items.findIndex((item) => item.key.fnv("emitterName"))
+          ]?.value;
+
+        if (OFCID >= 0) {
+          const OFColor = GetColor(RDProp[OFCID]);
+          OFBG = ToBG(OFColor);
+
+          Emitter.children[2].onclick = () => {
+            Palette = _.cloneDeep(OFColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        Emitter.children[2].className = `Prop-Block-Secondary Pointer ${
+          OFBG ? "" : "Blank-Obj"
+        }`;
+        Emitter.children[2].style = `background: ${OFBG ? OFBG : ""}`;
+
+        if (RFCID >= 0) {
+          const RFColor = GetColor(RDProp[RFCID]);
+          RFBG = ToBG(RFColor);
+
+          ReflectiveDiv.onclick = () => {
+            Palette = _.cloneDeep(RFColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        Emitter.children[3].className = `Prop-Block-Secondary Pointer ${
+          RFBG ? "" : "Blank-Obj"
+        }`;
+        Emitter.children[3].style = `background: ${RFBG ? RFBG : ""}`;
+
+        breakpoint: if (LCID >= 0) {
+          LDID = PropItems[LCID].value.items.findIndex((item) =>
+            item.key.fnv("dynamics")
+          );
+          if (LDID < 0) break breakpoint;
+          let PropType = PropItems[LCID].value.items[LDID];
+          let DynID = PropType.value.items.findIndex((item) =>
+            item.key.fnv("dynamics")
+          );
+          if (DynID >= 0) {
+            let ProbTableID = PropType.value.items[DynID].value.items.findIndex(
+              (item) => item.key.fnv("probabilityTables")
+            );
+            if (ProbTableID >= 0)
+              PropType.value.items[DynID].value.items.shift();
+          }
+          const LCColor = GetColor(
+            PropItems[LCID].value.items[LDID].value.items
+          );
+          LCBG = ToBG(LCColor);
+
+          Emitter.children[4].onclick = () => {
+            Palette = _.cloneDeep(LCColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        Emitter.children[4].className = `Prop-Block-Secondary Pointer ${
+          LCBG ? "" : "Blank-Obj"
+        }`;
+        Emitter.children[4].style = `background: ${LCBG ? LCBG : ""}`;
+
+        if (BCID >= 0) {
+          let PropType = PropItems[BCID].value.items;
+          let DynID = PropType.findIndex((item) => item.key.fnv("dynamics"));
+          if (DynID >= 0) {
+            let ProbTableID = PropType[DynID].value.items.findIndex((item) =>
+              item.key.fnv("probabilityTables")
+            );
+            if (ProbTableID >= 0) PropType[DynID].value.items.shift();
+          }
+          const BCColor = GetColor(PropItems[BCID].value.items);
+          BCBG = ToBG(BCColor);
+
+          Emitter.children[5].onclick = () => {
+            Palette = _.cloneDeep(BCColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        Emitter.children[5].className = `Prop-Block-Secondary Pointer ${
+          BCBG ? "" : "Blank-Obj"
+        }`;
+        Emitter.children[5].style = `background: ${BCBG ? BCBG : ""}`;
+
+        if (MCID >= 0) {
+          let PropType = PropItems[MCID].value.items;
+          let DynID = PropType?.findIndex((item) => item.key.fnv("dynamics"));
+          if (DynID >= 0) {
+            let ProbTableID = PropType[DynID].value.items.findIndex((item) =>
+              item.key.fnv("probabilityTables")
+            );
+            if (ProbTableID >= 0) PropType[DynID].value.items.shift();
+          }
+          const MCColor = GetColor(PropItems[MCID].value.items);
+          MCBG = ToBG(MCColor);
+
+          Emitter.children[6].onclick = () => {
+            Palette = _.cloneDeep(MCColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        Emitter.children[6].className = `Prop-Block Pointer ${
+          MCBG ? "" : "Blank-Obj"
+        }`;
+        Emitter.children[6].style = `background: ${MCBG ? MCBG : ""}`;
+
+        let BlendMode =
+          BMID >= 0
+            ? document.createElement("input")
+            : document.createElement("div");
+        BlendMode.className = `Blend-Mode`;
+
+        if (BMID >= 0) {
+          BlendMode.type = "number";
+          BlendMode.min = 0;
+          BlendMode.max = 9;
+          BlendMode.placeholder = PropItems[BMID].value;
+          BlendMode.onchange = (Event) => {
+            if (Event.target.value != "") {
+              PropItems[BMID].value = parseInt(Event.target.value);
+              Event.target.placeholder = parseInt(Event.target.value);
+            }
+          };
+        } else {
+          BlendMode.style = `visibility: hidden`;
+        }
+        Emitter.appendChild(BlendMode);
+
+        let disabled = document.createElement("input");
+        disabled.type = "checkbox";
+        disabled.className = `CheckBox Disable`;
+        if (DID >= 0) {
+          disabled.checked = PropItems[DID].value;
+        } else {
+          DID = PropItems.length;
+          PropItems.push({
+            key: "disabled",
+            type: "bool",
+            value: false,
+          });
+        }
+        disabled.onchange = (Event) => {
+          PropItems[DID].value = Event.target.checked;
+          console.log(Event.target.checked);
+        };
+        Emitter.appendChild(disabled);
+
+        DefDataDiv.appendChild(Emitter);
+      }
+    }
   }
-  toJSON() {
-    return {
-      key: this.key,
-      value: this.value,
-    };
-  }
-}
+  for (let cid = 0; cid < mids.length; cid++) {
+    let ParticleDiv = document
+      .getElementsByTagName("template")[0]
+      .content.cloneNode(true).firstElementChild;
+    ParticleDiv.setAttribute("type", "material");
+    let Container = Containers[mids[cid]];
 
-function getContainers(bin) {
-  return bin.entries.value.items;
+    ParticleDiv.children[0].children[1].innerText =
+      "[Material] " +
+        Container.value.items
+          .find((item) => item.key.fnv("name"))
+          ?.value.split("Materials/")
+          .pop() ?? `unknown ${nodes.length + 1}`;
+    ParticleDiv.id = Container.key;
+    ParticleList.appendChild(ParticleDiv);
+
+    let DefDataDiv = document.createElement("div");
+    DefDataDiv.className = "DefDataDiv";
+    ParticleDiv.appendChild(DefDataDiv);
+
+    let Params = Container.value.items;
+
+    let pVid = Params.findIndex((item) => item.key.fnv("paramValues"));
+    let dMid = Params.findIndex((item) => item.key.fnv("dynamicMaterial"));
+
+    if (pVid >= 0) {
+      for (let i = 0; i < Params[pVid].value.items.length; i++) {
+        if (Params[pVid].value.items[i].items[1] == undefined) continue;
+        if (!/Color/i.test(Params[pVid].value.items[i].items[0].value))
+          continue;
+        let param_object = document
+          .getElementsByTagName("template")[2]
+          .content.cloneNode(true).firstElementChild;
+        param_object.children[1].innerText =
+          Params[pVid].value.items[i].items[0].value;
+        param_object.children[2].style = `background: ${ToBG(
+          GetColor(Params[pVid].value.items[i].items[1])
+        )}; border: none;`;
+        param_object.children[2].onclick = () => {
+          Palette = _.cloneDeep(GetColor(Params[pVid].value.items[i].items[1]));
+          MapPalette();
+          document.getElementById("Slider-Input").value = Palette.length;
+        };
+        DefDataDiv.appendChild(param_object);
+      }
+    }
+    // if (dMid >= 0) {
+    //   let x = nodes.find(
+    //     (item) =>
+    //       item.children[1].innerText ==
+    //       Params[dMid].value.items[0].value.items[0].items[0].value
+    //   );
+    //   console.log(Params[dMid]);
+
+    // }
+  }
 }
 
 function ColorHelp() {
@@ -657,23 +886,12 @@ function CheckChildren(Particles, State) {
     }
   }
 }
-function ChildrenChecked(Dom) {
-  for (let i = 1; i < Dom.children[0]?.children.length; i++) {
-    for (let j = 0; j < Dom.children[i]?.children.length; j++) {
-      if (Dom.children[i].children[j].children[0].checked) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
 
 function IsBW(A, B, C) {
   return A == B && B == C ? A == 0 || A == 1 : false;
 }
 
 function RecolorProp(ColorProp, ConstOnly = false) {
-  console.log(ColorProp);
   if (ConstOnly) {
     let NewColor;
     switch (RecolorMode.value) {
@@ -1035,124 +1253,139 @@ function RecolorSelected() {
   FileSaved = false;
   ipcRenderer.send("PushHistory", ActiveFile);
 
-  let Container = ActiveFile.entries.value.items;
-  let Pdom = ParticleList.children;
-  for (let pid = 0; pid < Container.length; pid++) {
-    if (
-      !Pdom[pid].children[0].children[0].checked &&
-      !ChildrenChecked(Pdom[pid])
-    )
-      continue;
-    // console.log(Pdom[pid]);
-    // console.log(Container[pid].value.items);
+  let Containers = ActiveFile.entries.value.items;
+  let pDom = ParticleList.children;
+  let domMid = -1;
 
-    let DefData = Container[pid].value.items;
-    let DomDefData = ParticleList.children[pid].children;
-    if (Container[pid].value.name.fnv("VfxSystemDefinitionData")) {
-      for (let did = 1; did < DomDefData.length; did++) {
-        let bdid = did - 1;
-        for (let eid = 0; eid < DomDefData[did].children.length; eid++) {
-          let domEmitDef = DomDefData[did].children[eid].children;
-          let emitDef = DefData[bdid].value.items[eid].items;
-          if (!domEmitDef[0].checked) continue;
-          let RDID = emitDef.findIndex((item) =>
-            item.key.fnv("reflectionDefinition")
-          );
-          let RDProp = emitDef[RDID]?.value.items;
-          let OFCID = RDProp?.findIndex((item) => item.key.fnv("fresnelColor")); // Outline Fresnel Color
-          let RFCID = RDProp?.findIndex((item) =>
-            item.key.fnv("reflectionFresnelColor")
-          ); // Reflective Fresnel Color
-          let LCID = emitDef?.findIndex((item) => item.key.fnv("lingerColor")); // Linger Color
-          let BCID = emitDef?.findIndex((item) => item.key.fnv("birthColor")); // Birth Color
-          let MCID = emitDef?.findIndex((item) => item.key.fnv("color"));
-          if (OFCID >= 0 && T1.checked) {
-            RDProp[OFCID] = RecolorProp(RDProp[OFCID], true);
-            const OFColor = GetColor(RDProp[OFCID]);
-            domEmitDef[2].style.background = ToBG(OFColor);
-            domEmitDef[2].onclick = () => {
-              Palette = _.cloneDeep(OFColor);
-              MapPalette();
-              document.getElementById("Slider-Input").value = Palette.length;
-            };
-          }
-          if (RFCID >= 0 && T2.checked) {
-            RDProp[RFCID] = RecolorProp(RDProp[RFCID], true);
-            const RFColor = GetColor(RDProp[RFCID]);
-            domEmitDef[3].style.background = ToBG(RFColor);
-            domEmitDef[3].onclick = () => {
-              Palette = _.cloneDeep(RFColor);
-              MapPalette();
-              document.getElementById("Slider-Input").value = Palette.length;
-            };
-          }
-          breakpoint: if (LCID >= 0 && T3.checked) {
-            LDID = emitDef[LCID].value.items.findIndex((item) =>
-              item.key.fnv(1803004106)
-            );
-            if (LDID < 0) break breakpoint;
-            emitDef[LCID].value.items[LDID] = RecolorProp(
-              emitDef[LCID].value.items[LDID]
-            );
-            const LCColor = GetColor(
-              emitDef[LCID].value.items[LDID].value.items
-            );
-            domEmitDef[4].style.background = ToBG(LCColor);
-            domEmitDef[4].onclick = () => {
-              Palette = _.cloneDeep(LCColor);
-              MapPalette();
-              document.getElementById("Slider-Input").value = Palette.length;
-            };
-          }
-          if (BCID >= 0 && T4.checked) {
-            emitDef[BCID] = RecolorProp(emitDef[BCID]);
-            const BCColor = GetColor(emitDef[BCID].value.items);
-            domEmitDef[5].style.background = ToBG(BCColor);
-            domEmitDef[5].onclick = () => {
-              Palette = _.cloneDeep(BCColor);
-              MapPalette();
-              document.getElementById("Slider-Input").value = Palette.length;
-            };
-          }
-          if (MCID >= 0 && T5.checked) {
-            emitDef[MCID] = RecolorProp(emitDef[MCID]);
-            const MCColor = GetColor(emitDef[MCID].value.items);
-            domEmitDef[6].style.background = ToBG(MCColor);
-            domEmitDef[6].onclick = () => {
-              Palette = _.cloneDeep(MCColor);
-              MapPalette();
-              document.getElementById("Slider-Input").value = Palette.length;
-            };
-          }
+  for (let i = 0; i < ParticleList.children.length; i++) {
+    if (ParticleList.children[i].getAttribute("type") == "material") domMid = i;
+  }
+  for (let cid = 0; cid < (domMid >= 0?domMid:pDom.length); cid++) {
+    let id = pids[cid];
+    let Container = Containers[id];
+
+    let indices = filterIndices(
+      Container.value.items,
+      (item) =>
+        item.key.fnv("complexEmitterDefinitionData") ||
+        item.key.fnv("simpleEmitterDefinitionData")
+    );
+
+    for (let ddid = 0; ddid < indices?.length; ddid++) {
+      let Props = Container.value.items[indices[ddid]].value.items;
+      // console.log(Props)
+      for (let pid = 0; pid < Props.length; pid++) {
+        let PropItems = Props[pid].items;
+        domEmitDef = pDom[cid].children[1 + ddid].children[pid].children;
+        if (!domEmitDef[0].checked) continue;
+
+        let RDID = PropItems.findIndex((item) =>
+          item.key.fnv("reflectionDefinition")
+        );
+        let RDProp = PropItems[RDID]?.value.items;
+        let OFCID = RDProp?.findIndex((item) => item.key.fnv("fresnelColor")); // Outline Fresnel Color
+        let RFCID = RDProp?.findIndex((item) =>
+          item.key.fnv("reflectionFresnelColor")
+        ); // Reflective Fresnel Color
+        let LCID = PropItems?.findIndex((item) => item.key.fnv("lingerColor")); // Linger Color
+        let BCID = PropItems?.findIndex((item) => item.key.fnv("birthColor")); // Birth Color
+        let MCID = PropItems?.findIndex((item) => item.key.fnv("color"));
+        if (OFCID >= 0 && T1.checked) {
+          RDProp[OFCID] = RecolorProp(RDProp[OFCID], true);
+          const OFColor = GetColor(RDProp[OFCID]);
+          domEmitDef[2].style.background = ToBG(OFColor);
+          domEmitDef[2].onclick = () => {
+            Palette = _.cloneDeep(OFColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
         }
+        if (RFCID >= 0 && T2.checked) {
+          RDProp[RFCID] = RecolorProp(RDProp[RFCID], true);
+          const RFColor = GetColor(RDProp[RFCID]);
+          domEmitDef[3].style.background = ToBG(RFColor);
+          domEmitDef[3].onclick = () => {
+            Palette = _.cloneDeep(RFColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        breakpoint: if (LCID >= 0 && T3.checked) {
+          LDID = emitDef[LCID].value.items.findIndex((item) =>
+            item.key.fnv(1803004106)
+          );
+          if (LDID < 0) break breakpoint;
+          PropItems[LCID].value.items[LDID] = RecolorProp(
+            PropItems[LCID].value.items[LDID]
+          );
+          const LCColor = GetColor(
+            PropItems[LCID].value.items[LDID].value.items
+          );
+          domEmitDef[4].style.background = ToBG(LCColor);
+          domEmitDef[4].onclick = () => {
+            Palette = _.cloneDeep(LCColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        if (BCID >= 0 && T4.checked) {
+          PropItems[BCID] = RecolorProp(PropItems[BCID]);
+          const BCColor = GetColor(PropItems[BCID].value.items);
+          domEmitDef[5].style.background = ToBG(BCColor);
+          domEmitDef[5].onclick = () => {
+            Palette = _.cloneDeep(BCColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        if (MCID >= 0 && T5.checked) {
+          PropItems[MCID] = RecolorProp(PropItems[MCID]);
+          const MCColor = GetColor(PropItems[MCID].value.items);
+          domEmitDef[6].style.background = ToBG(MCColor);
+          domEmitDef[6].onclick = () => {
+            Palette = _.cloneDeep(MCColor);
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
+        //?
       }
-    } else if (Container[pid].value.name.fnv("StaticMaterialDef")) {
-      console.log(DomDefData);
-      console.log(DefData);
-      let paramIndex = DefData.findIndex((item) => item.key.fnv("paramValues"));
-
-      console.log(paramIndex);
-
-      for (let i = 0; i < DomDefData[1].children.length; i++) {
-        if (!DomDefData[1].children[i].children[0].checked) continue;
-        console.log(DomDefData[1].children[i].children[1]);
-        let valueIndex = DefData[paramIndex].value.items.findIndex((item) =>
-          item.items[0].value.fnv(
-            DomDefData[1].children[i].children[1].innerText
-          )
-        );
-        DefData[paramIndex].value.items[valueIndex].items[1] = RecolorProp(
-          DefData[paramIndex].value.items[valueIndex].items[1],
-          true
-        );
-        DomDefData[1].children[i].children[2].style.background = ToBG(
-          GetColor(DefData[paramIndex].value.items[valueIndex].items[1])
-        )
-      }
-    } else {
     }
   }
+  
+  for (let cid = domMid; cid < pDom.length; cid++) {
+    if (mids.length == 0) break;
+    let id = mids[cid - domMid];
+    let Container = Containers[id];
+    // continue
+    let Params = Container.value.items;
 
+    let pVid = Params.findIndex((item) => item.key.fnv("paramValues"));
+    let dMid = Params.findIndex((item) => item.key.fnv("dynamicMaterial"));
+
+    let paramValues = Params[pVid]?.value.items;
+    // console.log(paramValues);
+    let indices = filterIndices(paramValues, (item) =>
+      /Color/i.test(item.items[0].value)
+    );
+    if (pVid >= 0) {
+      for (let ddid = 0; ddid < indices?.length; ddid++) {
+        let id = indices[ddid];
+        let domEmitDef = pDom[cid].children[1].children[ddid];
+        if (!domEmitDef.children[0].checked) continue;
+        paramValues[id].items[1] = RecolorProp(paramValues[id].items[1], true);
+
+        domEmitDef.children[2].style = `background: ${ToBG(
+          GetColor(paramValues[id].items[1])
+        )}; border: none;`;
+        domEmitDef.children[2].onclick = () => {
+          Palette = _.cloneDeep(GetColor(paramValues[id].items[1]));
+          MapPalette();
+          document.getElementById("Slider-Input").value = Palette.length;
+        };
+      }
+    }
+  }
   ipcRenderer.send("UpdateBin", ActiveFile);
 }
 
@@ -1161,7 +1394,7 @@ function Undo() {
 
   if (response != 0) {
     ActiveFile = response.File;
-  }else{
+  } else {
     return 0;
   }
 
@@ -1173,6 +1406,7 @@ function Undo() {
 async function SaveBin() {
   ipcRenderer.send("SaveBin");
   FileSaved = true;
+  // ipcRenderer.send("Message")
 }
 
 function SaveSample() {

@@ -13,6 +13,8 @@ const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json");
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json");
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json");
 
+let openedBins = new Set();
+
 //#region variables
 let Prefs = fs.existsSync(PrefsPath)
   ? JSON.parse(fs.readFileSync(PrefsPath))
@@ -102,6 +104,7 @@ ipcMain.on("get-ssx", (event) => {
   event.returnValue = [Prefs, Samples, xRGBA];
 });
 ipcMain.on("update-settings", (event, arg) => {
+  console.log(arg);
   Prefs = JSON.parse(arg);
 });
 ipcMain.on("update-samples", (event, arg) => {
@@ -116,6 +119,12 @@ app.on("window-all-closed", () => {
   fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
   fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
   fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
+  for(let bin of openedBins){
+    let jsonName = bin.slice(0, -4) + ".json"
+    if (fs.statSync(jsonName).mtimeMs < fs.statSync(bin).mtimeMs) {
+      fs.unlinkSync(jsonName);
+    }
+  }
   app.quit();
 });
 
@@ -189,6 +198,7 @@ ipcMain.on("FileSelect", (event, arg) => {
 ipcMain.on("UserPath", (event) => {
   event.returnValue = app.getPath("userData");
 });
+
 ipcMain.on(
   "Message",
   (event, props = { title: "untitled", message: "unknownerror" }) => {
@@ -275,6 +285,7 @@ ipcMain.on("OpenBin", (event) => {
       message: "Select a bin file",
     })[0];
     FileCache = [];
+    openedBins.add(FilePath);
   } catch (error) {
     event.returnValue = undefined;
     console.log(FilePath);
@@ -332,6 +343,16 @@ ipcMain.on("SaveBin", (event) => {
     FilePath.slice(0, -4) + ".json",
     JSON.stringify(currentFile, null, 2)
   );
+  let before = fs.statSync(FilePath).mtimeMs;
   execSync(`"${Prefs.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}`);
-  event.returnValue = 0;
+  let after = fs.statSync(FilePath).mtimeMs;
+  if (after > before) {
+    dialog.showMessageBox(null, {
+      type: "info",
+      title: "Success",
+      message: "Bin saved successfully!",
+    });
+    event.returnValue = 0;
+  }
+  event.returnValue = 1;
 });

@@ -65,7 +65,7 @@
                 <input class="Range Margin-Top" id="Slider-Input" type="range" min="1" value="1" max="20"
                     oninput="ChangeColorCount(this.value)" />
             </div>
-            <div class="Input-Group">
+            <div class="Input-Group"  style="display:grid;grid-template-columns: auto 1fr auto 1fr auto 1fr auto">
                 <label class="Label Flex-1" id="Title">Hue:</label>
                 <input class="Ellipsis Filter Flex-1" type="number" id="Hue" placeholder="-360 to 360" min="-360"
                     value="0" max="360">
@@ -86,7 +86,7 @@
                     </div>
                 </div>
             </div>
-            <div class="Flex Input-Group Margin-Top Margin-Bottom">
+            <div class="Input-Group Margin-Top Margin-Bottom" style="display:grid; grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;gap:0.32rem;">
                 <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox"
                     onchange="CheckToggle(this)">
                 <input class="Ellipsis Flex-3 Filter" type="text" id="Filter" placeholder="Filter by Particle Name"
@@ -134,23 +134,30 @@
                 </div>
             </template>
             <template>
-                <div class="Flex Emitter-Div">
+                <div class="new-emitter" >
+                    <input type="checkbox" class="CheckBox">
+                    <div class="Label Flex-1 Ellipsis" style="width:auto;padding:0;">placeholder</div>
+                    <div class="" color-type="fresnelColor"></div>
+                    <div class="" color-type="reflectionFresnelColor"></div>
+                    <div class="" color-type="linger"></div>
+                    <div class="" color-type="birthColor"></div>
+                    <div class="" color-type="color"></div>
+                </div>
+                <!-- <div class="Flex Emitter-Div">
                     <input type="checkbox" class="CheckBox">
                     <div class="Label Flex-1 Ellipsis">placeholder</div>
-                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="fresnelColor" onclick="ClickColor(this)"></div>
-                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="reflectionFresnelColor" onclick="ClickColor(this)"></div>
-                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="linger" onclick="ClickColor(this)"></div>
-                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="birthColor" onclick="ClickColor(this)"></div>
-                    <div class="Prop-Block Pointer Blank-Obj" color-type="color" onclick="ClickColor(this)"></div>
-                    <input class="Blend-Mode" type="number" min="0" max="9" placeholder="1">
-                    <input type="checkbox" class="CheckBox Disable">
-                </div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="fresnelColor"></div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="reflectionFresnelColor"></div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="linger"></div>
+                    <div class="Prop-Block-Secondary Pointer Blank-Obj" color-type="birthColor"></div>
+                    <div class="Prop-Block Pointer Blank-Obj" color-type="color"></div>
+                </div> -->
             </template>
             <template>
                 <div class="Flex Emitter-Div">
                     <input type="checkbox" class="CheckBox">
                     <div class="Label Flex-1 Ellipsis">placeholder</div>
-                    <div class="Prop-Block Pointer Blank-Obj" color-type="material" onclick="ClickMaterial(this)"></div>
+                    <div class="Prop-Block Pointer Blank-Obj" color-type="material"></div>
                 </div>
             </template>
             <script src="../javascript/tabs/binsplash.js"></script>
