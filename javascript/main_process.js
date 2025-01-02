@@ -113,6 +113,9 @@ ipcMain.on("update-samples", (event, arg) => {
 ipcMain.on("update-xrgba", (event, arg) => {
   xRGBA = JSON.parse(arg);
 });
+ipcMain.on("AddOpened", (event, arg) => {
+  openedBins.add(arg);
+});
 
 app.setAppUserModelId("Hacksaw " + app.getVersion());
 app.on("window-all-closed", () => {
@@ -311,6 +314,7 @@ ipcMain.on("OpenBin", (event) => {
     File: currentFile,
   };
 });
+
 
 ipcMain.on("PushHistory", (event, arg) => {
   FileCache.push(arg);

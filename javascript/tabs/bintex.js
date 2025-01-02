@@ -60,12 +60,6 @@ async function SelectWadFolder(Path = undefined) {
   BinFiles = getAllFiles(WadPath, BinFiles).filter(file => file.endsWith(".bin"))
 
   Progress.max = BinFiles.length
-  for (let i = 0; i < BinFiles.length; i++) {
-    // ToJson(BinFiles[i])
-    // BinCount.innerText = `Converting Bins - ${Progress.value}/${Progress.max}`
-    // await sleep(10)
-    // Progress.value = i + 1
-  }
 
   ipcRenderer.send("Bin2Json", WadPath)
   
@@ -151,7 +145,7 @@ async function SelectWadFolder(Path = undefined) {
 
   Files2Delete = AssetFiles.filter(item => {
     slice = item.slice(WadPath.length + 1).toLowerCase()
-    return !CombinedOutput.includes(slice) && !slice.split("/").slice(-1)[0].startsWith("2x_") && !slice.split("/").slice(-1)[0].startsWith("4x_")
+    return !CombinedOutput.includes(slice) && !slice.split("/").slice(-1)[0].startsWith("2x_") && !slice.split("/").slice(-1)[0].startsWith("4x_") && !slice.includes("\/hud\/")
   })
 
   //Files2Delete = Files2Delete.filter(item => !item.endsWith(".anm"))
@@ -182,7 +176,7 @@ async function SelectWadFolder(Path = undefined) {
     }
   }
   fs.writeFileSync(`${WadPath}\\Missing.jsonc`, JSON.stringify(MissingOutput, null, 2))
-
+  // get empty folders
 }
 
 let Confirm = 0
@@ -206,7 +200,6 @@ async function DeleteUnused() {
 
   if (Files2Delete.length > 0) {
     for (let i = 0; i < Files2Delete.length; i++) {
-      await sleep(10)
       Progress.value = i + 1
       UnlinkList.removeChild(UnlinkList.firstChild)
       fs.unlinkSync(Files2Delete[i])
@@ -221,8 +214,9 @@ async function DeleteUnused() {
   }
   UnlinkList.innerText = ""
   Progress.classList.replace('Progress-Delete', 'Progress-Complete')
-}
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+
+  let EmptyFolders = [];
+  EmptyFolders = getAllFiles(WadPath, []).filter(file => fs.lstatSync(file).isDirectory() && fs.readdirSync(file).length == 0)
+  console.log(EmptyFolders);
 }
