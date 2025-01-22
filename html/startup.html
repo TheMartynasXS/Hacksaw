@@ -94,21 +94,6 @@
   const { Prefs } = require('../javascript/utils.js');
   const fs = require('fs');
 
-  let secrets = {
-    'bud': {
-      'name': 'budlibu500',
-      'icon': '../css/svg/Misc/GameIconsMoneyStack.svg',
-    },
-    'goat': {
-      'name': 'hellgoat2',
-      'icon': '../css/svg/Misc/FluentEmojiHighContrastGoat.svg',
-    },
-    'cz': {
-      'name': 'zzzzzzz2930',
-      'icon': '../css/svg/UI/Delete.svg',
-    }
-  }
-
   function SelectRitoBin() {
     Prefs.RitoBinPath();
     if (fs.existsSync(Prefs.obj.RitoBinPath)) {
