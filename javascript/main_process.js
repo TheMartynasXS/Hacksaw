@@ -9,7 +9,6 @@ const fs = require("fs");
 const { execSync, exec } = require("child_process");
 
 const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json");
-
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json");
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json");
 
@@ -61,63 +60,57 @@ const createWindow = (htmlDir) => {
 };
 
 app.whenReady().then(() => {
+  // Create required files if they don't exist
   if (!fs.existsSync(SamplesPath)) {
     fs.writeFileSync(SamplesPath, "[]", "utf8");
   }
   if (!fs.existsSync(xRGBAPath)) {
     fs.writeFileSync(xRGBAPath, "[]", "utf8");
   }
-  if (
-    !fs.existsSync(PrefsPath) ||
-    Prefs?.RitoBinPath == undefined ||
-    Prefs?.RitoBinPath?.length == 0
-  ) {
-    let button = dialog.showMessageBoxSync(null, {
-      type: "warning",
-      title: "Ritobin Missing",
-      defaultId: 2,
-      buttons: ["Continue", "cancel"],
-      message: "Select Ritobin_cli.exe before continuing.",
-    });
-    if (button == 0) {
-      Prefs.RitoBinPath = dialog.showOpenDialogSync({
-        title: "Select ritobin_cli.exe!",
-        filters: [{ name: "ritobin_cli", extensions: ["exe"] }],
-        properties: ["openFile"],
-      })[0];
-      fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
-    } else {
-      fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
-      fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
-      fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
-      app.quit();
-      return 0;
-    }
+
+  // Check if this is first startup (no prefs file or no ritobin path)
+  const isFirstStartup = !fs.existsSync(PrefsPath) || 
+                        !Prefs?.RitoBinPath || 
+                        Prefs.RitoBinPath.length === 0;
+
+  if (isFirstStartup) {
+    fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
+    fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
+    fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
   }
+
   if (!Prefs.hasOwnProperty("Regenerate")) {
     Prefs.Regenerate = false;
   }
-  createWindow("../html/binsplash.html");
+
+  // Load appropriate window based on startup state
+  const windowPath = isFirstStartup ? "../html/startup.html" : "../html/binsplash.html";
+  createWindow(windowPath);
 });
 
 ipcMain.on("get-ssx", (event) => {
   event.returnValue = [Prefs, Samples, xRGBA];
 });
+
 ipcMain.on("update-settings", (event, arg) => {
   console.log(arg);
   Prefs = JSON.parse(arg);
 });
+
 ipcMain.on("update-samples", (event, arg) => {
   Samples = JSON.parse(arg);
 });
+
 ipcMain.on("update-xrgba", (event, arg) => {
   xRGBA = JSON.parse(arg);
 });
+
 ipcMain.on("AddOpened", (event, arg) => {
   openedBins.add(arg);
 });
 
 app.setAppUserModelId("Hacksaw " + app.getVersion());
+
 app.on("window-all-closed", () => {
   fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
   fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
@@ -315,11 +308,11 @@ ipcMain.on("OpenBin", (event) => {
   };
 });
 
-
 ipcMain.on("PushHistory", (event, arg) => {
   FileCache.push(arg);
   event.returnValue = 0;
 });
+
 ipcMain.on("PopHistory", (event) => {
   if (FileCache.length > 0) {
     currentFile = FileCache.pop();
@@ -331,12 +324,14 @@ ipcMain.on("PopHistory", (event) => {
     event.returnValue = 0;
   }
 });
+
 ipcMain.on("PullBin", (event) => {
   event.returnValue = {
     Path: FilePath,
     File: currentFile,
   };
 });
+
 ipcMain.on("UpdateBin", (event, arg) => {
   currentFile = arg;
   event.returnValue = 0;
@@ -353,7 +348,7 @@ ipcMain.on("SaveBin", (event) => {
   if (after > before) {
     dialog.showMessageBox(null, {
       type: "info",
-      title: "Success",
+      title: "Success", 
       message: "Bin saved successfully!",
     });
     event.returnValue = 0;

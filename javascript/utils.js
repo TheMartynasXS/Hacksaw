@@ -412,6 +412,12 @@ function fnvCheck(x, y) {
     x.toString().toLowerCase() == y.toLowerCase() || x == fnv1a(y.toLowerCase())
   );
 }
+function filterIndices(array, condition) {
+  return array.reduce((acc, value, index) => {
+    if (condition(value)) acc.push(index);
+    return acc;
+  }, []);
+}
 
 module.exports = {
   extendPrototypes,
@@ -422,4 +428,5 @@ module.exports = {
   CreateMessage,
   getAllFiles,
   fnvCheck,
+  filterIndices,
 };

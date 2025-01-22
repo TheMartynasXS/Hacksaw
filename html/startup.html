@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+
+    <link rel="stylesheet" href="../css/index.css">
+
+</head>
+
+<style>
+  h1{
+    font-size: 2rem;
+    color: var(--accent);
+  }
+  body {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    place-items: center;
+    background: var(--bg-300);
+    overflow: hidden;
+  }
+  body > div {
+    display: flex;
+    flex-direction: column;
+    gap:2rem;
+  }
+  #animation {
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    animation: fadeIn 2s ease-in-out forwards,
+      rainbow 4s infinite;
+  }
+
+  #logo {
+    width: 64px;
+    height: 64px;
+    transform: scale(0);
+    animation: scaleIn 1s ease-in-out 0.5s forwards;
+    filter: drop-shadow(0 0 10px var(--shadow));
+  }
+  #Select-Files{
+    opacity: 0;
+    animation:  rainbow 4s infinite,
+                fadeIn 2s ease-in-out forwards;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes rainbow{
+    0%{
+      filter: hue-rotate(0deg) drop-shadow(0 0 10px var(--shadow));
+    }
+    50%{
+      filter: hue-rotate(180deg) drop-shadow(0 0 40px var(--shadow));
+    }
+    100%{
+      filter: hue-rotate(360deg) drop-shadow(0 0 10px var(--shadow));
+    }
+  }
+
+  
+</style>
+<body>
+  <div>
+    <div id="animation">
+      <img src="../build/icon.ico" alt="Hacksaw Logo" id="logo">
+      <h1>Hacksaw</h1>
+      <span id="subtext" style="color: var(--text-primary);">Select Ritobin_cli.exe to begin using Hacksaw</span>
+    </div>
+    <div class="Input-Group ">
+        <button class="Flex-1 Special-Input" onclick="SelectRitoBin()" id="Select-Files">Select Ritobin_cli.exe</button>
+    </div>
+  </div>
+  
+</body> 
+<template id="">
+
+</template>
+<script>
+  const { Prefs } = require('../javascript/utils.js');
+  const fs = require('fs');
+
+  let secrets = {
+    'bud': {
+      'name': 'budlibu500',
+      'icon': '../css/svg/Misc/GameIconsMoneyStack.svg',
+    },
+    'goat': {
+      'name': 'hellgoat2',
+      'icon': '../css/svg/Misc/FluentEmojiHighContrastGoat.svg',
+    },
+    'cz': {
+      'name': 'zzzzzzz2930',
+      'icon': '../css/svg/UI/Delete.svg',
+    }
+  }
+
+  function SelectRitoBin() {
+    Prefs.RitoBinPath();
+    if (fs.existsSync(Prefs.obj.RitoBinPath)) {
+      window.location.href = './binsplash.html';
+    }
+  }
+  
+</script>
+</html>

@@ -59,37 +59,37 @@ class NavBar extends HTMLElement {
         let tabs = [
             {
                 "name": "Splash",
-                "icon": "../css/svg/Paintroller.svg",
+                "icon": "../css/svg/Tabs/Paintroller.svg",
                 "link": "binsplash.html"
             },
             {
                 "name": "Stitch",
-                "icon": "../css/svg/Stitch.svg",
+                "icon": "../css/svg/Tabs/Stitch.svg",
                 "link": "stitch.html"
             },
             {
                 "name": "BinTex",
-                "icon": "../css/svg/ListBox.svg",
+                "icon": "../css/svg/Tabs/ListBox.svg",
                 "link": "bintex.html"
             },
             {
                 "name": "Particle Mover",
-                "icon": "../css/svg/Transfer.svg",
+                "icon": "../css/svg/Tabs/Transfer.svg",
                 "link": "mover.html"
             },
             {
                 "name": "Color Swap",
-                "icon": "../css/svg/ColorWand.svg",
+                "icon": "../css/svg/Tabs/ColorWand.svg",
                 "link": "colorswap.html"
             },
             {
                 "name": "xrgba",
-                "icon": "../css/svg/Swatch.svg",
+                "icon": "../css/svg/Tabs/Swatch.svg",
                 "link": "xrgba.html"
             },
             {
                 "name": "Settings",
-                "icon": "../css/svg/Cog.svg",
+                "icon": "../css/svg/Tabs/Cog.svg",
                 "link": "settings.html"
             }
         ]

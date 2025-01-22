@@ -653,7 +653,8 @@ input[type="color"]::-webkit-color-swatch {
 #ColorSwap > .Target-Container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  column-gap: 2rem;
+  grid-template-rows: repeat(auto, 1fr); 
+  column-gap: 2rem; 
   background-image: linear-gradient(
     90deg,
     var(--bg-100) calc(33% - 0.5rem),
@@ -676,12 +677,12 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 0.4rem;
   border-color: var(--bg-300);
 }
-.new-emitter{
-  display:grid;
+.new-emitter {
+  display: grid;
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto;
-  margin:0.25rem;
-  margin-block:0.35rem;
-  gap:0.75rem;
+  margin: 0.25rem;
+  margin-block: 0.35rem;
+  gap: 0.75rem;
 }
 
 #Title {

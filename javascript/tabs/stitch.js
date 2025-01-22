@@ -184,7 +184,7 @@ function RenderTarget(i = -1) {
 
             let Delete = document.createElement("button");
             Delete.innerHTML =
-              '<img class="Icon" src="../css/svg/Delete.svg"></img>';
+              '<img class="Icon" src="../css/svg/UI/Delete.svg"></img>';
             Delete.onclick = () => {
               FileSaved = false;
               ipcRenderer.send("PushHistory", TargetFile);
