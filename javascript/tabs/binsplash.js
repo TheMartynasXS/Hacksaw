@@ -571,7 +571,8 @@ function LoadFile(SkipAlert = true) {
     if (pVid >= 0) {
       for (let i = 0; i < Params[pVid].value.items.length; i++) {
         if (Params[pVid].value.items[i].items[1] == undefined) continue;
-        if (!/Color/i.test(Params[pVid].value.items[i].items[0].value))
+
+        if (!Params[pVid].value.items[i].items[0].value.toLowerCase().endsWith("color"))
           continue;
         let param_object = document
           .getElementsByTagName("template")[2]
@@ -1159,7 +1160,7 @@ function RecolorSelected() {
     let paramValues = Params[pVid]?.value.items;
     // console.log(paramValues);
     let indices = filterIndices(paramValues, (item) =>
-      /Color/i.test(item.items[0].value)
+      item.items[0].value.toLowerCase().endsWith("color")
     );
     if (pVid >= 0) {
       for (let ddid = 0; ddid < indices?.length; ddid++) {

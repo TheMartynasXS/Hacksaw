@@ -14,6 +14,8 @@ const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json");
 
 let openedBins = new Set();
 
+const { getWinSettings, saveBounds } = require("./settings");
+
 //#region variables
 let Prefs = fs.existsSync(PrefsPath)
   ? JSON.parse(fs.readFileSync(PrefsPath))
@@ -21,9 +23,14 @@ let Prefs = fs.existsSync(PrefsPath)
       PreferredMode: "random",
       IgnoreBW: true,
       RitoBinPath: "",
+      FFMPEGPath: "",
       Targets: [true, true, true, true, true],
       Regenerate: false,
+      GenerateMissing: false,
     };
+Prefs.Dev = isDev;
+
+
 
 let Samples = fs.existsSync(SamplesPath)
   ? JSON.parse(fs.readFileSync(SamplesPath))
@@ -82,6 +89,12 @@ app.whenReady().then(() => {
   if (!Prefs.hasOwnProperty("Regenerate")) {
     Prefs.Regenerate = false;
   }
+  if (!Prefs.hasOwnProperty("GenerateMissing")) {
+    Prefs.GenerateMissing = false;
+  }
+  if (!Prefs.hasOwnProperty("FFMPEGPath")) {
+    Prefs.FFMPEGPath = "";
+  }
 
   // Load appropriate window based on startup state
   const windowPath = isFirstStartup ? "../html/startup.html" : "../html/binsplash.html";
@@ -93,7 +106,6 @@ ipcMain.on("get-ssx", (event) => {
 });
 
 ipcMain.on("update-settings", (event, arg) => {
-  console.log(arg);
   Prefs = JSON.parse(arg);
 });
 
@@ -123,19 +135,6 @@ app.on("window-all-closed", () => {
   }
   app.quit();
 });
-
-const DefaultPreferences = JSON.stringify(
-  {
-    PreferredMode: "random",
-    IgnoreBW: true,
-    RitoBinPath: "",
-    Targets: [true, true, true, true, true],
-    Regenerate: false,
-    Dev: isDev,
-  },
-  null,
-  4
-);
 
 ipcMain.on("ChangeTab", (event, arg) => {
   mainWindow.loadFile(path.join(__dirname, "../html/" + arg));

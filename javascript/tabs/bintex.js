@@ -176,7 +176,9 @@ async function SelectWadFolder(Path = undefined) {
     }
   }
   fs.writeFileSync(`${WadPath}\\Missing.jsonc`, JSON.stringify(MissingOutput, null, 2))
-  // get empty folders
+  //get empty folders
+  let EmptyFolders = getAllFiles(WadPath, []).filter(file => fs.lstatSync(file).isDirectory() && fs.readdirSync(file).length == 0)
+
 }
 
 let Confirm = 0
