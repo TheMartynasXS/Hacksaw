@@ -9,7 +9,6 @@ const {
 const fs = require("fs");
 const { ipcRenderer } = require("electron");
 const { execSync } = require("child_process");
-const KEYS = require("../javascript/keys.json");
 
 window.onerror = function (msg, file, lineNo, columnNo) {
   ipcRenderer.send("Message", {
@@ -115,13 +114,13 @@ function RenderTarget(i = -1) {
       ParticleScale.placeholder = "1.0";
       ParticleScale.value =
         Container[PO_ID].value.items.find((item) => {
-          if (item.key == KEYS.Props.transform) {
+          if (item.key.fnv("transform")) {
             return item;
           }
         })?.value[0] ?? 1.0;
       ParticleScale.oninput = (e) => {
         let index = Container[PO_ID].value.items.findIndex((item) => {
-          if (item.key == KEYS.Props.transform) {
+          if (item.key.fnv("transform")) {
             return item;
           }
         });
@@ -137,7 +136,7 @@ function RenderTarget(i = -1) {
           );
         } else {
           Container[PO_ID].value.items.push({
-            key: KEYS.Props.transform,
+            key: "3786248987",
             type: "mtx44",
             value: [
               parseFloat(e.target.value),
@@ -208,7 +207,7 @@ function RenderTarget(i = -1) {
         }
       }
       TargetList.appendChild(ParticleDiv);
-    } else if (Container[PO_ID].value.name == KEYS.Props.resourceResolver) {
+    } else if (Container[PO_ID].value.name.fnv("4013559603")) {
     } else {
       let MaterialDiv = document.createElement("div");
       MaterialDiv.id = Container[PO_ID].key;
@@ -391,9 +390,6 @@ function RenderDonor() {
       }
       DonorList.appendChild(ParticleDiv);
     }
-    // else if (Container[PO_ID].value.name == KEYS.Props.resourceResolver) {
-
-    // }
   }
 
   Options.sort((a, b) => a.innerText.localeCompare(b.innerText));

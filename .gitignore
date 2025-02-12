@@ -11,3 +11,4 @@ dist/
 skin0.json
 package-lock.json
 javascript/hashes.json
+backups/

@@ -30,8 +30,6 @@ let Prefs = fs.existsSync(PrefsPath)
     };
 Prefs.Dev = isDev;
 
-
-
 let Samples = fs.existsSync(SamplesPath)
   ? JSON.parse(fs.readFileSync(SamplesPath))
   : [];
@@ -43,64 +41,45 @@ let currentFile = {};
 let FilePath = "";
 //#endregion
 
-let mainWindow;
-const createWindow = (htmlDir) => {
-  mainWindow = new BrowserWindow({
-    width: 800,
+let window = null;
+
+function main() {
+  const bounds = getWinSettings().size;
+  const position = getWinSettings().position;
+
+  console.log(bounds);
+  window = new BrowserWindow({
+    width: bounds.width,
+    height: bounds.height,
     minWidth: 800,
-    minHeight: 500,
-    height: 600,
+    minHeight: 600 + 20,
+    x: position ? position[0] : undefined,
+    y: position ? position[1] : undefined,
     title: "Hacksaw " + app.getVersion(),
     backgroundColor: "#3a3b41",
     icon: "buildhacksaw.ico",
     webPreferences: {
-      enableRemoteModule: true,
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, htmlDir));
-  isDev || process.argv.includes("--dev")
-    ? mainWindow.webContents.openDevTools({ mode: "detach" })
-    : mainWindow.removeMenu();
-};
+  window.on("moved", () => saveBounds(window.getBounds()));
+  window.on("resized", () => saveBounds(window.getBounds()));
+
+  if (Prefs?.RitoBinPath && Prefs?.RitoBinPath.length > 0) {
+    window.loadFile(path.join(__dirname, "../html/binsplash.html"));
+  } else {
+    window.loadFile(path.join(__dirname, "../html/startup.html"));
+  }
+  if (isDev) {
+    window.webContents.openDevTools();
+  }
+}
 
 app.whenReady().then(() => {
-  // Create required files if they don't exist
-  if (!fs.existsSync(SamplesPath)) {
-    fs.writeFileSync(SamplesPath, "[]", "utf8");
-  }
-  if (!fs.existsSync(xRGBAPath)) {
-    fs.writeFileSync(xRGBAPath, "[]", "utf8");
-  }
-
-  // Check if this is first startup (no prefs file or no ritobin path)
-  const isFirstStartup = !fs.existsSync(PrefsPath) || 
-                        !Prefs?.RitoBinPath || 
-                        Prefs.RitoBinPath.length === 0;
-
-  if (isFirstStartup) {
-    fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
-    fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
-    fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
-  }
-
-  if (!Prefs.hasOwnProperty("Regenerate")) {
-    Prefs.Regenerate = false;
-  }
-  if (!Prefs.hasOwnProperty("GenerateMissing")) {
-    Prefs.GenerateMissing = false;
-  }
-  if (!Prefs.hasOwnProperty("FFMPEGPath")) {
-    Prefs.FFMPEGPath = "";
-  }
-
-  // Load appropriate window based on startup state
-  const windowPath = isFirstStartup ? "../html/startup.html" : "../html/binsplash.html";
-  createWindow(windowPath);
+  main();
 });
-
 ipcMain.on("get-ssx", (event) => {
   event.returnValue = [Prefs, Samples, xRGBA];
 });
@@ -127,8 +106,8 @@ app.on("window-all-closed", () => {
   fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
   fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
   fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
-  for(let bin of openedBins){
-    let jsonName = bin.slice(0, -4) + ".json"
+  for (let bin of openedBins) {
+    let jsonName = bin.slice(0, -4) + ".json";
     if (fs.statSync(jsonName).mtimeMs < fs.statSync(bin).mtimeMs) {
       fs.unlinkSync(jsonName);
     }
@@ -137,7 +116,7 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.on("ChangeTab", (event, arg) => {
-  mainWindow.loadFile(path.join(__dirname, "../html/" + arg));
+  window.loadFile(path.join(__dirname, "../html/" + arg));
   event.returnValue = "done";
 });
 
@@ -244,14 +223,12 @@ ipcMain.on("Bin2Json", (event, path) => {
     execSync(
       `"${Prefs.RitoBinPath}" -o json "${FilePath}" ${isDev ? "" : "-k"}`
     );
-  } else if (
-    fs.lstatSync(path).isDirectory() &&
-    fs.existsSync(path) &&
-    path.includes(".wad")
-  ) {
+  } else if (fs.lstatSync(path).isDirectory() && fs.existsSync(path)) {
+    console.time("binning");
     execSync(
-      `"${Prefs.RitoBinPath}" -i bin -o json "${path}" ${isDev ? "" : "-k"}`
+      `"${Prefs.RitoBinPath}" -r -i bin -o json "${path}" ${isDev ? "" : "-k"}`
     );
+    console.timeLog("binning");
   }
   event.returnValue = 0;
 });
@@ -259,14 +236,12 @@ ipcMain.on("Bin2Json", (event, path) => {
 ipcMain.on("Json2Bin", (event, path) => {
   if (path.endsWith(".json") && fs.existsSync(path) && path.includes(".wad")) {
     execSync(`"${Prefs.RitoBinPath}" -o bin "${path}" ${isDev ? "" : "-k"}`);
-  } else if (
-    fs.lstatSync(path).isDirectory() &&
-    fs.existsSync(path) &&
-    path.includes(".wad")
-  ) {
+  } else if (fs.lstatSync(path).isDirectory() && fs.existsSync(path)) {
+    console.time("binning");
     execSync(
-      `"${Prefs.RitoBinPath}" -i json -o bin "${path}" ${isDev ? "" : "-k"}`
+      `"${Prefs.RitoBinPath}" -r -i json -o bin "${path}" ${isDev ? "" : "-k"}`
     );
+    console.timeLog("binning");
   }
   event.returnValue = 0;
 });
@@ -301,6 +276,21 @@ ipcMain.on("OpenBin", (event) => {
     null,
     2
   );
+
+  currentFile.entries.value.items.unshift({
+    key: 2193555760,
+    value: {
+      items: new Array(0),
+      name: 2021448597,
+    },
+  });
+  let cz = currentFile.entries.value.items
+  cz.unshift({ key: 2193555760 });
+
+  cz[0].value.items = new Array(0);
+  cz[0].value.name = 2021448597;
+
+
   event.returnValue = {
     Path: FilePath,
     File: currentFile,
@@ -347,7 +337,7 @@ ipcMain.on("SaveBin", (event) => {
   if (after > before) {
     dialog.showMessageBox(null, {
       type: "info",
-      title: "Success", 
+      title: "Success",
       message: "Bin saved successfully!",
     });
     event.returnValue = 0;

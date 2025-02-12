@@ -12,8 +12,6 @@ const {
 
 let FileSaved = true;
 
-const KEYS = require("../javascript/keys.json");
-
 const { execSync } = require("child_process");
 const { getColorHexRGB } = require("electron-color-picker");
 
@@ -28,7 +26,7 @@ const { get } = require("http");
 extendPrototypes();
 
 tempvalue = "ValueColor";
-
+console.log(Prefs)
 let RecolorMode = document.getElementById("Mode");
 let RecolorTarget = document.getElementById("Target");
 RecolorMode.value = Prefs.obj.PreferredMode;

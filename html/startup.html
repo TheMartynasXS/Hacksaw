@@ -28,6 +28,7 @@
     gap:2rem;
   }
   #animation {
+    user-select: none;
     display: grid;
     place-items: center;
     opacity: 0;
@@ -35,15 +36,14 @@
       rainbow 4s infinite;
   }
 
-  #logo {
-    width: 64px;
-    height: 64px;
+  #header {
     transform: scale(0);
-    animation: scaleIn 1s ease-in-out 0.5s forwards;
+    animation: scaleIn 1s ease-out 0.25s forwards;
     filter: drop-shadow(0 0 10px var(--shadow));
   }
-  #Select-Files{
-    opacity: 0;
+  #Select-Files,
+  svg{
+    /* opacity: 0; */
     animation:  rainbow 4s infinite,
                 fadeIn 2s ease-in-out forwards;
   }
@@ -62,13 +62,13 @@
 
   @keyframes rainbow{
     0%{
-      filter: hue-rotate(0deg) drop-shadow(0 0 10px var(--shadow));
+      filter: hue-rotate(0deg) drop-shadow(0 0 10px var(--shadow)) ;
     }
     50%{
-      filter: hue-rotate(180deg) drop-shadow(0 0 40px var(--shadow));
+      filter: hue-rotate(180deg) drop-shadow(0 0 10px var(--shadow)) ;
     }
     100%{
-      filter: hue-rotate(360deg) drop-shadow(0 0 10px var(--shadow));
+      filter: hue-rotate(360deg) drop-shadow(0 0 10px var(--shadow)) ;
     }
   }
 
@@ -76,9 +76,8 @@
 </style>
 <body>
   <div>
-    <div id="animation">
-      <img src="../build/icon.ico" alt="Hacksaw Logo" id="logo">
-      <h1>Hacksaw</h1>
+    <div id="animation" >
+      <h1 id="header" style="font-size: 7.5rem;margin-block: 1rem;">HACKSAW</h1>
       <span id="subtext" style="color: var(--text-primary);">Select Ritobin_cli.exe to begin using Hacksaw</span>
     </div>
     <div class="Input-Group ">

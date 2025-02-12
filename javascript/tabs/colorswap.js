@@ -9,7 +9,6 @@ const {
 const fs = require("fs");
 const { ipcRenderer } = require("electron");
 const { execSync } = require("child_process");
-const KEYS = require("../javascript/keys.json");
 const { ColorHandler, GetColor, ToBG } = require("../javascript/colors.js");
 const _ = require("lodash");
 
