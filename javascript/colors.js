@@ -42,7 +42,7 @@ function ToBG(Palette) {
         `${Palette[i].ToHEX()} ${Math.round(Palette[i].time * 100)}% `
       );
     }
-    return `linear-gradient(0.25turn,${result.join(", ")})`;
+    return `linear-gradient(0.25turn ,${result.join(", ")})`;
   }
 }
 

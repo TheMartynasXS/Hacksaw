@@ -31,61 +31,21 @@ let pathRegExp = new RegExp(/ASSETS.+(?:dds|skn|skl|sco|scb|tex)/gi);
 
 extendPrototypes();
 
-const { spawn } = require("child_process");
-const { StringDecoder } = require("string_decoder");
+console.time("Conversion");
+ritobinConvSync(
+  "C:\\Users\\mxs\\Desktop\\TestMod\\data\\characters\\neeko\\skins\\skin0.bin",
+  "bin",
+  "json",
+  (err) => console.log(err)
+);
+console.timeLog("Conversion");
 
-function ritobinConv(inputFileBytes, inputFormat, outputFormat, errorCallback) {
-  return new Promise((resolve, reject) => {
-    const decoder = new StringDecoder("utf8");
-    const process = spawn(
-      Prefs.obj.RitoBinPath,
-      [
-        "--input-format",
-        inputFormat,
-        "--output-format",
-        outputFormat,
-        "--verbose",
-        "-k", //keep hashed names
-        "-", // input as -
-      ],
-      {
-        stdio: ["pipe", "pipe", "pipe"],
-      }
-    );
-
-    process.stdin.write(inputFileBytes);
-    process.stdin.end();
-
-    let stdout = Buffer.alloc(0);
-    let stderr = Buffer.alloc(0);
-
-    process.stdout.on("data", (data) => {
-      stdout = Buffer.concat([stdout, data]);
-    });
-
-    process.stderr.on("data", (data) => {
-      stderr = Buffer.concat([stderr, data]);
-    });
-
-    process.on("close", (code) => {
-      if (code !== 0) {
-        errorCallback(decoder.write(stderr));
-        errors.write(decoder.write(stderr));
-        reject(new Error(`Process exited with code ${code}`));
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-}
 // const inputFilePath = process.env.INPUT_FILE_PATH || "C:\\Users\\mxs\\Desktop\\TestMod\\data\\characters\\neeko\\skins\\skin0.bin";
 // ritobinConv(fs.readFileSync(inputFilePath), "bin", "json", (err) => console.log(err)).then(
 //   buffer => {
 //     console.log(buffer.toString())
 //   }
 // )
-
-
 
 // SelectWadFolder("c:\\users\\mxs\\desktop\\hwei.wad.client");
 function SelectWadFolder(Path = undefined) {
@@ -107,15 +67,15 @@ function SelectWadFolder(Path = undefined) {
     file.endsWith(".bin")
   );
   console.time("Conversion");
-  console.log(BinFiles)
-  for(let i = 0; i < BinFiles.length; i++) {
+  console.log(BinFiles);
+  for (let i = 0; i < BinFiles.length; i++) {
     const buffer = fs.readFileSync(BinFiles[i]);
     ritobinConv(buffer, "bin", "json", (err) => console.log(err)).then(
-      buffer => {
-        console.log(buffer.toString())
-        console.timeLog("Conversion")
+      (buffer) => {
+        console.log(buffer.toString());
+        console.timeLog("Conversion");
       }
-    )
+    );
   }
 
   // ipcRenderer.send("Bin2Json", WadPath);

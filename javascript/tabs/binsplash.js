@@ -26,7 +26,6 @@ const { get } = require("http");
 extendPrototypes();
 
 tempvalue = "ValueColor";
-console.log(Prefs)
 let RecolorMode = document.getElementById("Mode");
 let RecolorTarget = document.getElementById("Target");
 RecolorMode.value = Prefs.obj.PreferredMode;
@@ -407,7 +406,7 @@ function LoadFile(SkipAlert = true) {
           const RFColor = GetColor(RDProp[RFCID]);
           RFBG = ToBG(RFColor);
 
-          ReflectiveDiv.onclick = () => {
+          Emitter.children[3].onclick = () => {
             Palette = _.cloneDeep(RFColor);
             MapPalette();
             document.getElementById("Slider-Input").value = Palette.length;
@@ -533,7 +532,6 @@ function LoadFile(SkipAlert = true) {
         }
         disabled.onchange = (Event) => {
           PropItems[DID].value = Event.target.checked;
-          console.log(Event.target.checked);
         };
         Emitter.appendChild(disabled);
 

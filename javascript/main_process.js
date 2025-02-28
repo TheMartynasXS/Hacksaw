@@ -12,9 +12,9 @@ const PrefsPath = path.join(app.getPath("userData"), "UserPrefs.json");
 const SamplesPath = path.join(app.getPath("userData"), "SampleDB.json");
 const xRGBAPath = path.join(app.getPath("userData"), "xRGBADB.json");
 
-let openedBins = new Set();
-
 const { getWinSettings, saveBounds } = require("./settings");
+const { spawnSync } = require("child_process");
+const { StringDecoder } = require("string_decoder");
 
 //#region variables
 let Prefs = fs.existsSync(PrefsPath)
@@ -96,9 +96,9 @@ ipcMain.on("update-xrgba", (event, arg) => {
   xRGBA = JSON.parse(arg);
 });
 
-ipcMain.on("AddOpened", (event, arg) => {
-  openedBins.add(arg);
-});
+// ipcMain.on("AddOpened", (event, arg) => {
+//   openedBins.add(arg);
+// });
 
 app.setAppUserModelId("Hacksaw " + app.getVersion());
 
@@ -106,12 +106,12 @@ app.on("window-all-closed", () => {
   fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
   fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
   fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
-  for (let bin of openedBins) {
-    let jsonName = bin.slice(0, -4) + ".json";
-    if (fs.statSync(jsonName).mtimeMs < fs.statSync(bin).mtimeMs) {
-      fs.unlinkSync(jsonName);
-    }
-  }
+  // for (let bin of openedBins) {
+  //   let jsonName = bin.slice(0, -4) + ".json";
+  //   if (fs.statSync(jsonName).mtimeMs < fs.statSync(bin).mtimeMs) {
+  //     fs.unlinkSync(jsonName);
+  //   }
+  // }
   app.quit();
 });
 
@@ -258,38 +258,17 @@ ipcMain.on("OpenBin", (event) => {
     openedBins.add(FilePath);
   } catch (error) {
     event.returnValue = undefined;
-    console.log(FilePath);
     return 0;
   }
 
-  if (
-    (fs.existsSync(FilePath.slice(0, -4) + ".json") && Prefs.Regenerate) ||
-    !fs.existsSync(FilePath.slice(0, -4) + ".json")
-  ) {
-    execSync(
-      `"${Prefs.RitoBinPath}" -o json "${FilePath}" ${isDev ? "" : "-k"}`
-    );
-  }
-
   currentFile = JSON.parse(
-    fs.readFileSync(FilePath.slice(0, -4) + ".json"),
-    null,
-    2
+    ritobinConvSync(
+      Buffer.from(fs.readFileSync(FilePath)),
+      "bin",
+      "json",
+      isDev
+    )
   );
-
-  currentFile.entries.value.items.unshift({
-    key: 2193555760,
-    value: {
-      items: new Array(0),
-      name: 2021448597,
-    },
-  });
-  let cz = currentFile.entries.value.items
-  cz.unshift({ key: 2193555760 });
-
-  cz[0].value.items = new Array(0);
-  cz[0].value.name = 2021448597;
-
 
   event.returnValue = {
     Path: FilePath,
@@ -327,20 +306,50 @@ ipcMain.on("UpdateBin", (event, arg) => {
 });
 
 ipcMain.on("SaveBin", (event) => {
-  fs.writeFileSync(
-    FilePath.slice(0, -4) + ".json",
-    JSON.stringify(currentFile, null, 2)
-  );
-  let before = fs.statSync(FilePath).mtimeMs;
-  execSync(`"${Prefs.RitoBinPath}" -o bin "${FilePath.slice(0, -4) + ".json"}`);
-  let after = fs.statSync(FilePath).mtimeMs;
-  if (after > before) {
-    dialog.showMessageBox(null, {
-      type: "info",
-      title: "Success",
-      message: "Bin saved successfully!",
-    });
-    event.returnValue = 0;
+  if (!currentFile.entries.value.items.some((entry) => entry.key == 2193555760)) {
+    let items = currentFile.entries.value.items
+    items.unshift({key: 2193555760 , value: {name: 2021448597, items: []}})
   }
-  event.returnValue = 1;
+  fs.writeFileSync(
+    FilePath,
+    ritobinConvSync(
+      Buffer.from(JSON.stringify(currentFile)),
+      "json",
+      "bin"
+    )
+  );
 });
+
+function ritobinConvSync(
+  inputDataBuffer,
+  inputFormat,
+  outputFormat,
+  unhash = false
+) {
+  const decoder = new StringDecoder("utf8");
+  const args = [
+    "--input-format",
+    inputFormat,
+    "--output-format",
+    outputFormat,
+    "-",
+  ];
+
+  if (!unhash) {
+    args.push("-k");
+  }
+
+  const process = spawnSync(Prefs.RitoBinPath, args, {
+    input: inputDataBuffer,
+    encoding: "buffer",
+    stdio: ["pipe", "pipe", "pipe"],
+    maxBuffer: 1024 * 1024 * 200,
+  });
+
+  if (process.status !== 0) {
+    const errorOutput = decoder.write(process.stderr);
+    errors.write(errorOutput);
+    throw new Error(`Process exited with code ${process.status}`);
+  }
+  return decoder.write(process.stdout);
+}
