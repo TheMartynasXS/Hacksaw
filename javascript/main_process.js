@@ -106,12 +106,6 @@ app.on("window-all-closed", () => {
   fs.writeFileSync(PrefsPath, JSON.stringify(Prefs, null, 2), "utf-8");
   fs.writeFileSync(SamplesPath, JSON.stringify(Samples, null, 2), "utf-8");
   fs.writeFileSync(xRGBAPath, JSON.stringify(xRGBA, null, 2), "utf-8");
-  // for (let bin of openedBins) {
-  //   let jsonName = bin.slice(0, -4) + ".json";
-  //   if (fs.statSync(jsonName).mtimeMs < fs.statSync(bin).mtimeMs) {
-  //     fs.unlinkSync(jsonName);
-  //   }
-  // }
   app.quit();
 });
 
@@ -255,7 +249,6 @@ ipcMain.on("OpenBin", (event) => {
       message: "Select a bin file",
     })[0];
     FileCache = [];
-    openedBins.add(FilePath);
   } catch (error) {
     event.returnValue = undefined;
     return 0;
@@ -306,18 +299,31 @@ ipcMain.on("UpdateBin", (event, arg) => {
 });
 
 ipcMain.on("SaveBin", (event) => {
-  if (!currentFile.entries.value.items.some((entry) => entry.key == 2193555760)) {
-    let items = currentFile.entries.value.items
-    items.unshift({key: 2193555760 , value: {name: 2021448597, items: []}})
+  if (
+    !currentFile.entries.value.items.some((entry) => entry.key == 2193555760)
+  ) {
+    let items = currentFile.entries.value.items;
+    items.unshift({ key: 2193555760, value: { name: 2021448597, items: [] } });
   }
-  fs.writeFileSync(
-    FilePath,
-    ritobinConvSync(
-      Buffer.from(JSON.stringify(currentFile)),
-      "json",
-      "bin"
-    )
-  );
+  try {
+    fs.writeFileSync(
+      FilePath,
+      Buffer.from(
+        ritobinConvSync(Buffer.from(JSON.stringify(currentFile)), "json", "bin")
+      )
+    );
+  } catch (error) {
+    fs.writeFileSync(
+      FilePath + ".backup.json",
+      JSON.stringify(currentFile, null, 2)
+    );
+    dialog.showMessageBox(null, {
+      type: "error",
+      title: "Error",
+      message: "File was not saved.",
+      detail: "Backup file has been created.",
+    });
+  }
 });
 
 function ritobinConvSync(
@@ -348,8 +354,15 @@ function ritobinConvSync(
 
   if (process.status !== 0) {
     const errorOutput = decoder.write(process.stderr);
-    errors.write(errorOutput);
-    throw new Error(`Process exited with code ${process.status}`);
+    throw new Error(
+      `Process exited with code ${process.status}: ${errorOutput}`
+    );
   }
-  return decoder.write(process.stdout);
+
+  // Return a string for JSON, raw buffer for BIN
+  if (outputFormat === "json") {
+    return decoder.write(process.stdout);
+  } else {
+    return process.stdout;
+  }
 }

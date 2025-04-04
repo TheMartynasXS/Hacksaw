@@ -5,7 +5,6 @@ const {
   Prefs,
   Samples,
   CreateMessage,
-  Sleep,
   extendPrototypes,
   filterIndices,
 } = require("../javascript/utils.js");
@@ -303,8 +302,14 @@ function ChangeColorCount(Count) {
 async function OpenBin(skip = false) {
   document.getElementById("CheckToggle").checked = false;
 
-  let result = ipcRenderer.sendSync("OpenBin");
+  document.body.appendChild(document.createElement("page-spinner"));
+  Sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  await Sleep(100);
 
+  let result = ipcRenderer.sendSync("OpenBin");
+  
+  document.querySelectorAll("page-spinner").forEach(el => el.remove());
+  
   if (result == undefined) {
     return 0;
   }
