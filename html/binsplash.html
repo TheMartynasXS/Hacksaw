@@ -86,9 +86,21 @@
                     </div>
                 </div>
             </div>
-            <div class="Input-Group Margin-Top Margin-Bottom" style="display:grid; grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;gap:0.32rem;">
+            <div class="Input-Group Margin-Top Margin-Bottom" style="display:grid; grid-template-columns: auto auto auto 1fr auto auto auto auto auto auto auto auto;gap:0.32rem;">
                 <input type="checkbox" id="CheckToggle" class="CheckBox SettingOptionCheckbox"
                     onchange="CheckToggle(this)">
+                
+                <!-- <select>
+                    <option value="skin0">skin0</option>
+                    <option value="skin1">skin1</option>
+                </select>
+                <select>
+                    <option value="skin0">P/Z</option>
+                    <option value="skin0">Q</option>
+                    <option value="skin0">W</option>
+                    <option value="skin0">E</option>
+                    <option value="skin1">R</option>
+                </select> -->
                 <input class="Ellipsis Flex-3 Filter" type="text" id="Filter" placeholder="Filter by Particle Name"
                     oninput="FilterParticles(this.value)">
                 <label class="Label" style="padding:0.4rem">

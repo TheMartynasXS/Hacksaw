@@ -19,9 +19,6 @@ const fs = require("fs");
 
 const { ColorHandler, GetColor, ToBG } = require("../javascript/colors.js");
 
-const fnv1a = require("fnv1a");
-const { get } = require("http");
-
 extendPrototypes();
 
 tempvalue = "ValueColor";
@@ -41,8 +38,6 @@ let T5 = document.getElementById("T5");
 let HUE = document.getElementById("Hue");
 let SAT = document.getElementById("Sat");
 let LIGHT = document.getElementById("Light");
-
-
 
 [T1, T2, T3, T4, T5].forEach((T, index) => {
   T.addEventListener("change", (Event) => {
@@ -307,9 +302,9 @@ async function OpenBin(skip = false) {
   await Sleep(100);
 
   let result = ipcRenderer.sendSync("OpenBin");
-  
-  document.querySelectorAll("page-spinner").forEach(el => el.remove());
-  
+
+  document.querySelectorAll("page-spinner").forEach((el) => el.remove());
+
   if (result == undefined) {
     return 0;
   }
@@ -346,8 +341,8 @@ function LoadFile(SkipAlert = true) {
     let Container = Containers[pids[cid]];
 
     ParticleDiv.children[0].children[1].innerText =
-      Container.value.items.find((item) => item.key.fnv("particleName"))
-        ?.value ?? `unknown ${nodes.length + 1}`;
+        Container.value.items.find((item) => item.key.fnv("particleName"))
+          ?.value ?? `unknown ${nodes.length + 1}`;
     ParticleDiv.id = Container.key;
     ParticleList.appendChild(ParticleDiv);
 
@@ -552,7 +547,7 @@ function LoadFile(SkipAlert = true) {
     let Container = Containers[mids[cid]];
 
     ParticleDiv.children[0].children[1].innerText =
-      "[Material] " +
+        "[Material] " +
         Container.value.items
           .find((item) => item.key.fnv("name"))
           ?.value.split("Materials/")
@@ -573,7 +568,11 @@ function LoadFile(SkipAlert = true) {
       for (let i = 0; i < Params[pVid].value.items.length; i++) {
         if (Params[pVid].value.items[i].items[1] == undefined) continue;
 
-        if (!Params[pVid].value.items[i].items[0].value.toLowerCase().endsWith("color"))
+        if (
+          !Params[pVid].value.items[i].items[0].value
+            .toLowerCase()
+            .endsWith("color")
+        )
           continue;
         let param_object = document
           .getElementsByTagName("template")[2]
@@ -1052,13 +1051,18 @@ function RecolorSelected() {
   let pDom = ParticleList.children;
   let domMid = -1;
 
+  // Find where materials start in the DOM
   for (let i = 0; i < ParticleList.children.length; i++) {
-    if (ParticleList.children[i].getAttribute("type") == "material") domMid = i;
+    if (ParticleList.children[i].getAttribute("type") == "material") {
+      domMid = i;
+      break;
+    }
   }
-  for (let cid = 0; cid < (domMid >= 0?domMid:pDom.length); cid++) {
+
+  // Process particles (VFX)
+  for (let cid = 0; cid < pids.length; cid++) {
     let id = pids[cid];
     let Container = Containers[id];
-
     let indices = filterIndices(
       Container.value.items,
       (item) =>
@@ -1068,7 +1072,6 @@ function RecolorSelected() {
 
     for (let ddid = 0; ddid < indices?.length; ddid++) {
       let Props = Container.value.items[indices[ddid]].value.items;
-      // console.log(Props)
       for (let pid = 0; pid < Props.length; pid++) {
         let PropItems = Props[pid].items;
         domEmitDef = pDom[cid].children[1 + ddid].children[pid].children;
@@ -1147,40 +1150,49 @@ function RecolorSelected() {
       }
     }
   }
-  
-  for (let cid = domMid; cid < pDom.length; cid++) {
-    if (mids.length == 0) break;
-    let id = mids[cid - domMid];
-    let Container = Containers[id];
-    // continue
-    let Params = Container.value.items;
 
-    let pVid = Params.findIndex((item) => item.key.fnv("paramValues"));
-    let dMid = Params.findIndex((item) => item.key.fnv("dynamicMaterial"));
+  // Process materials
+  if (mids.length > 0 && domMid >= 0) {
+    for (let cid = 0; cid < mids.length; cid++) {
+      let id = mids[cid];
+      let Container = Containers[id];
+      let domIndex = domMid + cid;
 
-    let paramValues = Params[pVid]?.value.items;
-    // console.log(paramValues);
-    let indices = filterIndices(paramValues, (item) =>
-      item.items[0].value.toLowerCase().endsWith("color")
-    );
-    if (pVid >= 0) {
-      for (let ddid = 0; ddid < indices?.length; ddid++) {
-        let id = indices[ddid];
-        let domEmitDef = pDom[cid].children[1].children[ddid];
-        if (!domEmitDef.children[0].checked) continue;
-        paramValues[id].items[1] = RecolorProp(paramValues[id].items[1], true);
+      if (domIndex >= pDom.length) continue;
 
-        domEmitDef.children[2].style = `background: ${ToBG(
-          GetColor(paramValues[id].items[1])
-        )}; border: none;`;
-        domEmitDef.children[2].onclick = () => {
-          Palette = _.cloneDeep(GetColor(paramValues[id].items[1]));
-          MapPalette();
-          document.getElementById("Slider-Input").value = Palette.length;
-        };
+      let Params = Container.value.items;
+      let pVid = Params.findIndex((item) => item.key.fnv("paramValues"));
+      let dMid = Params.findIndex((item) => item.key.fnv("dynamicMaterial"));
+
+      let paramValues = Params[pVid]?.value.items;
+      let indices = filterIndices(paramValues, (item) =>
+        item.items[0].value.toLowerCase().endsWith("color")
+      );
+
+      if (pVid >= 0) {
+        for (let ddid = 0; ddid < indices?.length; ddid++) {
+          let paramId = indices[ddid];
+          let domEmitDef = pDom[domIndex].children[1].children[ddid];
+          if (!domEmitDef?.children[0]?.checked) continue;
+
+          paramValues[paramId].items[1] = RecolorProp(
+            paramValues[paramId].items[1],
+            true
+          );
+
+          domEmitDef.children[2].style = `background: ${ToBG(
+            GetColor(paramValues[paramId].items[1])
+          )}; border: none;`;
+          domEmitDef.children[2].onclick = () => {
+            Palette = _.cloneDeep(GetColor(paramValues[paramId].items[1]));
+            MapPalette();
+            document.getElementById("Slider-Input").value = Palette.length;
+          };
+        }
       }
     }
   }
+
   ipcRenderer.send("UpdateBin", ActiveFile);
 }
 

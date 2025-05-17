@@ -300,10 +300,10 @@ ipcMain.on("UpdateBin", (event, arg) => {
 
 ipcMain.on("SaveBin", (event) => {
   if (
-    !currentFile.entries.value.items.some((entry) => entry.key == 2193555760)
+    !currentFile.entries.value.items.some((entry) => entry.key == 3155410166)
   ) {
     let items = currentFile.entries.value.items;
-    items.unshift({ key: 2193555760, value: { name: 2021448597, items: [] } });
+    items.unshift({ key: 3155410166, value: { name: 3155410166, items: [] } });
   }
   try {
     fs.writeFileSync(

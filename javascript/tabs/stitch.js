@@ -43,6 +43,8 @@ function Undo() {
   RenderTarget();
 }
 
+
+
 function OpenTargetBin() {
   let result = ipcRenderer.sendSync("OpenBin");
 
@@ -407,6 +409,7 @@ function ToJson(FilePath) {
   execSync(`"${Prefs.obj.RitoBinPath}" -o json "${FilePath}" -k`);
 }
 async function Save() {
+  ipcRenderer.send("UpdateBin", TargetFile);
   ipcRenderer.send("SaveBin");
   FileSaved = true;
 }
@@ -429,6 +432,7 @@ function ClearSelection() {
       break;
     }
   }
+  
 }
 
 let Active = null;
